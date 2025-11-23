@@ -1,0 +1,494 @@
+openapi: 3.0.3
+info:
+  title: Budget Buddy API
+  description: >-
+    REST API for Budget Buddy: manage categories and transactions.
+    Amounts are integer minor-units (cents).
+  version: "1.0.0"
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: http://localhost:8080
+    description: Local development server
+tags:
+  - name: auth
+    description: Authentication
+  - name: categories
+    description: Categories
+  - name: transactions
+    description: Transactions
+security:
+  - BearerAuth: [ ]
+paths:
+  /v1/auth/login:
+    post:
+      tags: [ auth ]
+      summary: Authenticate user and receive access + refresh tokens
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ username, password ]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Auth tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/auth/refresh:
+    post:
+      tags: [ auth ]
+      summary: Exchange a refresh token for a new access token
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ refresh_token ]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: New auth tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/categories:
+    get:
+      tags: [ categories ]
+      summary: List all categories
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+    post:
+      tags: [ categories ]
+      summary: Create a category
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+      responses:
+        '201':
+          description: Category created
+          headers:
+            Location:
+              description: URL of the created category
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/categories/{categoryId}:
+    parameters:
+      - name: categoryId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: UUID of the category
+    get:
+      tags: [ categories ]
+      summary: Get a single category
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: Category details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [ categories ]
+      summary: Update a category
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+      responses:
+        '200':
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [ categories ]
+      summary: Delete a category
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '204':
+          description: Category deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/transactions:
+    get:
+      tags: [ transactions ]
+      summary: List transactions with filtering
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+        - name: start
+          in: query
+          description: Inclusive start date (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: end
+          in: query
+          description: Inclusive end date (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: sort
+          in: query
+          description: sort e.g. date:desc or amount:asc
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paged transactions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+    post:
+      tags: [ transactions ]
+      summary: Create a transaction
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCreate'
+      responses:
+        '201':
+          description: Transaction created
+          headers:
+            Location:
+              description: URL of the created transaction
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/transactions/{transactionId}:
+    parameters:
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: UUID of the transaction
+    get:
+      tags: [ transactions ]
+      summary: Get a single transaction
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [ transactions ]
+      summary: Update a transaction
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionUpdate'
+      responses:
+        '200':
+          description: Updated transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [ transactions ]
+      summary: Delete a transaction
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '204':
+          description: Transaction deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 200
+    offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: Authentication required or invalid token
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: Access denied
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    PaginationMeta:
+      type: object
+      properties:
+        limit:
+          type: integer
+        offset:
+          type: integer
+        total:
+          type: integer
+    Problem:
+      type: object
+      description: RFC7807 Problem+JSON
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    AuthToken:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+        scope:
+          type: string
+      required: [ access_token, token_type, expires_in ]
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [ id, name ]
+    CategoryCreate:
+      type: object
+      required: [ name ]
+      properties:
+        name:
+          type: string
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+        categoryId:
+          type: string
+          nullable: true
+        amount:
+          type: integer
+          description: Amount in minor units (always positive)
+        type:
+          type: string
+          enum: [ expense, income, transfer ]
+          description: Transaction direction
+        currency:
+          type: string
+        date:
+          type: string
+          format: date
+          description: Local date of transaction (YYYY-MM-DD)
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [ id, amount, type, currency, date ]
+    TransactionCreate:
+      type: object
+      required: [ amount, type, currency, date ]
+      properties:
+        categoryId:
+          type: string
+        amount:
+          type: integer
+          description: Positive integer (minor units)
+        type:
+          type: string
+          enum: [ expense, income, transfer ]
+        currency:
+          type: string
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+    TransactionUpdate:
+      type: object
+      properties:
+        categoryId:
+          type: string
+        amount:
+          type: integer
+        type:
+          type: string
+          enum: [ expense, income, transfer ]
+        date:
+          type: string
+          format: date
+        description:
+          type: string
