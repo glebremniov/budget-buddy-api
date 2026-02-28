@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" factoryName="Spring Boot" name="Application (local)" type="SpringBootApplicationConfigurationType">
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.budget.buddy.budget_buddy_api.*"/>
+        <option name="ENABLED" value="true"/>
+      </pattern>
+    </extension>
+    <method v="2">
+      <option enabled="true" name="Make"/>
+    </method>
+    <module name="budget-buddy-api.main"/>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.budget.buddy.budget_buddy_api.Application"/>
+    <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UnknownPolicyInFreeMode"/>
+    <option name="ACTIVE_PROFILES" value="local"/>
+    <selectedOptions>
+      <option name="environmentVariables"/>
+    </selectedOptions>
+  </configuration>
+</component>

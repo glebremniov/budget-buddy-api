@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:budgetbuddy;DATABASE_TO_UPPER=false
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-local.sql
+      data-locations: classpath:data-local.sql
+
+server:
+  port: 8080
+
+security:
+  jwt:
+    secret: dde435ee1f3a08ac33823232f4be169b7b04fe35396677053b08e594c7bbe0406969bd623b964c662f797f65bf0c4b50a1d236668d1e002c58be759208828bb1
+    access-token-validity-seconds: 86400 # 1 day
+    refresh-token-validity-seconds: 1209600 # 14 days
+
+logging:
+  level:
+    web: DEBUG
+    com.budget.buddy.budget_buddy_api: TRACE
+    org.springframework:
+      jdbc: DEBUG
+      security: DEBUG

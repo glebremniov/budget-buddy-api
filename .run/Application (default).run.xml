@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" factoryName="Spring Boot" name="Application (default)" type="SpringBootApplicationConfigurationType">
+    <method v="2">
+      <option enabled="true" name="Make"/>
+    </method>
+    <module name="budget-buddy-api.main"/>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.budget.buddy.budget_buddy_api.Application"/>
+  </configuration>
+</component>
