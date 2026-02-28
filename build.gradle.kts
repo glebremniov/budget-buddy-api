@@ -33,6 +33,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
   implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
