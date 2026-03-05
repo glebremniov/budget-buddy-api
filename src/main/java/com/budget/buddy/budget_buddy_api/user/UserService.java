@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.user;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.BaseEntity;
+import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import com.budget.buddy.budget_buddy_api.security.auth.AuthService;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,10 +40,12 @@ public class UserService {
    */
   @NonNull
   public UUID getCurrentUserIdOrThrow() {
-    return getCurrentUserName()
-        .flatMap(userRepository::findByUsername)
-        .map(BaseEntity::getId)
+    var currentUserName = getCurrentUserName()
         .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("No authenticated user found"));
+
+    return userRepository.findByUsername(currentUserName)
+        .map(BaseEntity::getId)
+        .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found in database"));
   }
 
 }
