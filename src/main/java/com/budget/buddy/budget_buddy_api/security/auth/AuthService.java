@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.security.auth;
 
-import com.budget.buddy.budget_buddy_api.model.AuthToken;
+import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_api.security.jwt.JwtProperties;
 import com.budget.buddy.budget_buddy_api.security.jwt.JwtProvider;
 import java.util.Optional;

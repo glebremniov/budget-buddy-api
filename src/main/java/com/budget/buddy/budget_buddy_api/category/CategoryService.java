@@ -2,9 +2,9 @@ package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.AbstractCRUDLService;
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import com.budget.buddy.budget_buddy_api.model.Category;
-import com.budget.buddy.budget_buddy_api.model.CategoryCreate;
-import com.budget.buddy.budget_buddy_api.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_api.generated.model.Category;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
 import com.budget.buddy.budget_buddy_api.user.UserService;
 import java.util.Collections;
 import java.util.List;

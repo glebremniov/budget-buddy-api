@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.base;
 
-import com.budget.buddy.budget_buddy_api.model.Problem;
+import com.budget.buddy.budget_buddy_api.generated.model.Problem;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.ArrayList;

@@ -1,11 +1,11 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import com.budget.buddy.budget_buddy_api.api.CategoriesApi;
-import com.budget.buddy.budget_buddy_api.model.Category;
-import com.budget.buddy.budget_buddy_api.model.CategoryCreate;
-import com.budget.buddy.budget_buddy_api.model.CategoryUpdate;
-import com.budget.buddy.budget_buddy_api.model.PaginationMeta;
-import com.budget.buddy.budget_buddy_api.model.V1CategoriesGet200Response;
+import com.budget.buddy.budget_buddy_api.generated.api.CategoriesApi;
+import com.budget.buddy.budget_buddy_api.generated.model.Category;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
+import com.budget.buddy.budget_buddy_api.generated.model.V1CategoriesGet200Response;
 import java.net.URI;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;

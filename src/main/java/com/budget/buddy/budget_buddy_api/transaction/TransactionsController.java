@@ -1,9 +1,9 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.model.PaginationMeta;
-import com.budget.buddy.budget_buddy_api.model.Transaction;
-import com.budget.buddy.budget_buddy_api.model.TransactionCreate;
-import com.budget.buddy.budget_buddy_api.model.TransactionUpdate;
+import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
+import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
+import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;

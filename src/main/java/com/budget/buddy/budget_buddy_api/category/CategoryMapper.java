@@ -1,9 +1,9 @@
 package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.BaseMapper;
-import com.budget.buddy.budget_buddy_api.model.Category;
-import com.budget.buddy.budget_buddy_api.model.CategoryCreate;
-import com.budget.buddy.budget_buddy_api.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_api.generated.model.Category;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
 import java.util.UUID;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;

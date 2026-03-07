@@ -69,8 +69,8 @@ tasks.openApiGenerate {
   generatorName.set("spring")
   inputSpec.set("$rootDir/src/main/resources/openapi.yaml")
   outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
-  apiPackage.set("com.budget.buddy.budget_buddy_api.api")
-  modelPackage.set("com.budget.buddy.budget_buddy_api.model")
+  apiPackage.set("com.budget.buddy.budget_buddy_api.generated.api")
+  modelPackage.set("com.budget.buddy.budget_buddy_api.generated.model")
   configOptions.set(
     mapOf(
       "useSpringBoot4" to "true",

@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.UUID;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,6 @@ import org.springframework.data.relational.core.mapping.event.BeforeSaveEvent;
 class BaseEntityListenerTest {
 
   private static final Clock FIXED_CLOCK = Clock.fixed(Instant.EPOCH, Clock.systemUTC().getZone());
-  private static final UUID TEST_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
   @Mock
   private Supplier<String> idGenerator;
