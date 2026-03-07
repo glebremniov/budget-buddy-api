@@ -20,12 +20,6 @@ springdoc:
 server:
   port: ${SERVER_PORT:8080}
 
-security:
-  jwt:
-    secret:
-    access-token-validity-seconds: 900 # 15 minutes
-    refresh-token-validity-seconds: 1209600 # 14 days
-
 logging:
   level:
     root: INFO

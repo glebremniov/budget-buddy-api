@@ -3,9 +3,12 @@ server:
 
 security:
   jwt:
-    secret: dde435ee1f3a08ac33823232f4be169b7b04fe35396677053b08e594c7bbe0406969bd623b964c662f797f65bf0c4b50a1d236668d1e002c58be759208828bb1
-    access-token-validity-seconds: 86400 # 1 day
-    refresh-token-validity-seconds: 1209600 # 14 days
+    access-token:
+      secret: access-token-secret
+      validity-seconds: 86400 # 1 day
+    refresh-token:
+      secret: refresh-token-secret
+      validity-seconds: 1209600 # 14 days
 
 logging:
   level:

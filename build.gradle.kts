@@ -1,5 +1,3 @@
-import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
-
 plugins {
   java
   id("org.springframework.boot") version "4.0.3"
@@ -30,29 +28,32 @@ repositories {
 dependencies {
   val mapstructVersion = "1.6.3"
   val lombokVersion = "1.18.42"
-  val jjwtVersion = "0.13.0"
+  val openApiVerification = "3.0.1"
+  val h2Version = "2.4.240"
+  val postgreVersion = "42.7.10"
+  val lombokMapstructBindingVersion = "0.2.0"
+  val jacksonDatabindNullableVersion = "0.2.9"
+  val javaJwtVersion = "4.5.1"
 
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-h2console")
-  implementation("org.springdoc:springdoc-openapi-starter-common:3.0.1")
-  implementation("org.openapitools:jackson-databind-nullable:0.2.9")
-  implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
+  implementation("org.springdoc:springdoc-openapi-starter-common:${openApiVerification}")
+  implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
+  implementation("com.auth0:java-jwt:${javaJwtVersion}")
 
   compileOnly("org.projectlombok:lombok:${lombokVersion}")
   compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
 
-  runtimeOnly("io.jsonwebtoken:jjwt-impl:${jjwtVersion}")
-  runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jjwtVersion}")
-  runtimeOnly("com.h2database:h2:2.4.240")
-  runtimeOnly("org.postgresql:postgresql:42.7.10")
+  runtimeOnly("com.h2database:h2:${h2Version}")
+  runtimeOnly("org.postgresql:postgresql:${postgreVersion}")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
   developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
-  annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+  annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
   annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
   annotationProcessor("org.projectlombok:lombok:$lombokVersion")
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -65,8 +66,7 @@ tasks.withType<Test> {
   useJUnitPlatform()
 }
 
-// OpenAPI Generator configuration
-tasks.register<GenerateTask>("openapi") {
+tasks.openApiGenerate {
   generatorName.set("spring")
   inputSpec.set("$rootDir/src/main/resources/openapi.yaml")
   outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
@@ -98,5 +98,5 @@ sourceSets {
 
 // Ensure openapi task runs before compilation
 tasks.compileJava {
-  dependsOn("openapi")
+  dependsOn(tasks.openApiGenerate)
 }

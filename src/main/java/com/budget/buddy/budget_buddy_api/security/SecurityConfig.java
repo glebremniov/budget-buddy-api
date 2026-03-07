@@ -1,5 +1,7 @@
 package com.budget.buddy.budget_buddy_api.security;
 
+import com.budget.buddy.budget_buddy_api.security.jwt.JwtAuthenticationFilter;
+import com.budget.buddy.budget_buddy_api.security.jwt.JwtProvider;
 import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,15 +25,9 @@ import org.springframework.security.web.authentication.password.HaveIBeenPwnedRe
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private final JwtTokenProvider jwtTokenProvider;
-
-  public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
-    this.jwtTokenProvider = jwtTokenProvider;
-  }
-
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http, UserDetailsService userDetailsService) {
-    var jwtFilter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
+  SecurityFilterChain securityFilterChain(HttpSecurity http, JwtProvider accessTokenProvider, UserDetailsService userDetailsService) {
+    var jwtFilter = new JwtAuthenticationFilter(accessTokenProvider, userDetailsService);
 
     http
         .authorizeHttpRequests(auth -> auth
@@ -43,29 +39,29 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .httpBasic(AbstractHttpConfigurer::disable)
-        .csrf(csrf -> csrf.ignoringRequestMatchers("/v1/*"))
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/v1/**"))
         .formLogin(AbstractHttpConfigurer::disable);
 
     return http.build();
   }
 
   @Bean
-  public UserDetailsManager jdbcUserDetailsManager(DataSource dataSource) {
+  UserDetailsManager jdbcUserDetailsManager(DataSource dataSource) {
     return new JdbcUserDetailsManager(dataSource);
   }
 
   @Bean
-  public PasswordEncoder passwordEncoder() {
+  PasswordEncoder passwordEncoder() {
     return PasswordEncoderFactories.createDelegatingPasswordEncoder();
   }
 
   @Bean
-  public CompromisedPasswordChecker compromisedPasswordChecker() {
+  CompromisedPasswordChecker compromisedPasswordChecker() {
     return new HaveIBeenPwnedRestApiPasswordChecker();
   }
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) {
+  AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) {
     return authConfig.getAuthenticationManager();
   }
 }
