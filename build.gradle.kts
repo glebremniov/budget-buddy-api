@@ -3,6 +3,8 @@ plugins {
   id("org.springframework.boot") version "4.0.3"
   id("io.spring.dependency-management") version "1.1.7"
   id("org.openapi.generator") version "7.3.0"
+  id("jacoco")
+  id("org.sonarqube") version "7.2.3.7755"
 }
 
 group = "com.budget.buddy"
@@ -63,6 +65,7 @@ dependencies {
 
 tasks.withType<Test> {
   useJUnitPlatform()
+  finalizedBy("jacocoTestReport")
 }
 
 tasks.openApiGenerate {
@@ -98,4 +101,13 @@ sourceSets {
 // Ensure openapi task runs before compilation
 tasks.compileJava {
   dependsOn(tasks.openApiGenerate)
+}
+
+tasks.withType<JacocoReport> {
+  reports {
+    xml.apply {
+      isEnabled = true
+    }
+    executionData(tasks.withType<Test>())
+  }
 }
