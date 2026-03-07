@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
@@ -135,9 +136,10 @@ class AbstractCRUDLServiceTest {
   class DeleteTests {
 
     @Test
-    void should_DeleteEntity() {
+    void should_DeleteEntity_When_EntityExists() {
       // Given
       var id = "testId";
+      when(repository.existsById(id)).thenReturn(true);
 
       // When
       assertThatNoException()
@@ -145,6 +147,23 @@ class AbstractCRUDLServiceTest {
 
       // Then
       verify(repository).deleteById(id);
+      verify(repository).existsById(id);
+    }
+
+    @Test
+    void should_ThrowException_When_EntityNotFound() {
+      // Given
+      var id = "testId";
+      when(repository.existsById(id)).thenReturn(false);
+
+      // When
+      assertThatThrownBy(() -> service.delete(id))
+          .isInstanceOf(EntityNotFoundException.class)
+          .hasMessageContaining("Entity not found with id: " + id);
+
+      // Then
+      verify(repository).existsById(id);
+      verifyNoMoreInteractions(repository);
     }
   }
 
