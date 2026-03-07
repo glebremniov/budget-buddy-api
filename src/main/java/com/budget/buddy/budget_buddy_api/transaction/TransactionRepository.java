@@ -1,5 +1,6 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import com.budget.buddy.budget_buddy_api.base.crudl.BaseRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Repository;
  * Repository for Transaction entity operations using Spring Data JDBC.
  */
 @Repository
-public interface TransactionRepository extends CrudRepository<TransactionEntity, UUID> {
+public interface TransactionRepository extends BaseRepository<TransactionEntity, UUID>, CrudRepository<TransactionEntity, UUID> {
 
   /**
    * Find all transactions.

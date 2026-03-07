@@ -38,13 +38,6 @@ public class CategoryService extends AbstractCRUDLService<CategoryEntity, UUID, 
 
   @Override
   @Transactional
-  public void delete(UUID categoryId) {
-    var entity = readInternal(categoryId);
-    categoryRepository.delete(entity);
-  }
-
-  @Override
-  @Transactional
   protected CategoryEntity createInternal(CategoryCreate createRequest) {
     var ownerId = userService.getCurrentUserIdOrThrow();
     var entity = categoryMapper.toEntity(createRequest, ownerId);

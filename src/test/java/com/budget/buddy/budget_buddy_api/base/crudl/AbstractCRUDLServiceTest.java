@@ -152,22 +152,23 @@ class AbstractCRUDLServiceTest {
     void should_DeleteEntity_When_EntityExists() {
       // Given
       var id = "testId";
-      when(repository.existsById(id)).thenReturn(true);
+      var entity = new DummyEntity();
+      when(repository.findById(id)).thenReturn(Optional.of(entity));
 
       // When
       assertThatNoException()
           .isThrownBy(() -> service.delete(id));
 
       // Then
-      verify(repository).deleteById(id);
-      verify(repository).existsById(id);
+      verify(repository).delete(entity);
+      verify(repository).findById(id);
     }
 
     @Test
     void should_ThrowException_When_EntityNotFound() {
       // Given
       var id = "testId";
-      when(repository.existsById(id)).thenReturn(false);
+      when(repository.findById(id)).thenReturn(Optional.empty());
 
       // When
       assertThatThrownBy(() -> service.delete(id))
@@ -175,7 +176,7 @@ class AbstractCRUDLServiceTest {
           .hasMessageContaining("Entity not found with id: " + id);
 
       // Then
-      verify(repository).existsById(id);
+      verify(repository).findById(id);
       verifyNoMoreInteractions(repository);
     }
   }

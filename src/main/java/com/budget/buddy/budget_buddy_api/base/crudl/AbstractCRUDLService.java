@@ -48,11 +48,8 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
   @Transactional
   @Override
   public void delete(ID id) {
-    if (!repository.existsById(id)) {
-      throw new EntityNotFoundException(String.format(ENTITY_NOT_FOUND_MESSAGE, id));
-    }
-
-    repository.deleteById(id);
+    var entity = readInternal(id);
+    repository.delete(entity);
   }
 
   @Override

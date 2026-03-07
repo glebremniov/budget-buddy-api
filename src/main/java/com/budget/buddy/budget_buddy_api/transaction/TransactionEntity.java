@@ -23,7 +23,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class TransactionEntity extends BaseEntity<UUID> {
 
   @Column("category_id")
-  private String categoryId;
+  private UUID categoryId;
 
   @Column("amount")
   private Integer amount;

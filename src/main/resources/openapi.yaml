@@ -487,6 +487,8 @@ components:
         type:
           type: string
           enum: [ expense, income, transfer ]
+        currency:
+          type: string
         date:
           type: string
           format: date
