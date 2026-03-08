@@ -56,7 +56,7 @@ dependencies {
 
   annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
   annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
-  annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+  annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -70,7 +70,7 @@ tasks.withType<Test> {
 
 tasks.openApiGenerate {
   generatorName.set("spring")
-  inputSpec.set("$rootDir/src/main/resources/openapi.yaml")
+  inputSpec.set("${rootDir}/src/main/resources/openapi.yaml")
   outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
   apiPackage.set("com.budget.buddy.budget_buddy_api.generated.api")
   modelPackage.set("com.budget.buddy.budget_buddy_api.generated.model")
