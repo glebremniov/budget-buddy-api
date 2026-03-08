@@ -129,6 +129,7 @@ paths:
         required: true
         schema:
           type: string
+          format: uuid
         description: UUID of the category
     get:
       tags: [ categories ]
@@ -193,6 +194,7 @@ paths:
           in: query
           schema:
             type: string
+            format: uuid
         - name: start
           in: query
           description: Inclusive start date (YYYY-MM-DD)
@@ -258,6 +260,7 @@ paths:
         required: true
         schema:
           type: string
+          format: uuid
         description: UUID of the transaction
     get:
       tags: [ transactions ]
@@ -435,7 +438,7 @@ components:
           type: string
         categoryId:
           type: string
-          nullable: true
+          format: uuid
         amount:
           type: integer
           description: Amount in minor units (always positive)
@@ -464,6 +467,7 @@ components:
       properties:
         categoryId:
           type: string
+          format: uuid
         amount:
           type: integer
           description: Positive integer (minor units)
@@ -482,6 +486,7 @@ components:
       properties:
         categoryId:
           type: string
+          format: uuid
         amount:
           type: integer
         type:
