@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AbstractCRUDLServiceTest {
 
   @Mock
-  private BaseMapper<DummyEntity, Object, Object, Object> mapper;
+  private BaseMapper<DummyEntity, Object, Object, Object, Object> mapper;
 
   @Mock
   private BaseRepository<DummyEntity, String> repository;

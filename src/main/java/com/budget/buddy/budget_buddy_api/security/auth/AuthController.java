@@ -2,8 +2,8 @@ package com.budget.buddy.budget_buddy_api.security.auth;
 
 import com.budget.buddy.budget_buddy_api.generated.api.AuthApi;
 import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
-import com.budget.buddy.budget_buddy_api.generated.model.V1AuthLoginPostRequest;
-import com.budget.buddy.budget_buddy_api.generated.model.V1AuthRefreshPostRequest;
+import com.budget.buddy.budget_buddy_api.generated.model.LoginRequest;
+import com.budget.buddy.budget_buddy_api.generated.model.RefreshTokenRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ public class AuthController implements AuthApi {
    * @return AuthToken with access_token, refresh_token, and expires_in
    */
   @Override
-  public ResponseEntity<AuthToken> v1AuthLoginPost(@Valid V1AuthLoginPostRequest request) {
+  public ResponseEntity<AuthToken> loginUser(@Valid LoginRequest request) {
     var token = authService.login(request.getUsername(), request.getPassword());
     return ResponseEntity.ok(token);
   }
@@ -37,7 +37,7 @@ public class AuthController implements AuthApi {
    * @return AuthToken with new access_token
    */
   @Override
-  public ResponseEntity<AuthToken> v1AuthRefreshPost(@Valid V1AuthRefreshPostRequest request) {
+  public ResponseEntity<AuthToken> refreshToken(@Valid RefreshTokenRequest request) {
     var token = authService.refresh(request.getRefreshToken());
     return ResponseEntity.ok(token);
   }
