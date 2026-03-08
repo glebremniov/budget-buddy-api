@@ -1,3 +1,11 @@
+spring:
+  docker:
+    compose:
+      enabled: true
+      profiles:
+        active: "postgres"
+      file: docker-compose.local.yaml
+
 server:
   port: 8080
 
