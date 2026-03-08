@@ -23,7 +23,7 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
   private final BaseRepository<E, ID> repository;
 
   @Getter
-  private final BaseMapper<E, R, C, U> mapper;
+  private final BaseMapper<E, R, C, U, ?> mapper;
 
   @Transactional
   @Override

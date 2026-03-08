@@ -2,14 +2,13 @@ package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.AbstractCRUDLController;
 import com.budget.buddy.budget_buddy_api.generated.api.TransactionsApi;
+import com.budget.buddy.budget_buddy_api.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
-import com.budget.buddy.budget_buddy_api.generated.model.V1TransactionsGet200Response;
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,51 +18,51 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class TransactionController
-    extends AbstractCRUDLController<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate, V1TransactionsGet200Response>
+    extends AbstractCRUDLController<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions>
     implements TransactionsApi {
 
   private final TransactionService service;
+  private final TransactionMapper mapper;
 
-  public TransactionController(TransactionService service) {
-    super(service);
+  public TransactionController(TransactionService service, TransactionMapper mapper) {
+    super(service, mapper);
     this.service = service;
+    this.mapper = mapper;
   }
 
   @Override
-  public ResponseEntity<V1TransactionsGet200Response> v1TransactionsGet(Integer limit, Integer offset, String categoryId, LocalDate start, LocalDate end, String sort) {
-    var categoryUUID = UUID.fromString(categoryId);
-    var transactions = service.list(limit, offset, categoryUUID, start, end);
-    var total = service.count(categoryUUID, start, end);
+  public ResponseEntity<PaginatedTransactions> listTransactions(
+      Integer limit, Integer offset, UUID categoryId,
+      LocalDate start, LocalDate end, String sort) {
+    var items = service.list(limit, offset, categoryId, start, end);
+    var total = service.count(categoryId, start, end);
 
-    var meta = new PaginationMeta();
-    meta.setLimit(limit);
-    meta.setOffset(offset);
-    meta.setTotal((int) total);
+    var meta = new PaginationMeta()
+        .limit(limit)
+        .offset(offset)
+        .total((int) total);
 
-    var response = new V1TransactionsGet200Response()
-        .items(transactions)
-        .meta(meta);
-
+    var response = mapper.toPageResponse(items, meta);
     return ResponseEntity.ok(response);
   }
 
   @Override
-  public ResponseEntity<Transaction> v1TransactionsPost(TransactionCreate transactionCreate) {
+  public ResponseEntity<Transaction> createTransaction(TransactionCreate transactionCreate) {
     return super.createInternal(transactionCreate);
   }
 
   @Override
-  public ResponseEntity<Void> v1TransactionsTransactionIdDelete(String transactionId) {
+  public ResponseEntity<Void> deleteTransaction(UUID transactionId) {
     return super.deleteInternal(transactionId);
   }
 
   @Override
-  public ResponseEntity<Transaction> v1TransactionsTransactionIdGet(String transactionId) {
+  public ResponseEntity<Transaction> getTransaction(UUID transactionId) {
     return super.readInternal(transactionId);
   }
 
   @Override
-  public ResponseEntity<Transaction> v1TransactionsTransactionIdPut(String transactionId, TransactionUpdate transactionUpdate) {
+  public ResponseEntity<Transaction> updateTransaction(UUID transactionId, TransactionUpdate transactionUpdate) {
     return super.updateInternal(transactionId, transactionUpdate);
   }
 
@@ -72,15 +71,4 @@ public class TransactionController
     return URI.create("/v1/transactions/" + created.getId());
   }
 
-  @Override
-  protected V1TransactionsGet200Response listResponse(List<Transaction> items, PaginationMeta meta) {
-    return new V1TransactionsGet200Response()
-        .items(items)
-        .meta(meta);
-  }
-
-  @Override
-  protected UUID fromString(String id) {
-    return UUID.fromString(id);
-  }
 }

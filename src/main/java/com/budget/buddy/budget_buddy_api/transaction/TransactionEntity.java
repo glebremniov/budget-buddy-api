@@ -29,7 +29,7 @@ public class TransactionEntity extends BaseEntity<UUID> {
   private Integer amount;
 
   @Column("type")
-  private String type; // "expense", "income", "transfer"
+  private TransactionType type;
 
   @Column("currency")
   private String currency;
@@ -40,6 +40,8 @@ public class TransactionEntity extends BaseEntity<UUID> {
   @Column("description")
   private String description;
 
-  // Getters and Setters
+  public enum TransactionType {
+    EXPENSE, INCOME, TRANSFER
+  }
 
 }

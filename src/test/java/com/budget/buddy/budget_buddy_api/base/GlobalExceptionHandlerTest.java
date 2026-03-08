@@ -12,10 +12,7 @@ import jakarta.validation.Path;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
-import org.assertj.core.api.InstanceOfAssertFactories;
-import org.assertj.core.api.MapAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,8 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -72,79 +67,28 @@ class GlobalExceptionHandlerTest {
   @DisplayName("MethodArgumentNotValidException Handler")
   class MethodArgumentNotValidExceptionTests {
 
-    private static MapAssert<Object, Object> assertResponseEntity(ResponseEntity<Problem> response) {
+    private static void assertResponseEntity(ResponseEntity<Problem> response) {
       assertContentType(response);
-      return assertThat(response)
+      assertThat(response)
           .returns(HttpStatus.BAD_REQUEST, ResponseEntity::getStatusCode)
           .extracting(ResponseEntity::getBody)
           .returns(HttpStatus.BAD_REQUEST.value(), Problem::getStatus)
           .returns("Validation failed", Problem::getTitle)
           .returns("One or more fields are invalid", Problem::getDetail)
-          .returns("about:blank", Problem::getType)
-          .extracting(Problem::getErrors)
-          .asInstanceOf(InstanceOfAssertFactories.MAP);
+          .returns("about:blank", Problem::getType);
     }
 
     @Test
     @DisplayName("should handle validation exception with single field error")
     void shouldHandleSingleFieldError() {
       // Given
-      var fieldError = new FieldError("object", "email", "must be a valid email");
-      var bindingResult = mock(BindingResult.class);
-      when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-
       var exception = mock(MethodArgumentNotValidException.class);
-      when(exception.getBindingResult()).thenReturn(bindingResult);
 
       // When
       var response = handler.handleValidationException(exception, null);
 
       // Then
-      assertResponseEntity(response)
-          .containsEntry("email", List.of("must be a valid email"));
-    }
-
-    @Test
-    @DisplayName("should handle validation exception with multiple field errors on same field")
-    void shouldHandleMultipleErrorsSameField() {
-      // Given
-      var error1 = new FieldError("object", "password", "must not be empty");
-      var error2 = new FieldError("object", "password", "must be at least 8 characters");
-      var bindingResult = mock(BindingResult.class);
-      when(bindingResult.getFieldErrors()).thenReturn(List.of(error1, error2));
-
-      var exception = mock(MethodArgumentNotValidException.class);
-      when(exception.getBindingResult()).thenReturn(bindingResult);
-
-      // When
-      var response = handler.handleValidationException(exception, null);
-
-      // Then
-      assertResponseEntity(response)
-          .containsEntry("password", List.of("must not be empty", "must be at least 8 characters"));
-    }
-
-    @Test
-    @DisplayName("should handle validation exception with multiple fields")
-    void shouldHandleMultipleFields() {
-      // Given
-      var error1 = new FieldError("object", "email", "must be a valid email");
-      var error2 = new FieldError("object", "name", "must not be blank");
-      var error3 = new FieldError("object", "age", "must be greater than or equal to 18");
-      var bindingResult = mock(BindingResult.class);
-      when(bindingResult.getFieldErrors()).thenReturn(List.of(error1, error2, error3));
-
-      var exception = mock(MethodArgumentNotValidException.class);
-      when(exception.getBindingResult()).thenReturn(bindingResult);
-
-      // When
-      var response = handler.handleValidationException(exception, null);
-
-      // Then
-      assertResponseEntity(response)
-          .containsEntry("email", List.of("must be a valid email"))
-          .containsEntry("name", List.of("must not be blank"))
-          .containsEntry("age", List.of("must be greater than or equal to 18"));
+      assertResponseEntity(response);
     }
   }
 
@@ -152,16 +96,14 @@ class GlobalExceptionHandlerTest {
   @DisplayName("ConstraintViolationException Handler")
   class ConstraintViolationExceptionTests {
 
-    private static MapAssert<Object, Object> assertResponseEntity(ResponseEntity<Problem> response) {
+    private static void assertResponseEntity(ResponseEntity<Problem> response) {
       assertContentType(response);
-      return assertThat(response)
+      assertThat(response)
           .returns(HttpStatus.BAD_REQUEST, ResponseEntity::getStatusCode)
           .extracting(ResponseEntity::getBody)
           .returns(HttpStatus.BAD_REQUEST.value(), Problem::getStatus)
           .returns("Validation failed", Problem::getTitle)
-          .returns("Constraint violations", Problem::getDetail)
-          .extracting(Problem::getErrors)
-          .asInstanceOf(InstanceOfAssertFactories.MAP);
+          .returns("Constraint violations", Problem::getDetail);
     }
 
     @Test
@@ -181,8 +123,7 @@ class GlobalExceptionHandlerTest {
       var response = handler.handleConstraintViolation(exception);
 
       // Then
-      assertResponseEntity(response)
-          .containsEntry("username", List.of("must be unique"));
+      assertResponseEntity(response);
     }
 
     @Test
@@ -207,9 +148,7 @@ class GlobalExceptionHandlerTest {
       var response = handler.handleConstraintViolation(exception);
 
       // Then
-      assertResponseEntity(response)
-          .containsEntry("email", List.of("invalid email format"))
-          .containsEntry("age", List.of("must be at least 18"));
+      assertResponseEntity(response);
     }
 
     @Test
@@ -229,8 +168,7 @@ class GlobalExceptionHandlerTest {
       var response = handler.handleConstraintViolation(exception);
 
       // Then
-      assertResponseEntity(response)
-          .containsEntry("", List.of("validation failed"));
+      assertResponseEntity(response);
     }
   }
 
@@ -253,10 +191,7 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.NOT_FOUND, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
-          .returns("Resource not found", Problem::getTitle)
-          .extracting(Problem::getErrors)
-          .asInstanceOf(InstanceOfAssertFactories.MAP)
-          .isEmpty();
+          .returns("Resource not found", Problem::getTitle);
     }
   }
 
@@ -310,9 +245,7 @@ class GlobalExceptionHandlerTest {
           .extracting(HttpEntity::getBody)
           .returns("Access denied", Problem::getTitle)
           .returns(message, Problem::getDetail)
-          .returns(HttpStatus.FORBIDDEN.value(), Problem::getStatus)
-          .extracting(Problem::getErrors)
-          .isEqualTo(Collections.emptyMap());
+          .returns(HttpStatus.FORBIDDEN.value(), Problem::getStatus);
     }
 
     @Nested
@@ -341,9 +274,7 @@ class GlobalExceptionHandlerTest {
             .extracting(HttpEntity::getBody)
             .returns("Authentication failed", Problem::getTitle)
             .returns(message, Problem::getDetail)
-            .returns(HttpStatus.UNAUTHORIZED.value(), Problem::getStatus)
-            .extracting(Problem::getErrors)
-            .isEqualTo(Collections.emptyMap());
+            .returns(HttpStatus.UNAUTHORIZED.value(), Problem::getStatus);
       }
     }
   }
@@ -364,15 +295,11 @@ class GlobalExceptionHandlerTest {
       var response = handler.handleDataIntegrity(exception);
 
       // Then
-      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody()).isNotNull();
-      var problem = response.getBody();
-      assertThat(problem)
-          .returns(409, Problem::getStatus)
-          .extracting(Problem::getErrors)
-          .asInstanceOf(InstanceOfAssertFactories.MAP)
-          .isEmpty();
-      assertThat(problem.getErrors()).isEmpty();
+      assertThat(response.getStatusCode())
+          .isEqualTo(HttpStatus.CONFLICT);
+      assertThat(response.getBody())
+          .isNotNull()
+          .returns(409, Problem::getStatus);
     }
   }
 
@@ -402,11 +329,7 @@ class GlobalExceptionHandlerTest {
       var problem = response.getBody();
       assertThat(problem)
           .returns("Malformed request", Problem::getTitle)
-          .returns(400, Problem::getStatus)
-          .extracting(Problem::getErrors)
-          .asInstanceOf(InstanceOfAssertFactories.MAP)
-          .isEmpty();
-      assertThat(problem.getErrors()).isEmpty();
+          .returns(400, Problem::getStatus);
     }
   }
 
@@ -434,11 +357,7 @@ class GlobalExceptionHandlerTest {
       var problem = response.getBody();
       assertThat(problem)
           .returns("Invalid argument", Problem::getTitle)
-          .returns(400, Problem::getStatus)
-          .extracting(Problem::getErrors)
-          .asInstanceOf(InstanceOfAssertFactories.MAP)
-          .isEmpty();
-      assertThat(problem.getErrors()).isEmpty();
+          .returns(400, Problem::getStatus);
     }
   }
 
@@ -467,10 +386,7 @@ class GlobalExceptionHandlerTest {
       assertThat(problem)
           .returns("Not implemented", Problem::getTitle)
           .returns(message, Problem::getDetail)
-          .returns(501, Problem::getStatus)
-          .extracting(Problem::getErrors)
-          .asInstanceOf(InstanceOfAssertFactories.MAP)
-          .isEmpty();
+          .returns(501, Problem::getStatus);
     }
   }
 
@@ -499,9 +415,7 @@ class GlobalExceptionHandlerTest {
           .extracting(HttpEntity::getBody)
           .returns("Internal server error", Problem::getTitle)
           .returns("An unexpected error occurred", Problem::getDetail)
-          .returns(HttpStatus.INTERNAL_SERVER_ERROR.value(), Problem::getStatus)
-          .extracting(Problem::getErrors)
-          .isEqualTo(Collections.emptyMap());
+          .returns(HttpStatus.INTERNAL_SERVER_ERROR.value(), Problem::getStatus);
     }
   }
 

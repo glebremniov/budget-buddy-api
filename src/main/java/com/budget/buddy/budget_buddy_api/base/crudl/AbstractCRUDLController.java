@@ -2,15 +2,19 @@ package com.budget.buddy.budget_buddy_api.base.crudl;
 
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
 import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 
 public abstract class AbstractCRUDLController<E extends BaseEntity<ID>, ID, R, C, U, L> {
 
   private final AbstractCRUDLService<E, ID, R, C, U> service;
+  private final BaseMapper<E, R, C, U, L> mapper;
 
-  protected AbstractCRUDLController(AbstractCRUDLService<E, ID, R, C, U> service) {
+  protected AbstractCRUDLController(
+      AbstractCRUDLService<E, ID, R, C, U> service,
+      BaseMapper<E, R, C, U, L> mapper
+  ) {
     this.service = service;
+    this.mapper = mapper;
   }
 
   public ResponseEntity<R> createInternal(C createRequest) {
@@ -20,18 +24,18 @@ public abstract class AbstractCRUDLController<E extends BaseEntity<ID>, ID, R, C
         .body(created);
   }
 
-  public ResponseEntity<R> readInternal(String id) {
-    var item = service.read(fromString(id));
+  public ResponseEntity<R> readInternal(ID id) {
+    var item = service.read(id);
     return ResponseEntity.ok(item);
   }
 
-  public ResponseEntity<R> updateInternal(String id, U updateRequest) {
-    var updated = service.update(fromString(id), updateRequest);
+  public ResponseEntity<R> updateInternal(ID id, U updateRequest) {
+    var updated = service.update(id, updateRequest);
     return ResponseEntity.ok(updated);
   }
 
-  public ResponseEntity<Void> deleteInternal(String id) {
-    service.delete(fromString(id));
+  public ResponseEntity<Void> deleteInternal(ID id) {
+    service.delete(id);
     return ResponseEntity.noContent().build();
   }
 
@@ -44,15 +48,11 @@ public abstract class AbstractCRUDLController<E extends BaseEntity<ID>, ID, R, C
     meta.setOffset(offset);
     meta.setTotal((int) total);
 
-    var response = listResponse(items, meta);
+    var response = mapper.toPageResponse(items, meta);
 
     return ResponseEntity.ok(response);
   }
 
   protected abstract URI createdURI(R created);
-
-  protected abstract L listResponse(List<R> items, PaginationMeta meta);
-
-  protected abstract ID fromString(String id);
 
 }

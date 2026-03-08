@@ -5,45 +5,43 @@ import com.budget.buddy.budget_buddy_api.generated.api.CategoriesApi;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
-import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
-import com.budget.buddy.budget_buddy_api.generated.model.V1CategoriesGet200Response;
+import com.budget.buddy.budget_buddy_api.generated.model.PaginatedCategories;
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CategoryController
-    extends AbstractCRUDLController<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate, V1CategoriesGet200Response>
+    extends AbstractCRUDLController<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate, PaginatedCategories>
     implements CategoriesApi {
 
-  public CategoryController(CategoryService categoryService) {
-    super(categoryService);
+  public CategoryController(CategoryService service, CategoryMapper mapper) {
+    super(service, mapper);
   }
 
   @Override
-  public ResponseEntity<Void> v1CategoriesCategoryIdDelete(String categoryId) {
+  public ResponseEntity<Void> deleteCategory(UUID categoryId) {
     return super.deleteInternal(categoryId);
   }
 
   @Override
-  public ResponseEntity<Category> v1CategoriesCategoryIdGet(String categoryId) {
+  public ResponseEntity<Category> getCategory(UUID categoryId) {
     return super.readInternal(categoryId);
   }
 
   @Override
-  public ResponseEntity<Category> v1CategoriesCategoryIdPut(String categoryId, CategoryUpdate categoryUpdate) {
+  public ResponseEntity<Category> updateCategory(UUID categoryId, CategoryUpdate categoryUpdate) {
     return super.updateInternal(categoryId, categoryUpdate);
   }
 
   @Override
-  public ResponseEntity<V1CategoriesGet200Response> v1CategoriesGet(Integer limit, Integer offset) {
+  public ResponseEntity<PaginatedCategories> listCategories(Integer limit, Integer offset) {
     return super.listInternal(limit, offset);
   }
 
   @Override
-  public ResponseEntity<Category> v1CategoriesPost(CategoryCreate categoryCreate) {
+  public ResponseEntity<Category> createCategory(CategoryCreate categoryCreate) {
     return super.createInternal(categoryCreate);
   }
 
@@ -52,15 +50,4 @@ public class CategoryController
     return URI.create("/v1/categories/" + created.getId());
   }
 
-  @Override
-  protected V1CategoriesGet200Response listResponse(List<Category> items, PaginationMeta meta) {
-    return new V1CategoriesGet200Response()
-        .items(items)
-        .meta(meta);
-  }
-
-  @Override
-  protected UUID fromString(String id) {
-    return UUID.fromString(id);
-  }
 }

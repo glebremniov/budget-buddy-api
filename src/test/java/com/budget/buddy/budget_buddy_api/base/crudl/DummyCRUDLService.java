@@ -4,7 +4,7 @@ public class DummyCRUDLService extends AbstractCRUDLService<DummyEntity, String,
 
   public DummyCRUDLService(
       BaseRepository<DummyEntity, String> repository,
-      BaseMapper<DummyEntity, Object, Object, Object> mapper
+      BaseMapper<DummyEntity, Object, Object, Object, Object> mapper
   ) {
     super(repository, mapper);
   }
