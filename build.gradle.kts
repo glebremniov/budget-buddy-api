@@ -56,15 +56,15 @@ dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
-  testImplementation(platform("org.testcontainers:testcontainers-bom:2.0.3"))
-  testImplementation("org.testcontainers:testcontainers-postgresql")
-  testImplementation("org.testcontainers:testcontainers-junit-jupiter")
   testImplementation("org.springframework.boot:spring-boot-testcontainers")
   testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
+  testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+  testImplementation("org.testcontainers:testcontainers-postgresql")
 }
 
-tasks.named<Test>("test") {
+tasks.withType<Test> {
   useJUnitPlatform()
+  finalizedBy("jacocoTestReport")
 }
 
 tasks.openApiGenerate {
