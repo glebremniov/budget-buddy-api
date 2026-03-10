@@ -28,7 +28,6 @@ public class SecurityConfig {
   SecurityFilterChain securityFilterChain(HttpSecurity http) {
     http
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/h2-console/**").permitAll()
             .requestMatchers("/actuator/**").permitAll()
             .requestMatchers("/v1/auth/**").permitAll()
             .anyRequest().authenticated()

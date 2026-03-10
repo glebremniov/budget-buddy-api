@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset dev:002-dev-data context:dev
 INSERT INTO users (id, version, username, password, enabled, created_at, updated_at)
 VALUES ('a788506a-45e8-4e87-92e9-974bd5863311',
         1,
@@ -17,3 +20,7 @@ VALUES ('5910a910-4ed1-47e8-b0e5-73b27f0d5add',
         'a788506a-45e8-4e87-92e9-974bd5863311',
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP) ON CONFLICT (id) DO NOTHING;
+
+--rollback DELETE FROM categories WHERE id = '5910a910-4ed1-47e8-b0e5-73b27f0d5add';
+--rollback DELETE FROM authorities WHERE username = 'admin';
+--rollback DELETE FROM users WHERE id = 'a788506a-45e8-4e87-92e9-974bd5863311';

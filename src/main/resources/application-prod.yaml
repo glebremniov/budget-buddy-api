@@ -2,11 +2,15 @@ spring:
   docker:
     compose:
       enabled: false
-  devtools:
-    add-properties: false
-  h2:
-    console:
-      enabled: false
+  liquibase:
+    contexts: prod
+  datasource:
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
 
 management:
   endpoints:

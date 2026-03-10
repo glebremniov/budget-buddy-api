@@ -1,5 +1,7 @@
--- Keep existing tables for now (can be removed later if not needed)
-CREATE TABLE IF NOT EXISTS users
+--liquibase formatted sql
+
+--changeset dev:001-initial-schema
+CREATE TABLE users
 (
     id         UUID PRIMARY KEY,
     version    INT                  NOT NULL,
@@ -10,8 +12,7 @@ CREATE TABLE IF NOT EXISTS users
     updated_at TIMESTAMP            NOT NULL
 );
 
--- Authorities/Roles table for Spring Security
-CREATE TABLE IF NOT EXISTS authorities
+CREATE TABLE authorities
 (
     username  VARCHAR(255) NOT NULL,
     authority VARCHAR(255) NOT NULL,
@@ -19,8 +20,7 @@ CREATE TABLE IF NOT EXISTS authorities
     UNIQUE (username, authority)
 );
 
--- Categories table
-CREATE TABLE IF NOT EXISTS categories
+CREATE TABLE categories
 (
     id         UUID PRIMARY KEY,
     version    INT          NOT NULL,
@@ -31,8 +31,7 @@ CREATE TABLE IF NOT EXISTS categories
     FOREIGN KEY (owner_id) REFERENCES users (id)
 );
 
--- Transactions table
-CREATE TABLE IF NOT EXISTS transactions
+CREATE TABLE transactions
 (
     id          UUID PRIMARY KEY,
     version     INT         NOT NULL,
@@ -46,3 +45,8 @@ CREATE TABLE IF NOT EXISTS transactions
     updated_at  TIMESTAMP   NOT NULL,
     FOREIGN KEY (category_id) REFERENCES categories (id)
 );
+
+--rollback DROP TABLE transactions;
+--rollback DROP TABLE categories;
+--rollback DROP TABLE authorities;
+--rollback DROP TABLE users;

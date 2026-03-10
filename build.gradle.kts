@@ -1,9 +1,9 @@
 plugins {
   java
+  jacoco
   id("org.springframework.boot") version "4.0.3"
   id("io.spring.dependency-management") version "1.1.7"
   id("org.openapi.generator") version "7.3.0"
-  id("jacoco")
   id("org.sonarqube") version "7.2.3.7755"
 }
 
@@ -29,10 +29,7 @@ repositories {
 
 dependencies {
   val mapstructVersion = "1.6.3"
-  val lombokVersion = "1.18.42"
   val openApiVerification = "3.0.1"
-  val h2Version = "2.4.240"
-  val postgreVersion = "42.7.10"
   val lombokMapstructBindingVersion = "0.2.0"
   val jacksonDatabindNullableVersion = "0.2.9"
 
@@ -41,26 +38,28 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("org.springframework.boot:spring-boot-h2console")
+  implementation("org.springframework.boot:spring-boot-starter-liquibase")
   implementation("org.springdoc:springdoc-openapi-starter-common:${openApiVerification}")
   implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
 
-  compileOnly("org.projectlombok:lombok:${lombokVersion}")
+  compileOnly("org.projectlombok:lombok")
   compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
 
-  runtimeOnly("com.h2database:h2:${h2Version}")
-  runtimeOnly("org.postgresql:postgresql:${postgreVersion}")
+  runtimeOnly("org.postgresql:postgresql")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
   developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
   annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
   annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
-  annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+  annotationProcessor("org.projectlombok:lombok")
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
-  testImplementation("org.assertj:assertj-core")
+  testImplementation("org.springframework.boot:spring-boot-testcontainers")
+  testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
+  testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+  testImplementation("org.testcontainers:testcontainers-postgresql")
 }
 
 tasks.withType<Test> {
@@ -77,8 +76,6 @@ tasks.openApiGenerate {
   configOptions.set(
     mapOf(
       "useSpringBoot4" to "true",
-      "generateApis" to "true",
-      "generateModels" to "true",
       "generateSupportingFiles" to "false",
       "useTags" to "true",
       "interfaceOnly" to "true",
@@ -105,9 +102,6 @@ tasks.compileJava {
 
 tasks.withType<JacocoReport> {
   reports {
-    xml.apply {
-      isEnabled = true
-    }
-    executionData(tasks.withType<Test>())
+    xml.required = true
   }
 }

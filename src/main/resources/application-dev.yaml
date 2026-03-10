@@ -2,12 +2,9 @@ spring:
   docker:
     compose:
       enabled: true
-      profiles:
-        active: "postgres"
       file: docker-compose.local.yaml
-
-server:
-  port: 8080
+  liquibase:
+    contexts: dev
 
 security:
   jwt:
@@ -21,3 +18,4 @@ logging:
     org.springframework:
       jdbc: DEBUG
       security: DEBUG
+    liquibase: DEBUG
