@@ -16,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @RequiredArgsConstructor
-public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U, P>
-    implements CRUDLService<ID, R, C, U, P> {
+public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U>
+    implements CRUDLService<ID, R, C, U> {
 
   private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
@@ -25,7 +25,7 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
   private final BaseRepository<E, ID> repository;
 
   @Getter
-  private final BaseMapper<E, R, C, U, ?, P> mapper;
+  private final BaseMapper<E, R, C, U, ?> mapper;
 
   @Override
   public R create(C createRequest) {
@@ -41,8 +41,8 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
   }
 
   @Override
-  public R update(ID id, U updateRequest) {
-    E updatedEntity = updateInternal(id, updateRequest);
+  public R update(ID id, U patchRequest) {
+    E updatedEntity = updateInternal(id, patchRequest);
     return mapper.toModel(updatedEntity);
   }
 
@@ -74,13 +74,6 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
     return repository.count();
   }
 
-  @Transactional
-  @Override
-  public R patch(ID id, P patchRequest) {
-    E patchedEntity = patchInternal(id, patchRequest);
-    return mapper.toModel(patchedEntity);
-  }
-
   protected E readInternal(ID id) {
     return repository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
@@ -96,25 +89,9 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
   }
 
   protected E updateInternal(ID id, U updateRequest) {
-    var existingEntity = readInternal(id);
-
-    E updatedEntity = mapper.toEntityForUpdate(updateRequest);
-    transferBaseEntityFields(existingEntity, updatedEntity);
-
-    return repository.save(updatedEntity);
-  }
-
-  protected E patchInternal(ID id, P patchRequest) {
     E existingEntity = readInternal(id);
-    mapper.patchEntity(patchRequest, existingEntity);
+    mapper.patchEntity(updateRequest, existingEntity);
     return repository.save(existingEntity);
-  }
-
-  protected void transferBaseEntityFields(E from, E to) {
-    to.setId(from.getId());
-    to.setVersion(from.getVersion());
-    to.setCreatedAt(from.getCreatedAt());
-    to.setUpdatedAt(from.getUpdatedAt());
   }
 
 }

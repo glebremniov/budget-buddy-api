@@ -6,11 +6,9 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-public interface BaseMapper<E extends BaseEntity<?>, R, C, U, L, P> {
+public interface BaseMapper<E extends BaseEntity<?>, R, C, U, L> {
 
   E toEntity(C createRequest);
-
-  E toEntityForUpdate(U updateRequest);
 
   R toModel(E entity);
 
@@ -19,5 +17,5 @@ public interface BaseMapper<E extends BaseEntity<?>, R, C, U, L, P> {
   L toPageResponse(List<R> items, PaginationMeta meta);
 
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  void patchEntity(P patchRequest, @MappingTarget E existingEntity);
+  void patchEntity(U patchRequest, @MappingTarget E existingEntity);
 }

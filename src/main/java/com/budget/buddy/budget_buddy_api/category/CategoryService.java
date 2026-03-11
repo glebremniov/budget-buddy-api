@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Service for category operations.
  */
 @Service
-public class CategoryService extends AbstractCRUDLService<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate, CategoryPatch> {
+public class CategoryService extends AbstractCRUDLService<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate> {
 
   private final UserService userService;
   private final CategoryRepository categoryRepository;
@@ -50,15 +50,6 @@ public class CategoryService extends AbstractCRUDLService<CategoryEntity, UUID, 
     var ownerId = userService.getCurrentUserIdOrThrow();
     return categoryRepository.findByIdAndOwnerId(categoryId, ownerId)
         .orElseThrow(() -> new EntityNotFoundException("Category not found"));
-  }
-
-  @Override
-  @Transactional
-  protected CategoryEntity updateInternal(UUID categoryId, CategoryUpdate request) {
-    var entity = readInternal(categoryId);
-    entity.setName(request.getName());
-
-    return categoryRepository.save(entity);
   }
 
   @Override

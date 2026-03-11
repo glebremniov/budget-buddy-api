@@ -10,6 +10,6 @@ import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface TransactionMapper
-    extends BaseMapper<TransactionEntity, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions, TransactionPatch> {
+    extends BaseMapper<TransactionEntity, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions> {
 
 }

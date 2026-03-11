@@ -76,6 +76,7 @@ tasks.openApiGenerate {
   configOptions.set(
     mapOf(
       "useSpringBoot4" to "true",
+      "openApiNullable" to "true",
       "generateSupportingFiles" to "false",
       "useTags" to "true",
       "interfaceOnly" to "true",

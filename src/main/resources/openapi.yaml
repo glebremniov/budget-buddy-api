@@ -65,6 +65,26 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /v1/auth/register:
+    post:
+      tags: [ auth ]
+      summary: Register new user
+      operationId: registerUser
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User registered successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
   /v1/categories:
     get:
       tags: [ categories ]
@@ -363,7 +383,28 @@ components:
           schema:
             $ref: "#/components/schemas/Problem"
 
+    Conflict:
+      description: Resource already exists
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+
   schemas:
+
+    RegisterRequest:
+      type: object
+      required: [ username, password ]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: john
+        password:
+          type: string
+          minLength: 8
+          example: strongpassword123
 
     LoginRequest:
       type: object
@@ -386,7 +427,7 @@ components:
 
     AuthToken:
       type: object
-      required: [ access_token, token_type, expires_in ]
+      required: [ access_token, token_type, expires_in, refresh_token ]
       properties:
         access_token:
           type: string
@@ -429,9 +470,11 @@ components:
 
     CategoryUpdate:
       type: object
+      description: Patch request — only provided fields will be updated
       properties:
         name:
           type: string
+          nullable: true
           example: Dining
 
     Transaction:
@@ -499,24 +542,31 @@ components:
 
     TransactionUpdate:
       type: object
+      description: Patch request — only provided fields will be updated
       properties:
         categoryId:
           type: string
           format: uuid
+          nullable: true
         amount:
           type: integer
+          nullable: true
         type:
           type: string
           enum: [ EXPENSE, INCOME, TRANSFER ]
+          nullable: true
         currency:
           type: string
           minLength: 3
           maxLength: 3
+          nullable: true
         date:
           type: string
           format: date
+          nullable: true
         description:
           type: string
+          nullable: true
 
     PaginationMeta:
       type: object

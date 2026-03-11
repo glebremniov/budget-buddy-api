@@ -23,12 +23,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AbstractCRUDLServiceTest {
 
   @Mock
-  private BaseMapper<DummyEntity, Object, Object, Object, Object, Object> mapper;
+  private BaseMapper<DummyEntity, Object, Object, Object, Object> mapper;
 
   @Mock
   private BaseRepository<DummyEntity, String> repository;
 
-  private AbstractCRUDLService<DummyEntity, String, Object, Object, Object, Object> service;
+  private AbstractCRUDLService<DummyEntity, String, Object, Object, Object> service;
 
   @BeforeEach
   void setUp() {
@@ -105,28 +105,26 @@ class AbstractCRUDLServiceTest {
       existingEntity.setUpdatedAt(OffsetDateTime.now());
 
       var updateRequest = new Object();
-      var updatedEntity = new DummyEntity();
       var expected = new Object();
       when(repository.findById(id)).thenReturn(Optional.of(existingEntity));
-      when(mapper.toEntityForUpdate(updateRequest)).thenReturn(updatedEntity);
-      when(repository.save(updatedEntity)).thenReturn(updatedEntity);
-      when(mapper.toModel(updatedEntity)).thenReturn(expected);
+      when(repository.save(existingEntity)).thenReturn(existingEntity);
+      when(mapper.toModel(existingEntity)).thenReturn(expected);
 
       // When
       var actual = service.update(id, updateRequest);
 
       // Then
       assertThat(actual).isEqualTo(expected);
-      assertThat(updatedEntity)
+      assertThat(existingEntity)
           .returns(existingEntity.getId(), BaseEntity::getId)
           .returns(existingEntity.getVersion(), BaseEntity::getVersion)
           .returns(existingEntity.getCreatedAt(), BaseEntity::getCreatedAt)
           .returns(existingEntity.getUpdatedAt(), BaseEntity::getUpdatedAt);
 
       verify(repository).findById(id);
-      verify(mapper).toEntityForUpdate(updateRequest);
-      verify(repository).save(updatedEntity);
-      verify(mapper).toModel(updatedEntity);
+      verify(mapper).patchEntity(updateRequest, existingEntity);
+      verify(repository).save(existingEntity);
+      verify(mapper).toModel(existingEntity);
     }
 
     @Test

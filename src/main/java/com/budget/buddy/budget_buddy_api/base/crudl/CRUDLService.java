@@ -11,15 +11,15 @@ import java.util.List;
  * @param <C> The type of the create request object used for creating new entities.
  * @param <U> The type of the update request object used for updating existing entities.
  */
-public interface CRUDLService<ID, R, C, U, P> {
+public interface CRUDLService<ID, R, C, U> {
 
   /**
-   * Create a new entity based on the provided create request object.
+   * Create a new entity based on the provided createRequest request object.
    *
-   * @param entity The create request object containing the data for the new entity.
+   * @param createRequest The createRequest request object containing the data for the new entity.
    * @return The created resource/model representing the new entity.
    */
-  R create(C entity);
+  R create(C createRequest);
 
   /**
    * Read an existing entity by its unique identifier.
@@ -31,14 +31,14 @@ public interface CRUDLService<ID, R, C, U, P> {
   R read(ID id) throws EntityNotFoundException;
 
   /**
-   * Update an existing entity identified by its unique identifier using the provided update request object.
+   * Partially update an existing entity identified by its unique identifier.
    *
-   * @param id The unique identifier of the entity to update.
-   * @param entity The update request object containing the updated data for the entity.
+   * @param id The unique identifier of the entity to patch.
+   * @param patchRequest The patch request object containing only the fields to update.
    * @return The updated resource/model representing the modified entity.
    * @throws EntityNotFoundException If no entity with the specified ID exists.
    */
-  R update(ID id, U entity) throws EntityNotFoundException;
+  R update(ID id, U patchRequest) throws EntityNotFoundException;
 
   /**
    * Delete an existing entity by its unique identifier.
@@ -70,15 +70,5 @@ public interface CRUDLService<ID, R, C, U, P> {
    * @return The total count of existing entities.
    */
   long count();
-
-  /**
-   * Partially update an existing entity identified by its unique identifier.
-   *
-   * @param id The unique identifier of the entity to patch.
-   * @param patch The patch request object containing only the fields to update.
-   * @return The updated resource/model representing the modified entity.
-   * @throws EntityNotFoundException If no entity with the specified ID exists.
-   */
-  R patch(ID id, P patch) throws EntityNotFoundException;
 
 }

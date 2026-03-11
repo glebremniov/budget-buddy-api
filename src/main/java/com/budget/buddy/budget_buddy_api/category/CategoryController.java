@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CategoryController
-    extends AbstractCRUDLController<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate, PaginatedCategories, CategoryPatch>
+    extends AbstractCRUDLController<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate, PaginatedCategories>
     implements CategoriesApi {
 
   public CategoryController(CategoryService service, CategoryMapper mapper) {
