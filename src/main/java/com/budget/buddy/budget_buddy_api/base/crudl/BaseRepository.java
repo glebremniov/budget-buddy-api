@@ -12,6 +12,7 @@ import org.springframework.data.repository.Repository;
  * @param <ID> the type of the entity's identifier
  */
 @NoRepositoryBean
+@SuppressWarnings("java:S119")
 public interface BaseRepository<E extends BaseEntity<ID>, ID> extends Repository<E, ID> {
 
   /**

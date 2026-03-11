@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <C> Create request type (DTO)
  * @param <U> Update request type (DTO)
  */
+@SuppressWarnings("java:S119")
 @Transactional
 @RequiredArgsConstructor
 public abstract class AbstractBaseService<E extends BaseEntity<ID>, ID, R, C, U>

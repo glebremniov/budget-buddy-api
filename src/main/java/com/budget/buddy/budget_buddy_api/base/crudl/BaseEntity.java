@@ -15,6 +15,7 @@ import org.springframework.data.relational.core.mapping.Column;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@SuppressWarnings("java:S119")
 public abstract class BaseEntity<ID> {
 
   @Id

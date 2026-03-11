@@ -4,6 +4,7 @@ import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
 
+@SuppressWarnings("java:S119")
 public abstract class BaseController<ID, R, C, U, L> {
 
   private final BaseService<ID, R, C, U> service;
