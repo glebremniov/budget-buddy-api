@@ -11,7 +11,7 @@ import java.util.List;
  * @param <C> The type of the create request object used for creating new entities.
  * @param <U> The type of the update request object used for updating existing entities.
  */
-public interface CRUDLService<ID, R, C, U> {
+public interface BaseService<ID, R, C, U> {
 
   /**
    * Create a new entity based on the provided createRequest request object.

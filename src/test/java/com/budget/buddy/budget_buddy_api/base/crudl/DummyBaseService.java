@@ -1,8 +1,8 @@
 package com.budget.buddy.budget_buddy_api.base.crudl;
 
-public class DummyCRUDLService extends AbstractCRUDLService<DummyEntity, String, Object, Object, Object> {
+public class DummyBaseService extends AbstractBaseService<DummyEntity, String, Object, Object, Object> {
 
-  public DummyCRUDLService(
+  public DummyBaseService(
       BaseRepository<DummyEntity, String> repository,
       BaseMapper<DummyEntity, Object, Object, Object, Object> mapper
   ) {

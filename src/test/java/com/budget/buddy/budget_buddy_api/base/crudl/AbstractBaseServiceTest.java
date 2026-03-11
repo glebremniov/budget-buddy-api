@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractCRUDLServiceTest {
+class AbstractBaseServiceTest {
 
   @Mock
   private BaseMapper<DummyEntity, Object, Object, Object, Object> mapper;
@@ -28,11 +28,11 @@ class AbstractCRUDLServiceTest {
   @Mock
   private BaseRepository<DummyEntity, String> repository;
 
-  private AbstractCRUDLService<DummyEntity, String, Object, Object, Object> service;
+  private AbstractBaseService<DummyEntity, String, Object, Object, Object> service;
 
   @BeforeEach
   void setUp() {
-    service = new DummyCRUDLService(repository, mapper);
+    service = new DummyBaseService(repository, mapper);
   }
 
   @Nested

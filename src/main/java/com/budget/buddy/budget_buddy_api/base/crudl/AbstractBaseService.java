@@ -16,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @RequiredArgsConstructor
-public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U>
-    implements CRUDLService<ID, R, C, U> {
+public abstract class AbstractBaseService<E extends BaseEntity<ID>, ID, R, C, U>
+    implements BaseService<ID, R, C, U> {
 
   private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
