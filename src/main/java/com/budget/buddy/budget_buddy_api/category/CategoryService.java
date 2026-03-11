@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Service for category operations.
  */
 @Service
-public class CategoryService extends AbstractCRUDLService<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate> {
+public class CategoryService extends AbstractCRUDLService<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate, CategoryPatch> {
 
   private final UserService userService;
   private final CategoryRepository categoryRepository;

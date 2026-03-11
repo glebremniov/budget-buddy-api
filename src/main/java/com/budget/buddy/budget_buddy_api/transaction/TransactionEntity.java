@@ -40,8 +40,4 @@ public class TransactionEntity extends BaseEntity<UUID> {
   @Column("description")
   private String description;
 
-  public enum TransactionType {
-    EXPENSE, INCOME, TRANSFER
-  }
-
 }

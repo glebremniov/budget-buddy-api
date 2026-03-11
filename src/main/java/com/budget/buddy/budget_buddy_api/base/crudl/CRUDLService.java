@@ -11,7 +11,7 @@ import java.util.List;
  * @param <C> The type of the create request object used for creating new entities.
  * @param <U> The type of the update request object used for updating existing entities.
  */
-public interface CRUDLService<ID, R, C, U> {
+public interface CRUDLService<ID, R, C, U, P> {
 
   /**
    * Create a new entity based on the provided create request object.
@@ -70,5 +70,15 @@ public interface CRUDLService<ID, R, C, U> {
    * @return The total count of existing entities.
    */
   long count();
+
+  /**
+   * Partially update an existing entity identified by its unique identifier.
+   *
+   * @param id The unique identifier of the entity to patch.
+   * @param patch The patch request object containing only the fields to update.
+   * @return The updated resource/model representing the modified entity.
+   * @throws EntityNotFoundException If no entity with the specified ID exists.
+   */
+  R patch(ID id, P patch) throws EntityNotFoundException;
 
 }

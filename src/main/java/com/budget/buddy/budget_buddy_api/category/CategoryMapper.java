@@ -14,7 +14,7 @@ import org.mapstruct.MappingConstants;
  */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CategoryMapper
-    extends BaseMapper<CategoryEntity, Category, CategoryCreate, CategoryUpdate, PaginatedCategories> {
+    extends BaseMapper<CategoryEntity, Category, CategoryCreate, CategoryUpdate, PaginatedCategories, CategoryPatch> {
 
   CategoryEntity toEntity(CategoryCreate request, UUID ownerId);
 

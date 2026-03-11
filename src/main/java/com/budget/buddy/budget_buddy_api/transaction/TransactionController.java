@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class TransactionController
-    extends AbstractCRUDLController<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions>
+    extends AbstractCRUDLController<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions, TransactionPatch>
     implements TransactionsApi {
 
   private final TransactionService service;

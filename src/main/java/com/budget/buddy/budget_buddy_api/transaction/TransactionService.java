@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TransactionService extends
-    AbstractCRUDLService<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate> {
+    AbstractCRUDLService<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate, TransactionPatch> {
 
   private final TransactionRepository repository;
   private final TransactionMapper mapper;

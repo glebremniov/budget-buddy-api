@@ -16,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @RequiredArgsConstructor
-public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U>
-    implements CRUDLService<ID, R, C, U> {
+public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U, P>
+    implements CRUDLService<ID, R, C, U, P> {
 
   private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
@@ -25,7 +25,7 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
   private final BaseRepository<E, ID> repository;
 
   @Getter
-  private final BaseMapper<E, R, C, U, ?> mapper;
+  private final BaseMapper<E, R, C, U, ?, P> mapper;
 
   @Override
   public R create(C createRequest) {
@@ -74,6 +74,13 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
     return repository.count();
   }
 
+  @Transactional
+  @Override
+  public R patch(ID id, P patchRequest) {
+    E patchedEntity = patchInternal(id, patchRequest);
+    return mapper.toModel(patchedEntity);
+  }
+
   protected E readInternal(ID id) {
     return repository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
@@ -95,6 +102,12 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
     transferBaseEntityFields(existingEntity, updatedEntity);
 
     return repository.save(updatedEntity);
+  }
+
+  protected E patchInternal(ID id, P patchRequest) {
+    E existingEntity = readInternal(id);
+    mapper.patchEntity(patchRequest, existingEntity);
+    return repository.save(existingEntity);
   }
 
   protected void transferBaseEntityFields(E from, E to) {
