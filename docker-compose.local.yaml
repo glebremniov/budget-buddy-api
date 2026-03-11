@@ -2,8 +2,8 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_DB=bugetbuddy
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=budgetbuddy
+      - POSTGRES_USER=budgetbuddy
+      - POSTGRES_PASSWORD=budgetbuddy
     ports:
-      - "5432"
+      - "5432:5432"

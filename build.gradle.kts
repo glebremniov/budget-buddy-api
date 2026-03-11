@@ -60,6 +60,11 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
   testImplementation("org.testcontainers:testcontainers-junit-jupiter")
   testImplementation("org.testcontainers:testcontainers-postgresql")
+
+  testCompileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
+  testAnnotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+  testAnnotationProcessor("org.projectlombok:lombok")
+  testAnnotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
 }
 
 tasks.withType<Test> {
@@ -76,6 +81,7 @@ tasks.openApiGenerate {
   configOptions.set(
     mapOf(
       "useSpringBoot4" to "true",
+      "openApiNullable" to "true",
       "generateSupportingFiles" to "false",
       "useTags" to "true",
       "interfaceOnly" to "true",

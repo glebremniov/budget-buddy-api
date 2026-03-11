@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset dev:002-dev-data context:dev
+--changeset g.remniov@gmail.com:002-dev-data context:dev
 INSERT INTO users (id, version, username, password, enabled, created_at, updated_at)
 VALUES ('a788506a-45e8-4e87-92e9-974bd5863311',
         1,

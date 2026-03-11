@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.AbstractCRUDLController;
+import com.budget.buddy.budget_buddy_api.base.crudl.BaseController;
 import com.budget.buddy.budget_buddy_api.generated.api.TransactionsApi;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class TransactionController
-    extends AbstractCRUDLController<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions>
+    extends BaseController<UUID, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions>
     implements TransactionsApi {
 
   private final TransactionService service;

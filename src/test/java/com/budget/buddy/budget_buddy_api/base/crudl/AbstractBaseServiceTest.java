@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractCRUDLServiceTest {
+class AbstractBaseServiceTest {
 
   @Mock
   private BaseMapper<DummyEntity, Object, Object, Object, Object> mapper;
@@ -28,11 +28,11 @@ class AbstractCRUDLServiceTest {
   @Mock
   private BaseRepository<DummyEntity, String> repository;
 
-  private AbstractCRUDLService<DummyEntity, String, Object, Object, Object> service;
+  private AbstractBaseService<DummyEntity, String, Object, Object, Object> service;
 
   @BeforeEach
   void setUp() {
-    service = new DummyCRUDLService(repository, mapper);
+    service = new DummyBaseService(repository, mapper);
   }
 
   @Nested
@@ -105,28 +105,26 @@ class AbstractCRUDLServiceTest {
       existingEntity.setUpdatedAt(OffsetDateTime.now());
 
       var updateRequest = new Object();
-      var updatedEntity = new DummyEntity();
       var expected = new Object();
       when(repository.findById(id)).thenReturn(Optional.of(existingEntity));
-      when(mapper.toEntityForUpdate(updateRequest)).thenReturn(updatedEntity);
-      when(repository.save(updatedEntity)).thenReturn(updatedEntity);
-      when(mapper.toModel(updatedEntity)).thenReturn(expected);
+      when(repository.save(existingEntity)).thenReturn(existingEntity);
+      when(mapper.toModel(existingEntity)).thenReturn(expected);
 
       // When
       var actual = service.update(id, updateRequest);
 
       // Then
       assertThat(actual).isEqualTo(expected);
-      assertThat(updatedEntity)
+      assertThat(existingEntity)
           .returns(existingEntity.getId(), BaseEntity::getId)
           .returns(existingEntity.getVersion(), BaseEntity::getVersion)
           .returns(existingEntity.getCreatedAt(), BaseEntity::getCreatedAt)
           .returns(existingEntity.getUpdatedAt(), BaseEntity::getUpdatedAt);
 
       verify(repository).findById(id);
-      verify(mapper).toEntityForUpdate(updateRequest);
-      verify(repository).save(updatedEntity);
-      verify(mapper).toModel(updatedEntity);
+      verify(mapper).patchEntity(updateRequest, existingEntity);
+      verify(repository).save(existingEntity);
+      verify(mapper).toModel(existingEntity);
     }
 
     @Test

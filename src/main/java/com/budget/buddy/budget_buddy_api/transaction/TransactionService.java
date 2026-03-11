@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.AbstractCRUDLService;
+import com.budget.buddy.budget_buddy_api.base.crudl.AbstractBaseService;
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TransactionService extends
-    AbstractCRUDLService<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate> {
+    AbstractBaseService<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate> {
 
   private final TransactionRepository repository;
   private final TransactionMapper mapper;

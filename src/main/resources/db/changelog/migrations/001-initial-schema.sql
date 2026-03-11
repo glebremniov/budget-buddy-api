@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset dev:001-initial-schema
+--changeset g.remniov@gmail.com:001-initial-schema
 CREATE TABLE users
 (
     id         UUID PRIMARY KEY,

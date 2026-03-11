@@ -62,6 +62,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthToken"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/auth/register:
+    post:
+      tags: [ auth ]
+      summary: Register new user
+      operationId: registerUser
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User registered successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
 
   /v1/categories:
     get:
@@ -78,6 +100,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaginatedCategories"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
     post:
       tags: [ categories ]
@@ -97,12 +121,15 @@ paths:
               description: URL of created category
               schema:
                 type: string
+                format: uri
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Category"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /v1/categories/{categoryId}:
     parameters:
@@ -119,12 +146,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Category"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
 
-    put:
+    patch:
       tags: [ categories ]
-      summary: Update category
+      summary: Partially update category
       operationId: updateCategory
       requestBody:
         required: true
@@ -139,6 +168,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Category"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
     delete:
       tags: [ categories ]
@@ -147,6 +182,10 @@ paths:
       responses:
         "204":
           description: Category deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /v1/transactions:
     get:
@@ -175,9 +214,14 @@ paths:
             format: date
         - name: sort
           in: query
-          description: "Example: date:desc or amount:asc"
+          description: Sort order
           schema:
             type: string
+            enum:
+              - date:asc
+              - date:desc
+              - amount:asc
+              - amount:desc
       responses:
         "200":
           description: Paginated transactions
@@ -185,6 +229,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaginatedTransactions"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
     post:
       tags: [ transactions ]
@@ -203,10 +249,15 @@ paths:
             Location:
               schema:
                 type: string
+                format: uri
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Transaction"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /v1/transactions/{transactionId}:
     parameters:
@@ -223,12 +274,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Transaction"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
 
-    put:
+    patch:
       tags: [ transactions ]
-      summary: Update transaction
+      summary: Partially update transaction
       operationId: updateTransaction
       requestBody:
         required: true
@@ -243,6 +296,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Transaction"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
     delete:
       tags: [ transactions ]
@@ -251,6 +310,10 @@ paths:
       responses:
         "204":
           description: Transaction deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
 components:
 
@@ -320,7 +383,28 @@ components:
           schema:
             $ref: "#/components/schemas/Problem"
 
+    Conflict:
+      description: Resource already exists
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+
   schemas:
+
+    RegisterRequest:
+      type: object
+      required: [ username, password ]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: john
+        password:
+          type: string
+          minLength: 8
+          example: strongpassword123
 
     LoginRequest:
       type: object
@@ -343,7 +427,7 @@ components:
 
     AuthToken:
       type: object
-      required: [ access_token, token_type, expires_in ]
+      required: [ access_token, token_type, expires_in, refresh_token ]
       properties:
         access_token:
           type: string
@@ -386,9 +470,11 @@ components:
 
     CategoryUpdate:
       type: object
+      description: Patch request — only provided fields will be updated
       properties:
         name:
           type: string
+          nullable: true
           example: Dining
 
     Transaction:
@@ -413,6 +499,8 @@ components:
             - TRANSFER
         currency:
           type: string
+          minLength: 3
+          maxLength: 3
           example: EUR
         date:
           type: string
@@ -443,6 +531,8 @@ components:
           enum: [ EXPENSE, INCOME, TRANSFER ]
         currency:
           type: string
+          minLength: 3
+          maxLength: 3
           example: EUR
         date:
           type: string
@@ -452,25 +542,35 @@ components:
 
     TransactionUpdate:
       type: object
+      description: Patch request — only provided fields will be updated
       properties:
         categoryId:
           type: string
           format: uuid
+          nullable: true
         amount:
           type: integer
+          nullable: true
         type:
           type: string
           enum: [ EXPENSE, INCOME, TRANSFER ]
+          nullable: true
         currency:
           type: string
+          minLength: 3
+          maxLength: 3
+          nullable: true
         date:
           type: string
           format: date
+          nullable: true
         description:
           type: string
+          nullable: true
 
     PaginationMeta:
       type: object
+      required: [ limit, offset, total ]
       properties:
         limit:
           type: integer
@@ -481,6 +581,7 @@ components:
 
     PaginatedCategories:
       type: object
+      required: [ items, meta ]
       properties:
         items:
           type: array
@@ -491,6 +592,7 @@ components:
 
     PaginatedTransactions:
       type: object
+      required: [ items, meta ]
       properties:
         items:
           type: array
@@ -501,10 +603,13 @@ components:
 
     Problem:
       type: object
-      description: RFC7807 Problem+JSON
+      description: RFC 7807 Problem+JSON
+      required: [ title, status ]
       properties:
         type:
           type: string
+          format: uri
+          default: "about:blank"
         title:
           type: string
         status:
@@ -513,3 +618,4 @@ components:
           type: string
         instance:
           type: string
+          format: uri

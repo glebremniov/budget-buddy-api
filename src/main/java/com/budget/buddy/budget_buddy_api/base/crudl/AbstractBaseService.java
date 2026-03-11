@@ -14,10 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <C> Create request type (DTO)
  * @param <U> Update request type (DTO)
  */
+@SuppressWarnings("java:S119")
 @Transactional
 @RequiredArgsConstructor
-public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U>
-    implements CRUDLService<ID, R, C, U> {
+public abstract class AbstractBaseService<E extends BaseEntity<ID>, ID, R, C, U>
+    implements BaseService<ID, R, C, U> {
 
   private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
@@ -41,8 +42,8 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
   }
 
   @Override
-  public R update(ID id, U updateRequest) {
-    E updatedEntity = updateInternal(id, updateRequest);
+  public R update(ID id, U patchRequest) {
+    E updatedEntity = updateInternal(id, patchRequest);
     return mapper.toModel(updatedEntity);
   }
 
@@ -89,19 +90,9 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
   }
 
   protected E updateInternal(ID id, U updateRequest) {
-    var existingEntity = readInternal(id);
-
-    E updatedEntity = mapper.toEntityForUpdate(updateRequest);
-    transferBaseEntityFields(existingEntity, updatedEntity);
-
-    return repository.save(updatedEntity);
-  }
-
-  protected void transferBaseEntityFields(E from, E to) {
-    to.setId(from.getId());
-    to.setVersion(from.getVersion());
-    to.setCreatedAt(from.getCreatedAt());
-    to.setUpdatedAt(from.getUpdatedAt());
+    E existingEntity = readInternal(id);
+    mapper.patchEntity(updateRequest, existingEntity);
+    return repository.save(existingEntity);
   }
 
 }

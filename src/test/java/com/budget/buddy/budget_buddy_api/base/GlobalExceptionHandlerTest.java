@@ -6,19 +6,23 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
 
 import com.budget.buddy.budget_buddy_api.generated.model.Problem;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpEntity;
@@ -29,6 +33,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 
@@ -36,12 +41,30 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @DisplayName("GlobalExceptionHandler Tests")
 class GlobalExceptionHandlerTest {
 
-  private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+  private static final String REQUEST_URI = "/test";
+  private static final URI PROBLEM_TYPE = URI.create("about:blank");
+  @Mock
+  private ServletWebRequest webRequest;
+  @Mock
+  private HttpServletRequest httpServletRequest;
+  private GlobalExceptionHandler handler;
 
-  private static void assertContentType(ResponseEntity<Problem> response) {
+  private static void assertProblemResponse(ResponseEntity<Problem> response) {
     assertThat(response)
         .extracting(HttpEntity::getHeaders)
         .returns(APPLICATION_PROBLEM_JSON, HttpHeaders::getContentType);
+
+    assertThat(response)
+        .extracting(HttpEntity::getBody)
+        .returns(PROBLEM_TYPE, Problem::getType)
+        .returns(URI.create(REQUEST_URI), Problem::getInstance);
+  }
+
+  @BeforeEach
+  void init() {
+    when(httpServletRequest.getRequestURI()).thenReturn(REQUEST_URI);
+    when(webRequest.getRequest()).thenReturn(httpServletRequest);
+    handler = new GlobalExceptionHandler();
   }
 
   static class MockPropertyPath implements Path {
@@ -68,14 +91,14 @@ class GlobalExceptionHandlerTest {
   class MethodArgumentNotValidExceptionTests {
 
     private static void assertResponseEntity(ResponseEntity<Problem> response) {
-      assertContentType(response);
+      assertProblemResponse(response);
       assertThat(response)
           .returns(HttpStatus.BAD_REQUEST, ResponseEntity::getStatusCode)
           .extracting(ResponseEntity::getBody)
           .returns(HttpStatus.BAD_REQUEST.value(), Problem::getStatus)
           .returns("Validation failed", Problem::getTitle)
           .returns("One or more fields are invalid", Problem::getDetail)
-          .returns("about:blank", Problem::getType);
+          .returns(PROBLEM_TYPE, Problem::getType);
     }
 
     @Test
@@ -85,7 +108,7 @@ class GlobalExceptionHandlerTest {
       var exception = mock(MethodArgumentNotValidException.class);
 
       // When
-      var response = handler.handleValidationException(exception, null);
+      var response = handler.handleValidationException(exception, webRequest);
 
       // Then
       assertResponseEntity(response);
@@ -97,7 +120,7 @@ class GlobalExceptionHandlerTest {
   class ConstraintViolationExceptionTests {
 
     private static void assertResponseEntity(ResponseEntity<Problem> response) {
-      assertContentType(response);
+      assertProblemResponse(response);
       assertThat(response)
           .returns(HttpStatus.BAD_REQUEST, ResponseEntity::getStatusCode)
           .extracting(ResponseEntity::getBody)
@@ -120,7 +143,7 @@ class GlobalExceptionHandlerTest {
       var exception = new ConstraintViolationException(violations);
 
       // When
-      var response = handler.handleConstraintViolation(exception);
+      var response = handler.handleConstraintViolation(exception, webRequest);
 
       // Then
       assertResponseEntity(response);
@@ -145,7 +168,7 @@ class GlobalExceptionHandlerTest {
       var exception = new ConstraintViolationException(violations);
 
       // When
-      var response = handler.handleConstraintViolation(exception);
+      var response = handler.handleConstraintViolation(exception, webRequest);
 
       // Then
       assertResponseEntity(response);
@@ -165,7 +188,7 @@ class GlobalExceptionHandlerTest {
       var exception = new ConstraintViolationException(violations);
 
       // When
-      var response = handler.handleConstraintViolation(exception);
+      var response = handler.handleConstraintViolation(exception, webRequest);
 
       // Then
       assertResponseEntity(response);
@@ -184,10 +207,10 @@ class GlobalExceptionHandlerTest {
       var exception = new NoSuchElementException(message);
 
       // When
-      var response = handler.handleNotFound(exception);
+      var response = handler.handleNotFound(exception, webRequest);
 
       // Then
-      assertContentType(response);
+      assertProblemResponse(response);
       assertThat(response)
           .returns(HttpStatus.NOT_FOUND, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
@@ -207,10 +230,10 @@ class GlobalExceptionHandlerTest {
       when(exception.getMessage()).thenReturn("Resource /api/not-found not found");
 
       // When
-      var response = handler.handleNoResourceFoundException(exception);
+      var response = handler.handleNoResourceFoundException(exception, webRequest);
 
       // Then
-      assertContentType(response);
+      assertProblemResponse(response);
       assertThat(response)
           .returns(HttpStatus.NOT_FOUND, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
@@ -236,10 +259,10 @@ class GlobalExceptionHandlerTest {
       var exception = new AccessDeniedException(message);
 
       // When
-      var response = handler.handleAccessDenied(exception);
+      var response = handler.handleAccessDenied(exception, webRequest);
 
       // Then
-      assertContentType(response);
+      assertProblemResponse(response);
       assertThat(response)
           .returns(HttpStatus.FORBIDDEN, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
@@ -265,10 +288,10 @@ class GlobalExceptionHandlerTest {
         when(exception.getMessage()).thenReturn(message);
 
         // When
-        var response = handler.handleAuthenticationException(exception);
+        var response = handler.handleAuthenticationException(exception, webRequest);
 
         // Then
-        assertContentType(response);
+        assertProblemResponse(response);
         assertThat(response)
             .returns(HttpStatus.UNAUTHORIZED, ResponseEntity::getStatusCode)
             .extracting(HttpEntity::getBody)
@@ -292,7 +315,7 @@ class GlobalExceptionHandlerTest {
           "Data integrity violation", cause);
 
       // When
-      var response = handler.handleDataIntegrity(exception);
+      var response = handler.handleDataIntegrity(exception, webRequest);
 
       // Then
       assertThat(response.getStatusCode())
@@ -321,7 +344,7 @@ class GlobalExceptionHandlerTest {
       when(exception.getMessage()).thenReturn(message);
 
       // When
-      var response = handler.handleNotReadable(exception);
+      var response = handler.handleNotReadable(exception, webRequest);
 
       // Then
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -349,7 +372,7 @@ class GlobalExceptionHandlerTest {
       var exception = new IllegalArgumentException(message);
 
       // When
-      var response = handler.handleIllegalArgument(exception);
+      var response = handler.handleIllegalArgument(exception, webRequest);
 
       // Then
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -377,7 +400,7 @@ class GlobalExceptionHandlerTest {
       var exception = new UnsupportedOperationException(message);
 
       // When
-      var response = handler.handleUnsupported(exception);
+      var response = handler.handleUnsupported(exception, webRequest);
 
       // Then
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_IMPLEMENTED);
@@ -406,10 +429,10 @@ class GlobalExceptionHandlerTest {
       var exception = new Exception(message);
 
       // When
-      var response = handler.handleGeneric(exception);
+      var response = handler.handleGeneric(exception, webRequest);
 
       // Then
-      assertContentType(response);
+      assertProblemResponse(response);
       assertThat(response)
           .returns(HttpStatus.INTERNAL_SERVER_ERROR, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)

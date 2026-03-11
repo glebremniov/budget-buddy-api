@@ -10,6 +10,7 @@ import org.springframework.data.relational.core.mapping.event.BeforeSaveEvent;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings("java:S119")
 public class BaseEntityListener<ENTITY extends BaseEntity<ID>, ID> extends AbstractRelationalEventListener<ENTITY> {
 
   private final Clock clock;
