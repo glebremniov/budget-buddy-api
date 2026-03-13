@@ -1,7 +1,6 @@
 package com.budget.buddy.budget_buddy_api.user;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.BaseEntity;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,11 +29,5 @@ public class UserEntity extends BaseEntity<UUID> {
 
   @Column("enabled")
   private boolean enabled;
-
-  @Column("created_at")
-  private OffsetDateTime createdAt;
-
-  @Column("updated_at")
-  private OffsetDateTime updatedAt;
 
 }

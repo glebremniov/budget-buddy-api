@@ -15,20 +15,20 @@ public class JwtProvider {
   private final Clock clock;
   private final JwtEncoder jwtEncoder;
 
-  public String create(String username, long validitySeconds) {
-    var claims = buildClaims(username, validitySeconds);
+  public String create(String subject, long validitySeconds) {
+    var claims = buildClaims(subject, validitySeconds);
 
     return jwtEncoder
         .encode(JwtEncoderParameters.from(claims))
         .getTokenValue();
   }
 
-  private JwtClaimsSet buildClaims(String username, long validitySeconds) {
+  private JwtClaimsSet buildClaims(String subject, long validitySeconds) {
     var now = Instant.now(clock);
     var expiresAt = now.plusSeconds(validitySeconds);
 
     return JwtClaimsSet.builder()
-        .subject(username)
+        .subject(subject)
         .issuedAt(now)
         .expiresAt(expiresAt)
         .build();

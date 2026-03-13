@@ -5,8 +5,7 @@ import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
-import com.budget.buddy.budget_buddy_api.user.UserService;
-import java.util.Collections;
+import com.budget.buddy.budget_buddy_api.security.auth.AuthUtils;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -18,44 +17,39 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CategoryService extends AbstractBaseService<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate> {
 
-  private final UserService userService;
-  private final CategoryRepository categoryRepository;
-  private final CategoryMapper categoryMapper;
+  private final CategoryRepository repository;
+  private final CategoryMapper mapper;
 
-  public CategoryService(UserService userService, CategoryRepository categoryRepository, CategoryMapper categoryMapper) {
-    super(categoryRepository, categoryMapper);
-    this.userService = userService;
-    this.categoryRepository = categoryRepository;
-    this.categoryMapper = categoryMapper;
+  public CategoryService(CategoryRepository repository, CategoryMapper mapper) {
+    super(repository, mapper);
+    this.repository = repository;
+    this.mapper = mapper;
   }
 
   @Override
   public long count() {
-    return userService.getCurrentUserName()
-        .map(categoryRepository::countByOwnerUsername)
-        .orElse(0L);
+    var ownerId = AuthUtils.requireCurrentUserId();
+    return repository.countByOwnerId(ownerId);
   }
 
   @Override
   @Transactional
   protected CategoryEntity createInternal(CategoryCreate createRequest) {
-    var ownerId = userService.getCurrentUserIdOrThrow();
-    var entity = categoryMapper.toEntity(createRequest, ownerId);
-
-    return categoryRepository.save(entity);
+    var ownerId = AuthUtils.requireCurrentUserId();
+    var entity = mapper.toEntity(createRequest, ownerId);
+    return repository.save(entity);
   }
 
   @Override
   protected CategoryEntity readInternal(UUID categoryId) {
-    var ownerId = userService.getCurrentUserIdOrThrow();
-    return categoryRepository.findByIdAndOwnerId(categoryId, ownerId)
+    var ownerId = AuthUtils.requireCurrentUserId();
+    return repository.findByIdAndOwnerId(categoryId, ownerId)
         .orElseThrow(() -> new EntityNotFoundException("Category not found"));
   }
 
   @Override
   protected List<CategoryEntity> listInternal() {
-    return userService.getCurrentUserName()
-        .map(categoryRepository::findAllByOwnerUsername)
-        .orElseGet(Collections::emptyList);
+    var ownerId = AuthUtils.requireCurrentUserId();
+    return repository.findAllByOwnerId(ownerId);
   }
 }

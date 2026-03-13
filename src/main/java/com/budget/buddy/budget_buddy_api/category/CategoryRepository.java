@@ -4,13 +4,11 @@ import com.budget.buddy.budget_buddy_api.base.crudl.BaseRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.repository.NoRepositoryBean;
 
-@NoRepositoryBean
 public interface CategoryRepository extends BaseRepository<CategoryEntity, UUID> {
 
   /**
-   * Find all categories by owner ID.
+   * Find all categories by owner's ID.
    *
    * @param ownerId the ID of the owner
    * @return list of categories owned by the specified owner
@@ -18,19 +16,18 @@ public interface CategoryRepository extends BaseRepository<CategoryEntity, UUID>
   Optional<CategoryEntity> findByIdAndOwnerId(UUID id, UUID ownerId);
 
   /**
-   * Find all categories by owner's username.
+   * Find all categories by owner's ID.
    *
-   * @param username the username of the owner
-   * @return list of categories owned by the specified username
+   * @param ownerId the ID of the owner
+   * @return list of categories owned by the specified owner
    */
-  List<CategoryEntity> findAllByOwnerUsername(String username);
+  List<CategoryEntity> findAllByOwnerId(UUID ownerId);
 
   /**
-   * Count the number of categories owned by a specific username.
+   * Count the number of categories by owner's ID.
    *
-   * @param username the username of the owner
-   * @return the count of categories owned by the specified username
+   * @param ownerId the id of the owner
+   * @return the count of categories owned by the specified owner
    */
-  long countByOwnerUsername(String username);
-
+  long countByOwnerId(UUID ownerId);
 }
