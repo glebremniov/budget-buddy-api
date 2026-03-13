@@ -1,21 +1,24 @@
 package com.budget.buddy.budget_buddy_api.security.auth;
 
 import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
+import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
 import com.budget.buddy.budget_buddy_api.security.jwt.JwtProperties;
 import com.budget.buddy.budget_buddy_api.security.jwt.JwtProvider;
-import com.budget.buddy.budget_buddy_api.user.UserEntity;
-import com.budget.buddy.budget_buddy_api.user.UserRepository;
+import com.budget.buddy.budget_buddy_api.user.UserDto;
+import com.budget.buddy.budget_buddy_api.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for authentication operations. Handles user login and token refresh.
+ * Service for authentication operations.
+ * Handles user registration, login and token refresh.
  */
 @Service
 @RequiredArgsConstructor
@@ -23,11 +26,11 @@ public class AuthService {
 
   private static final String TOKEN_TYPE = "Bearer";
 
-  private final AuthenticationManager authenticationManager;
-  private final JwtProperties tokenProperties;
-  private final JwtProvider tokenProvider;
-  private final UserRepository userRepository;
+  private final JwtProperties jwtProperties;
+  private final JwtProvider jwtProvider;
   private final JwtDecoder jwtDecoder;
+  private final AuthenticationManager authenticationManager;
+  private final UserService userService;
 
   private static AuthToken buildAuthToken(String accessToken, String refreshToken, int expiresInSeconds) {
     var token = new AuthToken();
@@ -35,8 +38,22 @@ public class AuthService {
     token.setRefreshToken(refreshToken);
     token.setTokenType(TOKEN_TYPE);
     token.setExpiresIn(expiresInSeconds);
-
     return token;
+  }
+
+  /**
+   * Register a new user with default role
+   *
+   * @param request registration request containing username and password
+   * @throws DataIntegrityViolationException if username is already taken
+   */
+  @Transactional
+  public void register(RegisterRequest request) {
+    if (userService.existsByUsername(request.getUsername())) {
+      throw new DataIntegrityViolationException("Username already taken: " + request.getUsername());
+    }
+
+    userService.create(request);
   }
 
   /**
@@ -50,13 +67,13 @@ public class AuthService {
     var authenticationRequest = UsernamePasswordAuthenticationToken.unauthenticated(username, password);
     authenticationManager.authenticate(authenticationRequest);
 
-    var user = userRepository.findByUsername(username)
+    var user = userService.findByUsername(username)
         .orElseThrow(() -> UsernameNotFoundException.fromUsername(username));
 
-    var subject = user.getId().toString();
-    var accessToken = tokenProvider.create(subject, tokenProperties.accessTokenValiditySeconds());
-    var refreshToken = tokenProvider.create(subject, tokenProperties.refreshTokenValiditySeconds());
-    var expiresIn = (int) tokenProperties.accessTokenValiditySeconds();
+    var subject = user.id().toString();
+    var accessToken = jwtProvider.create(subject, jwtProperties.accessTokenValiditySeconds());
+    var refreshToken = jwtProvider.create(subject, jwtProperties.refreshTokenValiditySeconds());
+    var expiresIn = (int) jwtProperties.accessTokenValiditySeconds();
 
     return buildAuthToken(accessToken, refreshToken, expiresIn);
   }
@@ -71,19 +88,18 @@ public class AuthService {
     var decoded = jwtDecoder.decode(refreshToken);
     var user = requireEnabledUser(decoded.getSubject());
 
-    var accessToken = tokenProvider
-        .create(user.getId().toString(), tokenProperties.accessTokenValiditySeconds());
-    var expiresIn = (int) tokenProperties.accessTokenValiditySeconds();
+    var accessToken = jwtProvider
+        .create(user.id().toString(), jwtProperties.accessTokenValiditySeconds());
+    var expiresIn = (int) jwtProperties.accessTokenValiditySeconds();
 
     return buildAuthToken(accessToken, refreshToken, expiresIn);
   }
 
-  public UserEntity requireEnabledUser(String subject) {
+  public UserDto requireEnabledUser(String subject) {
     var userId = AuthUtils.toUserId(subject);
-    var user = userRepository.findById(userId)
-        .orElseThrow(() -> new BadCredentialsException("User with id %s is not found".formatted(userId)));
+    var user = userService.read(userId);
 
-    if (user.isEnabled()) {
+    if (user.enabled()) {
       return user;
     }
 

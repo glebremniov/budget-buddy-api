@@ -4,8 +4,10 @@ import com.budget.buddy.budget_buddy_api.generated.api.AuthApi;
 import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_api.generated.model.LoginRequest;
 import com.budget.buddy.budget_buddy_api.generated.model.RefreshTokenRequest;
+import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,5 +42,11 @@ public class AuthController implements AuthApi {
   public ResponseEntity<AuthToken> refreshToken(@Valid RefreshTokenRequest request) {
     var token = authService.refresh(request.getRefreshToken());
     return ResponseEntity.ok(token);
+  }
+
+  @Override
+  public ResponseEntity<Void> registerUser(RegisterRequest registerRequest) {
+    authService.register(registerRequest);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 }

@@ -3,6 +3,7 @@ package com.budget.buddy.budget_buddy_api.security;
 import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.Customizer;
@@ -51,6 +52,7 @@ public class SecurityConfig {
   }
 
   @Bean
+  @Profile("prod")
   CompromisedPasswordChecker compromisedPasswordChecker() {
     return new HaveIBeenPwnedRestApiPasswordChecker();
   }
