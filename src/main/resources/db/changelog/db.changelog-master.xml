@@ -7,5 +7,6 @@
 
   <include file="migrations/001-initial-schema.sql" relativeToChangelogFile="true"/>
   <include file="migrations/002-dev-data.sql" relativeToChangelogFile="true"/>
+  <include file="migrations/003-refresh-tokens.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,9 +99,6 @@ class AbstractBaseServiceTest {
       var id = "testId";
       var existingEntity = new DummyEntity();
       existingEntity.setId(existingEntity.getId());
-      existingEntity.setVersion(1);
-      existingEntity.setCreatedAt(OffsetDateTime.now().minusDays(1));
-      existingEntity.setUpdatedAt(OffsetDateTime.now());
 
       var updateRequest = new Object();
       var expected = new Object();
@@ -116,10 +112,7 @@ class AbstractBaseServiceTest {
       // Then
       assertThat(actual).isEqualTo(expected);
       assertThat(existingEntity)
-          .returns(existingEntity.getId(), BaseEntity::getId)
-          .returns(existingEntity.getVersion(), BaseEntity::getVersion)
-          .returns(existingEntity.getCreatedAt(), BaseEntity::getCreatedAt)
-          .returns(existingEntity.getUpdatedAt(), BaseEntity::getUpdatedAt);
+          .returns(existingEntity.getId(), BaseEntity::getId);
 
       verify(repository).findById(id);
       verify(mapper).patchEntity(updateRequest, existingEntity);

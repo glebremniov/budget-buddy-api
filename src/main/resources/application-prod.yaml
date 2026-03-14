@@ -28,8 +28,12 @@ springdoc:
 security:
   jwt:
     secret: ${BUDGET_BUDDY_API_JWT_SECRET}
-    access-token-validity-seconds: ${BUDGET_BUDDY_API_JWT_ACCESS_TOKEN_VALIDITY_SECONDS}
-    refresh-token-validity-seconds: ${BUDGET_BUDDY_API_JWT_REFRESH_TOKEN_VALIDITY_SECONDS}
+    validity-seconds: ${BUDGET_BUDDY_API_JWT_ACCESS_TOKEN_VALIDITY_SECONDS}
+  refresh-token:
+    validity-seconds: ${BUDGET_BUDDY_API_REFRESH_TOKEN_VALIDITY_SECONDS}
+    cleanup:
+      enabled: true
+      cron: "0 0 3 * * *"
 
 logging:
   level:

@@ -6,5 +6,8 @@ spring:
 security:
   jwt:
     secret: df187efc1d1805492852ea8c2742a8b16620143f000328d894af3d5242cdbcb9
-    access-token-validity-seconds: 86400 # 1 day
-    refresh-token-validity-seconds: 1209600 # 14 days
+    validity-seconds: 86400 # 1 day
+  refresh-token:
+    validity-seconds: 1209600 # 14 days
+    cleanup:
+      enabled: false

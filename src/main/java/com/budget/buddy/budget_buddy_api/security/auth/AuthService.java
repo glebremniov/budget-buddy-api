@@ -4,6 +4,7 @@ import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
 import com.budget.buddy.budget_buddy_api.security.jwt.JwtProperties;
 import com.budget.buddy.budget_buddy_api.security.jwt.JwtProvider;
+import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenService;
 import com.budget.buddy.budget_buddy_api.user.UserDto;
 import com.budget.buddy.budget_buddy_api.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -12,13 +13,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for authentication operations.
- * Handles user registration, login and token refresh.
+ * Handles user registration, login, token refresh and logout.
  */
 @Service
 @RequiredArgsConstructor
@@ -28,9 +28,9 @@ public class AuthService {
 
   private final JwtProperties jwtProperties;
   private final JwtProvider jwtProvider;
-  private final JwtDecoder jwtDecoder;
   private final AuthenticationManager authenticationManager;
   private final UserService userService;
+  private final RefreshTokenService refreshTokenService;
 
   private static AuthToken buildAuthToken(String accessToken, String refreshToken, int expiresInSeconds) {
     var token = new AuthToken();
@@ -57,52 +57,69 @@ public class AuthService {
   }
 
   /**
-   * Authenticate user with username and password
+   * Authenticate user and issue access + opaque refresh token
    *
    * @param username user name
    * @param password user password
    * @return AuthToken containing access and refresh tokens
    */
+  @Transactional
   public AuthToken login(String username, String password) {
-    var authenticationRequest = UsernamePasswordAuthenticationToken.unauthenticated(username, password);
-    authenticationManager.authenticate(authenticationRequest);
+    authenticationManager.authenticate(
+        UsernamePasswordAuthenticationToken.unauthenticated(username, password));
 
     var user = userService.findByUsername(username)
         .orElseThrow(() -> UsernameNotFoundException.fromUsername(username));
 
-    var subject = user.id().toString();
-    var accessToken = jwtProvider.create(subject, jwtProperties.accessTokenValiditySeconds());
-    var refreshToken = jwtProvider.create(subject, jwtProperties.refreshTokenValiditySeconds());
-    var expiresIn = (int) jwtProperties.accessTokenValiditySeconds();
+    var accessToken = jwtProvider.create(user.id().toString(), jwtProperties.validitySeconds());
+    var refreshToken = refreshTokenService.create(user.id());
+    var expiresIn = (int) jwtProperties.validitySeconds();
 
     return buildAuthToken(accessToken, refreshToken, expiresIn);
   }
 
   /**
-   * Refresh access token using refresh token
+   * Refresh access token using opaque refresh token with rotation
    *
-   * @param refreshToken refresh token
-   * @return AuthToken with new access token
+   * @param refreshToken opaque refresh token
+   * @return AuthToken with new access and refresh tokens
    */
+  @Transactional
   public AuthToken refresh(String refreshToken) {
-    var decoded = jwtDecoder.decode(refreshToken);
-    var user = requireEnabledUser(decoded.getSubject());
+    var tokenEntity = refreshTokenService.rotate(refreshToken);
+    var user = requireEnabledUser(tokenEntity.getUserId());
 
-    var accessToken = jwtProvider
-        .create(user.id().toString(), jwtProperties.accessTokenValiditySeconds());
-    var expiresIn = (int) jwtProperties.accessTokenValiditySeconds();
+    var newAccessToken = jwtProvider.create(user.id().toString(), jwtProperties.validitySeconds());
+    var newRefreshToken = refreshTokenService.create(user.id());
+    var expiresIn = (int) jwtProperties.validitySeconds();
 
-    return buildAuthToken(accessToken, refreshToken, expiresIn);
+    return buildAuthToken(newAccessToken, newRefreshToken, expiresIn);
   }
 
-  public UserDto requireEnabledUser(String subject) {
-    var userId = AuthUtils.toUserId(subject);
+  /**
+   * Logout user by revoking all refresh tokens
+   */
+  @Transactional
+  public void logout() {
+    var userId = AuthUtils.requireCurrentUserId();
+    refreshTokenService.revokeAll(userId);
+  }
+
+  /**
+   * Find and validate that user exists and is enabled
+   *
+   * @param userId user ID
+   * @return UserDto if user exists and is enabled
+   * @throws DisabledException if user is disabled
+   */
+  public UserDto requireEnabledUser(java.util.UUID userId) {
     var user = userService.read(userId);
 
-    if (user.enabled()) {
-      return user;
+    if (!user.enabled()) {
+      throw new DisabledException("User is disabled");
     }
 
-    throw new DisabledException("User is disabled");
+    return user;
   }
+
 }

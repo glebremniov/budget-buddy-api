@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.BaseEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.AuditableEntity;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +21,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true)
-public class CategoryEntity extends BaseEntity<UUID> {
+public class CategoryEntity extends AuditableEntity<UUID> {
 
   @Column("name")
   private String name;

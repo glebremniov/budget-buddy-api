@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.BaseEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.AuditableEntity;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
-public class TransactionEntity extends BaseEntity<UUID> {
+public class TransactionEntity extends AuditableEntity<UUID> {
 
   @ToString.Include
   @Column("category_id")

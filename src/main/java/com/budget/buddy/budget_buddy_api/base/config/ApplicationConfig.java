@@ -23,7 +23,7 @@ public class ApplicationConfig {
   }
 
   @Bean
-  public JdbcCustomConversions customConversions(Clock clock) {
+  JdbcCustomConversions customConversions(Clock clock) {
     return new JdbcCustomConversions(List.of(new TimestampToOffsetDateTimeConverter(clock)));
   }
 

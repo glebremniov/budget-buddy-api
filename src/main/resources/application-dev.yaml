@@ -6,13 +6,23 @@ spring:
   liquibase:
     contexts: dev
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
 security:
   jwt:
-    access-token-validity-seconds: 86400 # 1 day
-    refresh-token-validity-seconds: 1209600 # 14 days
+    validity-seconds: 86400 # 1 day
+  refresh-token:
+    validity-seconds: 1209600 # 14 days
+    cleanup:
+      enabled: false
 
 logging:
   level:
+    root: INFO
     web: DEBUG
     com.budget.buddy.budget_buddy_api: TRACE
     org.springframework:

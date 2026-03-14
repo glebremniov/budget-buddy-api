@@ -20,7 +20,6 @@ security:
   - BearerAuth: [ ]
 
 paths:
-
   /v1/auth/login:
     post:
       tags: [ auth ]
@@ -84,6 +83,17 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "409":
           $ref: "#/components/responses/Conflict"
+
+  /v1/auth/logout:
+    post:
+      tags: [ auth ]
+      summary: Logout user and invalidate refresh tokens
+      operationId: logoutUser
+      responses:
+        "204":
+          description: Logged out successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /v1/categories:
     get:
@@ -316,7 +326,6 @@ paths:
           $ref: "#/components/responses/NotFound"
 
 components:
-
   securitySchemes:
     BearerAuth:
       type: http
@@ -324,7 +333,6 @@ components:
       bearerFormat: JWT
 
   parameters:
-
     categoryId:
       name: categoryId
       in: path
@@ -361,7 +369,6 @@ components:
         default: 0
 
   responses:
-
     BadRequest:
       description: Bad request
       content:
@@ -391,7 +398,6 @@ components:
             $ref: "#/components/schemas/Problem"
 
   schemas:
-
     RegisterRequest:
       type: object
       required: [ username, password ]
@@ -423,7 +429,8 @@ components:
       properties:
         refresh_token:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          description: Opaque refresh token
+          example: d74855a0aba429506a0b0423e79ff475
 
     AuthToken:
       type: object
@@ -439,6 +446,7 @@ components:
           example: 3600
         refresh_token:
           type: string
+          description: Opaque refresh token
         scope:
           type: string
 
