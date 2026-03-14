@@ -43,7 +43,7 @@ public class UserService extends AbstractBaseService<UserEntity, UUID, UserDto, 
 
   @Override
   public UserDto update(UUID uuid, Object patchRequest) throws EntityNotFoundException {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override

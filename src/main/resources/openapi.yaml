@@ -85,6 +85,17 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
 
+  /v1/auth/logout:
+    post:
+      tags: [ auth ]
+      summary: Logout user and invalidate refresh tokens
+      operationId: logoutUser
+      responses:
+        "204":
+          description: Logged out successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
   /v1/categories:
     get:
       tags: [ categories ]
@@ -423,7 +434,8 @@ components:
       properties:
         refresh_token:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+          description: Opaque refresh token
+          example: d74855a0aba429506a0b0423e79ff475
 
     AuthToken:
       type: object
@@ -439,6 +451,7 @@ components:
           example: 3600
         refresh_token:
           type: string
+          description: Opaque refresh token
         scope:
           type: string
 
