@@ -2,6 +2,8 @@ package com.budget.buddy.budget_buddy_api.base.crudl;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Generic CRUDL (Create, Read, Update, Delete, List) service interface for managing entities.
@@ -59,11 +61,10 @@ public interface BaseService<ID, R, C, U> {
   /**
    * List entities with pagination support.
    *
-   * @param page The page number to retrieve (0-based index).
-   * @param size The number of entities to retrieve per page.
-   * @return A list of resources/models representing the entities for the specified page and size.
+   * @param pageable The page request.
+   * @return A page of resources/models representing the entities for the specified page and size.
    */
-  List<R> list(int page, int size);
+  Page<R> list(Pageable pageable);
 
   /**
    * Count the total number of existing entities.

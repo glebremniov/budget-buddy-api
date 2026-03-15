@@ -1,9 +1,10 @@
 package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.BaseRepository;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CategoryRepository extends BaseRepository<CategoryEntity, UUID> {
 
@@ -21,7 +22,7 @@ public interface CategoryRepository extends BaseRepository<CategoryEntity, UUID>
    * @param ownerId the ID of the owner
    * @return list of categories owned by the specified owner
    */
-  List<CategoryEntity> findAllByOwnerId(UUID ownerId);
+  Page<CategoryEntity> findAllByOwnerId(UUID ownerId, Pageable pageable);
 
   /**
    * Count the number of categories by owner's ID.

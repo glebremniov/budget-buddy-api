@@ -584,7 +584,7 @@ components:
         offset:
           type: integer
         total:
-          type: integer
+          type: long
 
     PaginatedCategories:
       type: object

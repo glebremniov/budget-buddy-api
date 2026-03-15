@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractBaseServiceTest {
@@ -195,19 +197,24 @@ class AbstractBaseServiceTest {
     @Test
     void should_ReturnPaginatedListOfModels() {
       // Given
-      var entities = List.of(new DummyEntity(), new DummyEntity(), new DummyEntity());
-      var entitiesPage = List.of(entities.get(1), entities.get(2));
-      var expected = List.of(new Object(), new Object());
-      when(repository.findAll()).thenReturn(entities);
-      when(mapper.toModelList(entitiesPage)).thenReturn(expected);
+      var entity1 = new DummyEntity();
+      var entity2 = new DummyEntity();
+      var model1 = new Object();
+      var model2 = new Object();
+      var entities = new PageImpl<>(List.of(entity1, entity2));
+      var pageable = PageRequest.of(1, 2);
+      when(repository.findAll(pageable)).thenReturn(entities);
+      when(mapper.toModel(entity1)).thenReturn(model1);
+      when(mapper.toModel(entity2)).thenReturn(model2);
 
       // When
-      var actual = service.list(2, 1);
+      var actual = service.list(pageable);
 
       // Then
-      assertThat(actual).isEqualTo(expected);
-      verify(repository).findAll();
-      verify(mapper).toModelList(entitiesPage);
+      assertThat(actual).containsExactlyInAnyOrder(model1, model2);
+      verify(repository).findAll(pageable);
+      verify(mapper).toModel(entity1);
+      verify(mapper).toModel(entity2);
     }
   }
 

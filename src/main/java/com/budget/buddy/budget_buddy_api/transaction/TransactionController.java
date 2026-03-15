@@ -55,7 +55,7 @@ public class TransactionController
     var meta = new PaginationMeta()
         .limit(limit)
         .offset(offset)
-        .total((int) total);
+        .total(total);
 
     var response = mapper.toPageResponse(items, meta);
     return ResponseEntity.ok(response);

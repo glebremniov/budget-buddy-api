@@ -6,6 +6,8 @@ import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +59,7 @@ public class UserService extends AbstractBaseService<UserEntity, UUID, UserDto, 
   }
 
   @Override
-  public List<UserDto> list(int page, int size) {
+  public Page<UserDto> list(Pageable pageRequest) {
     throw new UnsupportedOperationException();
   }
 

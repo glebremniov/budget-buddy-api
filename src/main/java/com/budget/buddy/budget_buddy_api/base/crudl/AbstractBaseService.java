@@ -5,6 +5,8 @@ import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -72,13 +74,10 @@ public abstract class AbstractBaseService<E extends BaseEntity<ID>, ID, R, C, U>
 
   @Transactional(readOnly = true)
   @Override
-  public List<R> list(int limit, int offset) {
-    log.debug("List all entities with limit {}, offset {}", limit, offset);
-    List<E> entities = listInternal();
-    log.debug("Found {} entities", entities.size());
-    int end = Math.min(offset + limit, entities.size());
-    List<E> page = entities.subList(offset, end);
-    return mapper.toModelList(page);
+  public Page<R> list(Pageable pageable) {
+    log.debug("List all entities with pageRequest: {}", pageable);
+    return listInternal(pageable)
+        .map(mapper::toModel);
   }
 
   @Transactional(readOnly = true)
@@ -111,6 +110,10 @@ public abstract class AbstractBaseService<E extends BaseEntity<ID>, ID, R, C, U>
 
   protected List<E> listInternal() {
     return repository.findAll();
+  }
+
+  protected Page<E> listInternal(Pageable pageRequest) {
+    return repository.findAll(pageRequest);
   }
 
 }
