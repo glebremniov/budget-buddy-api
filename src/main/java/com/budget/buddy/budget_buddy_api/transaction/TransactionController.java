@@ -10,6 +10,9 @@ import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.UUID;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class TransactionController
     extends BaseController<UUID, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions>
     implements TransactionsApi {
+
+  private static final Sort DEFAULT_SORT = Sort.by(Direction.DESC, "date");
 
   private final TransactionService service;
   private final TransactionMapper mapper;
@@ -32,9 +37,19 @@ public class TransactionController
 
   @Override
   public ResponseEntity<PaginatedTransactions> listTransactions(
-      Integer limit, Integer offset, UUID categoryId,
-      LocalDate start, LocalDate end, String sort) {
-    var items = service.list(limit, offset, categoryId, start, end);
+      Integer limit,
+      Integer offset,
+      UUID categoryId,
+      LocalDate start,
+      LocalDate end,
+      String order
+  ) {
+    var sort = Direction.fromOptionalString(order)
+        .map(direction -> Sort.by(direction, "date"))
+        .orElse(DEFAULT_SORT);
+
+    var pageable = PageRequest.of(offset, limit, sort);
+    var items = service.list(categoryId, start, end, pageable);
     var total = service.count(categoryId, start, end);
 
     var meta = new PaginationMeta()
