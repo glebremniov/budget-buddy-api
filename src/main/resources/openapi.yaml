@@ -224,14 +224,13 @@ paths:
             format: date
         - name: sort
           in: query
-          description: Sort order
+          description: Sort order (by date)
           schema:
             type: string
             enum:
-              - date:asc
-              - date:desc
-              - amount:asc
-              - amount:desc
+              - asc
+              - desc
+            default: desc
       responses:
         "200":
           description: Paginated transactions
