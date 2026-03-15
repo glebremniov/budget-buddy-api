@@ -6,8 +6,9 @@ import com.budget.buddy.budget_buddy_api.generated.model.Category;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
 import com.budget.buddy.budget_buddy_api.security.auth.AuthUtils;
-import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,8 +49,8 @@ public class CategoryService extends AbstractBaseService<CategoryEntity, UUID, C
   }
 
   @Override
-  protected List<CategoryEntity> listInternal() {
+  protected Page<CategoryEntity> listInternal(Pageable pageable) {
     var ownerId = AuthUtils.requireCurrentUserId();
-    return repository.findAllByOwnerId(ownerId);
+    return repository.findAllByOwnerId(ownerId, pageable);
   }
 }

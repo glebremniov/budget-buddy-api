@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.base.crudl;
 
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.repository.ListPagingAndSortingRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -11,6 +12,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  */
 @NoRepositoryBean
 @SuppressWarnings("java:S119")
-public interface BaseRepository<E extends BaseEntity<ID>, ID> extends ListCrudRepository<E, ID> {
+public interface BaseRepository<E extends BaseEntity<ID>, ID>
+    extends ListCrudRepository<E, ID>, ListPagingAndSortingRepository<E, ID> {
 
 }

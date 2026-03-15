@@ -2,6 +2,7 @@ package com.budget.buddy.budget_buddy_api.base.crudl;
 
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
 import java.net.URI;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 
 @SuppressWarnings("java:S119")
@@ -41,15 +42,18 @@ public abstract class BaseController<ID, R, C, U, L> {
   }
 
   public ResponseEntity<L> listInternal(Integer limit, Integer offset) {
-    var items = service.list(limit, offset);
-    var total = service.count();
+    return listInternal(PageRequest.of(offset, limit));
+  }
+
+  public ResponseEntity<L> listInternal(PageRequest pageRequest) {
+    var items = service.list(pageRequest);
 
     var meta = new PaginationMeta();
-    meta.setLimit(limit);
-    meta.setOffset(offset);
-    meta.setTotal((int) total);
+    meta.setLimit(items.getSize());
+    meta.setOffset(items.getNumber());
+    meta.setTotal(items.getTotalElements());
 
-    var response = mapper.toPageResponse(items, meta);
+    var response = mapper.toPageResponse(items.getContent(), meta);
 
     return ResponseEntity.ok(response);
   }
