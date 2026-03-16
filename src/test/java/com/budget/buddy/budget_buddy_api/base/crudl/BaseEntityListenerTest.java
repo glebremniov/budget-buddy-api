@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.relational.core.mapping.event.BeforeConvertEvent;
 
 @ExtendWith(MockitoExtension.class)
 class BaseEntityListenerTest {
@@ -27,12 +26,11 @@ class BaseEntityListenerTest {
   void onBeforeConvert_ShouldSetId_When_NewEntity() {
     // Given
     var entity = new DummyEntity();
-    var event = new BeforeConvertEvent<>(entity);
     when(idGenerator.get()).thenReturn("newId");
 
     // When
     assertThatNoException()
-        .isThrownBy(() -> listener.onBeforeConvert(event));
+        .isThrownBy(() -> listener.onBeforeConvert(entity));
 
     // Then
     assertThat(entity.getId()).isEqualTo("newId");
@@ -44,11 +42,10 @@ class BaseEntityListenerTest {
     // Given
     var entity = new DummyEntity();
     entity.setId("existingId");
-    var event = new BeforeConvertEvent<>(entity);
 
     // When
     assertThatNoException()
-        .isThrownBy(() -> listener.onBeforeConvert(event));
+        .isThrownBy(() -> listener.onBeforeConvert(entity));
 
     // Then
     assertThat(entity.getId()).isEqualTo("existingId");

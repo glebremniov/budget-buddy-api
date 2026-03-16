@@ -1,32 +1,14 @@
 package com.budget.buddy.budget_buddy_api.base.crudl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;
-import org.springframework.data.relational.core.mapping.Column;
 
 @SuppressWarnings("java:S119")
-@Setter
-@Getter
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
-public abstract class BaseEntity<ID> implements Persistable<ID> {
+public interface BaseEntity<ID> extends Persistable<ID> {
 
-  @ToString.Include
-  @Id
-  @Column("id")
-  private ID id;
+  void setId(ID id);
 
   @Override
-  public boolean isNew() {
+  default boolean isNew() {
     return getId() == null;
   }
-
 }

@@ -6,7 +6,7 @@
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
 
   <include file="migrations/001-initial-schema.sql" relativeToChangelogFile="true"/>
-  <include file="migrations/002-dev-data.sql" relativeToChangelogFile="true"/>
   <include file="migrations/003-refresh-tokens.sql" relativeToChangelogFile="true"/>
+  <include file="migrations/004-timestamp-with-timezone.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

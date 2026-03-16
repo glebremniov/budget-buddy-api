@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RefreshTokenService implements TokenService<String> {
 
   private final Clock clock;
+  private final RefreshTokenProvider tokenProvider;
   private final RefreshTokenRepository repository;
   private final RefreshTokenProperties properties;
 
@@ -33,12 +34,13 @@ public class RefreshTokenService implements TokenService<String> {
   public String createToken(UserDto user) {
     var now = OffsetDateTime.now(clock);
     var token = RefreshTokenEntity.builder()
+        .token(tokenProvider.get())
         .userId(user.id())
         .createdAt(now)
         .expiresAt(now.plusSeconds(properties.validitySeconds()))
         .build();
-    repository.save(token);
-    return token.getId();
+    return repository.save(token)
+        .getToken();
   }
 
   /**
@@ -52,7 +54,7 @@ public class RefreshTokenService implements TokenService<String> {
   public RefreshTokenEntity rotate(String refreshToken) {
     var now = OffsetDateTime.now(clock);
 
-    var tokenEntity = repository.findById(refreshToken)
+    var tokenEntity = repository.findByToken(refreshToken)
         .orElseThrow(() -> new BadCredentialsException("Refresh token is invalid"));
 
     if (now.isAfter(tokenEntity.getExpiresAt())) {

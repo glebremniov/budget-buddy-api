@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -23,7 +24,14 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
-public class RefreshTokenEntity extends BaseEntity<String> {
+public class RefreshTokenEntity implements BaseEntity<UUID> {
+
+  @Id
+  @Column("id")
+  private UUID id;
+
+  @Column("token")
+  private String token;
 
   @ToString.Include
   @Column("user_id")

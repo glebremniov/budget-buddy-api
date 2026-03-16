@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.security.refresh.token;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
@@ -26,4 +27,5 @@ public interface RefreshTokenRepository extends CrudRepository<RefreshTokenEntit
   @Query("DELETE FROM refresh_tokens WHERE expires_at < :now")
   void deleteAllExpired(OffsetDateTime now);
 
+  Optional<RefreshTokenEntity> findByToken(String refreshToken);
 }

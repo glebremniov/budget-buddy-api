@@ -3,7 +3,8 @@
 --changeset g.remniov@gmail.com:003-refresh-tokens
 CREATE TABLE refresh_tokens
 (
-    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    id    UUID PRIMARY KEY,
+    token VARCHAR(255) NOT NULL UNIQUE,
     user_id    UUID         NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     expires_at TIMESTAMP    NOT NULL,
     created_at TIMESTAMP    NOT NULL

@@ -1,0 +1,23 @@
+--liquibase formatted sql
+
+--changeset g.remniov@gmail.com:004-timestamp-with-timezone
+ALTER TABLE users
+    ALTER COLUMN created_at TYPE TIMESTAMP WITH TIME ZONE,
+    ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE categories
+    ALTER COLUMN created_at TYPE TIMESTAMP WITH TIME ZONE,
+    ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE transactions
+    ALTER COLUMN created_at TYPE TIMESTAMP WITH TIME ZONE,
+    ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE refresh_tokens
+    ALTER COLUMN created_at TYPE TIMESTAMP WITH TIME ZONE,
+    ALTER COLUMN expires_at TYPE TIMESTAMP WITH TIME ZONE;
+
+--rollback ALTER TABLE refresh_tokens ALTER COLUMN expires_at TYPE TIMESTAMP, ALTER COLUMN created_at TYPE TIMESTAMP;
+--rollback ALTER TABLE transactions ALTER COLUMN updated_at TYPE TIMESTAMP, ALTER COLUMN created_at TYPE TIMESTAMP;
+--rollback ALTER TABLE categories ALTER COLUMN updated_at TYPE TIMESTAMP, ALTER COLUMN created_at TYPE TIMESTAMP;
+--rollback ALTER TABLE users ALTER COLUMN updated_at TYPE TIMESTAMP, ALTER COLUMN created_at TYPE TIMESTAMP;

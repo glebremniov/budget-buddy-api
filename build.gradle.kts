@@ -61,6 +61,7 @@ dependencies {
   testImplementation("org.testcontainers:testcontainers-junit-jupiter")
   testImplementation("org.testcontainers:testcontainers-postgresql")
 
+  testCompileOnly("org.projectlombok:lombok")
   testCompileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
   testAnnotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
   testAnnotationProcessor("org.projectlombok:lombok")
