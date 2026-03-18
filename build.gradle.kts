@@ -1,5 +1,6 @@
 plugins {
   java
+  `jvm-test-suite`
   jacoco
   id("org.springframework.boot") version "4.0.4"
   id("io.spring.dependency-management") version "1.1.7"
@@ -14,12 +15,6 @@ description = "API for Budget Buddy App"
 java {
   toolchain {
     languageVersion = JavaLanguageVersion.of(25)
-  }
-}
-
-configurations {
-  compileOnly {
-    extendsFrom(configurations.annotationProcessor.get())
   }
 }
 
@@ -56,14 +51,6 @@ dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
-  testImplementation("org.springframework.boot:spring-boot-testcontainers")
-  testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
-  testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
-  testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-  testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test")
-  testImplementation("org.springframework.boot:spring-boot-starter-security-test")
-  testImplementation("org.testcontainers:testcontainers-junit-jupiter")
-  testImplementation("org.testcontainers:testcontainers-postgresql")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
   testCompileOnly("org.projectlombok:lombok")
@@ -73,9 +60,36 @@ dependencies {
   testAnnotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
 }
 
-tasks.withType<Test> {
-  useJUnitPlatform()
-  finalizedBy("jacocoTestReport")
+@Suppress("UnstableApiUsage")
+testing {
+  suites {
+    val test by getting(JvmTestSuite::class) {
+      useJUnitJupiter()
+    }
+
+    register<JvmTestSuite>("integrationTest") {
+      useJUnitJupiter()
+      dependencies {
+        implementation(project())
+        implementation("org.springframework.boot:spring-boot-starter-liquibase-test")
+        implementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
+        implementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+        implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test")
+        implementation("org.springframework.boot:spring-boot-starter-security-test")
+        implementation("org.springframework.boot:spring-boot-testcontainers")
+        implementation("org.testcontainers:testcontainers-junit-jupiter")
+        implementation("org.testcontainers:testcontainers-postgresql")
+      }
+
+      targets {
+        all {
+          testTask.configure {
+            shouldRunAfter(test)
+          }
+        }
+      }
+    }
+  }
 }
 
 tasks.openApiGenerate {
@@ -98,7 +112,21 @@ tasks.openApiGenerate {
   )
 }
 
-// Add generated sources to sourceSet
+configurations {
+  compileOnly {
+    extendsFrom(configurations.annotationProcessor.get())
+  }
+  named("integrationTestImplementation") {
+    extendsFrom(configurations.testImplementation.get())
+  }
+  named("integrationTestCompileOnly") {
+    extendsFrom(configurations.testCompileOnly.get())
+  }
+  named("integrationTestAnnotationProcessor") {
+    extendsFrom(configurations.testAnnotationProcessor.get())
+  }
+}
+
 sourceSets {
   main {
     java {
@@ -107,13 +135,43 @@ sourceSets {
   }
 }
 
-// Ensure openapi task runs before compilation
 tasks.compileJava {
   dependsOn(tasks.openApiGenerate)
 }
 
-tasks.withType<JacocoReport> {
+tasks.named("compileIntegrationTestJava") {
+  dependsOn(tasks.openApiGenerate)
+}
+
+tasks.named<Test>("test") {
+  finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.named<Test>("integrationTest") {
+  finalizedBy(tasks.jacocoTestReport)
+}
+
+@Suppress("UnstableApiUsage")
+tasks.named("check") {
+  dependsOn(testing.suites.named("test"))
+  dependsOn(testing.suites.named("integrationTest"))
+}
+
+tasks.jacocoTestReport {
+  dependsOn(tasks.test)
   reports {
+    html.required = true
     xml.required = true
+  }
+  executionData(fileTree(layout.buildDirectory).include("jacoco/*.exec"))
+}
+
+sonarqube {
+  properties {
+    property(
+      "sonar.coverage.jacoco.xmlReportPaths",
+      layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
+    )
+    property("sonar.tests", "src/test/java,src/integrationTest/java")
   }
 }
