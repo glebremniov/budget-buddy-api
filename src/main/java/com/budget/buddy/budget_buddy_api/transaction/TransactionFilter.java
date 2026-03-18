@@ -10,7 +10,7 @@ public record TransactionFilter(
     LocalDate end
 ) {
 
-  public static TransactionFilter withEmptyOwnerId(
+  public static TransactionFilter of(
       UUID categoryId,
       LocalDate start,
       LocalDate end

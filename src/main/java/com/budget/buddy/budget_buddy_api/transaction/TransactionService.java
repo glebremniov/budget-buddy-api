@@ -16,9 +16,6 @@ import org.springframework.stereotype.Service;
 public class TransactionService extends
     OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate> {
 
-  private final TransactionRepository repository;
-  private final TransactionMapper mapper;
-
   public TransactionService(
       TransactionRepository repository,
       TransactionMapper mapper,
@@ -26,21 +23,32 @@ public class TransactionService extends
       Converter<String, UUID> ownerIdConverter
   ) {
     super(repository, mapper, validators, ownerIdConverter);
-    this.repository = repository;
-    this.mapper = mapper;
   }
 
   public List<Transaction> list(
       TransactionFilter filter,
       Pageable pageable
   ) {
-    var entities = repository.findAllByFilter(filter.withOwnerId(getRequieredOnwerId()), pageable);
-    return mapper.toModelList(entities);
+    var entities = getRepository()
+        .findAllByFilter(filter.withOwnerId(getRequiredOwnerId()), pageable);
+    return getMapper()
+        .toModelList(entities);
   }
 
 
   public long count(TransactionFilter filter) {
-    return repository.countByFilter(filter.withOwnerId(getRequieredOnwerId()));
+    return getRepository()
+        .countByFilter(filter.withOwnerId(getRequiredOwnerId()));
+  }
+
+  @Override
+  protected TransactionRepository getRepository() {
+    return (TransactionRepository) super.getRepository();
+  }
+
+  @Override
+  protected TransactionMapper getMapper() {
+    return (TransactionMapper) super.getMapper();
   }
 
 }

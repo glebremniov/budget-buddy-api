@@ -4,13 +4,11 @@ import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
 import com.budget.buddy.budget_buddy_api.security.auth.token.AuthTokenService;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenService;
-import com.budget.buddy.budget_buddy_api.user.UserDto;
 import com.budget.buddy.budget_buddy_api.user.UserService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -71,7 +69,7 @@ public class AuthService {
   @Transactional
   public AuthToken refresh(String refreshToken) {
     var tokenEntity = refreshTokenService.rotate(refreshToken);
-    var user = requireEnabledUser(tokenEntity.getUserId());
+    var user = userService.requireEnabledUser(tokenEntity.getUserId());
 
     return authTokenService.createToken(user);
   }
@@ -83,23 +81,6 @@ public class AuthService {
   public void logout() {
     var userId = AuthUtils.requireCurrentUserId(UUID::fromString);
     refreshTokenService.revokeAll(userId);
-  }
-
-  /**
-   * Find and validate that user exists and is enabled
-   *
-   * @param userId user ID
-   * @return UserDto if user exists and is enabled
-   * @throws DisabledException if user is disabled
-   */
-  public UserDto requireEnabledUser(UUID userId) {
-    var user = userService.read(userId);
-
-    if (!user.enabled()) {
-      throw new DisabledException("User is disabled");
-    }
-
-    return user;
   }
 
 }

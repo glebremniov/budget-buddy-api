@@ -6,7 +6,6 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,12 +52,8 @@ public class RefreshTokenService implements TokenService<String> {
   public RefreshTokenEntity rotate(String refreshToken) {
     var now = OffsetDateTime.now(clock);
 
-    var tokenEntity = repository.findByToken(refreshToken)
+    var tokenEntity = repository.findValidToken(refreshToken, now)
         .orElseThrow(() -> new BadCredentialsException("Refresh token is invalid"));
-
-    if (now.isAfter(tokenEntity.getExpiresAt())) {
-      throw new AccountExpiredException("Refresh token is expired");
-    }
 
     repository.delete(tokenEntity);
     return tokenEntity;

@@ -49,7 +49,7 @@ public class TransactionController
         .orElse(DEFAULT_SORT);
 
     var pageable = PageRequest.of(offset, limit, sort);
-    var filter = TransactionFilter.withEmptyOwnerId(categoryId, start, end);
+    var filter = TransactionFilter.of(categoryId, start, end);
     var items = service.list(filter, pageable);
     var total = service.count(filter);
 

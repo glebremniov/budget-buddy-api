@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,5 +74,20 @@ public class UserService extends AbstractBaseEntityService<UserEntity, UUID, Use
   @Override
   public long count() {
     throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Find and validate that user exists and is enabled
+   *
+   * @param userId user ID
+   * @return UserDto if user exists and is enabled
+   * @throws DisabledException if user is disabled
+   */
+  public UserDto requireEnabledUser(UUID userId) {
+    var user = readInternal(userId);
+    if (!user.isEnabled()) {
+      throw new DisabledException("User is disabled");
+    }
+    return mapper.toModel(user);
   }
 }
