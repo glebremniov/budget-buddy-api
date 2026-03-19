@@ -31,17 +31,8 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
   }
 
   protected String registerAndLogin(String username, String password) throws Exception {
-    mvc.post().uri("/v1/auth/register")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new RegisterRequest().username(username).password(password)))
-        .exchange();
-
-    var result = mvc.post().uri("/v1/auth/login")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new LoginRequest().username(username).password(password)))
-        .exchange();
-
-    return parseBody(result, AuthToken.class).getAccessToken();
+    register(username, password);
+    return login(username, password).getAccessToken();
   }
 
   protected void register(String username, String password) {
