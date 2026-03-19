@@ -4,7 +4,7 @@ REST API for personal budget management. Built with Spring Boot 4 and PostgreSQL
 
 ## Tech Stack
 
-- **Java 25** / Spring Boot 4.0.3
+- **Java 25** / Spring Boot 4.0.4
 - **Spring Data JDBC** + PostgreSQL
 - **Spring Security** — JWT (access) + opaque refresh tokens
 - **Liquibase** — database migrations

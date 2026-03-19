@@ -1,7 +1,7 @@
 plugins {
   java
   jacoco
-  id("org.springframework.boot") version "4.0.3"
+  id("org.springframework.boot") version "4.0.4"
   id("io.spring.dependency-management") version "1.1.7"
   id("org.openapi.generator") version "7.3.0"
   id("org.sonarqube") version "7.2.3.7755"
@@ -29,7 +29,7 @@ repositories {
 
 dependencies {
   val mapstructVersion = "1.6.3"
-  val openApiVerification = "3.0.1"
+  val openApiVersion = "3.0.2"
   val lombokMapstructBindingVersion = "0.2.0"
   val jacksonDatabindNullableVersion = "0.2.9"
 
@@ -39,7 +39,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
-  implementation("org.springdoc:springdoc-openapi-starter-common:${openApiVerification}")
+  implementation("org.springdoc:springdoc-openapi-starter-common:${openApiVersion}")
   implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
 
   compileOnly("org.projectlombok:lombok")
@@ -57,10 +57,14 @@ dependencies {
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.boot:spring-boot-testcontainers")
+  testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
   testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+  testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test")
+  testImplementation("org.springframework.boot:spring-boot-starter-security-test")
   testImplementation("org.testcontainers:testcontainers-junit-jupiter")
   testImplementation("org.testcontainers:testcontainers-postgresql")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
   testCompileOnly("org.projectlombok:lombok")
   testCompileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
