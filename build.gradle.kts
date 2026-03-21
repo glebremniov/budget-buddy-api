@@ -36,9 +36,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
   implementation("org.springdoc:springdoc-openapi-starter-common:${openApiVersion}")
   implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
+  implementation("org.mapstruct:mapstruct:${mapstructVersion}")
 
   compileOnly("org.projectlombok:lombok")
-  compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
 
   runtimeOnly("org.postgresql:postgresql")
 
@@ -158,12 +158,18 @@ tasks.named("check") {
 }
 
 tasks.jacocoTestReport {
-  dependsOn(tasks.test)
+  dependsOn(tasks.test, tasks.named("integrationTest"))
   reports {
     html.required = true
     xml.required = true
   }
   executionData(fileTree(layout.buildDirectory).include("jacoco/*.exec"))
+
+  classDirectories.setFrom(files(classDirectories.files.map {
+    fileTree(it).matching {
+      exclude("**/generated/**")
+    }
+  }))
 }
 
 sonarqube {
@@ -173,6 +179,7 @@ sonarqube {
       layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
     )
     property("sonar.tests", "src/test/java,src/integrationTest/java")
+    property("sonar.coverage.exclusions", "**/generated/**")
     property("sonar.issue.ignore.multicriteria", "S119")
     property("sonar.issue.ignore.multicriteria.S119.ruleKey", "java:S119")
     property("sonar.issue.ignore.multicriteria.S119.resourceKey", "**/*.java")
