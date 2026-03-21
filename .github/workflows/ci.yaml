@@ -40,6 +40,8 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build and test
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew build sonar --info
 
       - name: Upload build artifact
