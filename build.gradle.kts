@@ -100,6 +100,7 @@ tasks.openApiGenerate {
   configOptions.set(
     mapOf(
       "useSpringBoot4" to "true",
+//      "useJSpecify" to "true", // https://github.com/OpenAPITools/openapi-generator/pull/23256
       "openApiNullable" to "true",
       "generateSupportingFiles" to "false",
       "useTags" to "true",
@@ -157,9 +158,8 @@ tasks.named("check") {
 }
 
 tasks.jacocoTestReport {
-  dependsOn(tasks.test, tasks.named("integrationTest"))
+  dependsOn(tasks.test)
   reports {
-    html.required = true
     xml.required = true
   }
   executionData(fileTree(layout.buildDirectory).include("jacoco/*.exec"))
