@@ -72,10 +72,19 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         run: |
           ./gradlew bootBuildImage \
-            --imageName=${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-          docker tag ${{ env.IMAGE_NAME }}:${{ env.VERSION }} ${{ env.IMAGE_NAME }}:latest
-          docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-          docker push ${{ env.IMAGE_NAME }}:latest
+            --imageName=${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-amd64 
+            --imagePlatform linux/amd64
+          docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-amd64
+          
+          ./gradlew bootBuildImage \
+            --imageName ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-arm64 
+            --imagePlatform linux/arm64
+          docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-arm64
+          
+          docker manifest create ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest \
+            --amend ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-amd64 \
+            --amend ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-arm64
+          docker manifest push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest
 
 #      - name: Deploy to Raspberry Pi
 #        if: steps.check_tag.outputs.exists == 'false'
