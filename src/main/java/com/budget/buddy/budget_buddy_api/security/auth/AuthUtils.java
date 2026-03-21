@@ -29,7 +29,7 @@ public final class AuthUtils {
    * Retrieves the current authenticated user's ID using the provided converter.
    *
    * @param converter the converter to transform the subject (string) to the target type
-   * @param <T>       the target type of the user ID
+   * @param <T> the target type of the user ID
    * @return the current user ID
    * @throws InvalidBearerTokenException if the user is not authenticated
    */

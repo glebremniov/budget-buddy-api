@@ -15,8 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for authentication operations.
- * Handles user registration, login, token refresh and logout.
+ * Service for authentication operations. Handles user registration, login, token refresh and logout.
  */
 @Service
 @RequiredArgsConstructor

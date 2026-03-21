@@ -141,7 +141,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
   /**
    * Logic to update an entity.
    *
-   * @param id            the unique identifier
+   * @param id the unique identifier
    * @param updateRequest the update request
    * @return the updated entity
    */

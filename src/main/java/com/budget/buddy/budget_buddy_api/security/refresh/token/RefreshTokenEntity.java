@@ -13,8 +13,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
- * Refresh token entity stored in the database.
- * Allows token invalidation and rotation.
+ * Refresh token entity stored in the database. Allows token invalidation and rotation.
  */
 @Table("refresh_tokens")
 @Getter

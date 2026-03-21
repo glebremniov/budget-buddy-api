@@ -13,9 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for managing user transactions.
- * Extends {@link OwnableEntityService} to provide basic CRUD operations
- * and includes custom filtering for transactions.
+ * Service for managing user transactions. Extends {@link OwnableEntityService} to provide basic CRUD operations and includes custom filtering for transactions.
  */
 @Service
 public class TransactionService extends
@@ -33,7 +31,7 @@ public class TransactionService extends
   /**
    * List transactions with filtering and pagination.
    *
-   * @param filter   the transaction filter
+   * @param filter the transaction filter
    * @param pageable the page request
    * @return list of transactions
    */

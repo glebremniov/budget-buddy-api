@@ -14,11 +14,11 @@ import org.springframework.data.domain.Pageable;
 /**
  * Base class for services managing entities that belong to a user.
  *
- * @param <E>  the entity type
+ * @param <E> the entity type
  * @param <ID> the identifier type
- * @param <R>  the read model type (DTO)
- * @param <C>  the create request type (DTO)
- * @param <U>  the update request type (DTO)
+ * @param <R> the read model type (DTO)
+ * @param <C> the create request type (DTO)
+ * @param <U> the update request type (DTO)
  */
 public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     extends AbstractBaseEntityService<E, ID, R, C, U> {

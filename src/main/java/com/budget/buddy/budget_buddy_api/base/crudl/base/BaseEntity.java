@@ -3,8 +3,7 @@ package com.budget.buddy.budget_buddy_api.base.crudl.base;
 import org.springframework.data.domain.Persistable;
 
 /**
- * Base interface for all entities in the application.
- * Extends {@link Persistable} to provide standard persistence status.
+ * Base interface for all entities in the application. Extends {@link Persistable} to provide standard persistence status.
  *
  * @param <ID> the identifier type
  */

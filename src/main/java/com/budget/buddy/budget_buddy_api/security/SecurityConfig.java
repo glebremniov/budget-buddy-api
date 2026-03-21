@@ -20,8 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 
 /**
- * Security configuration for the application.
- * Configures HTTP security, authentication manager, password encoder, and user details manager.
+ * Security configuration for the application. Configures HTTP security, authentication manager, password encoder, and user details manager.
  */
 @Configuration
 @EnableWebSecurity

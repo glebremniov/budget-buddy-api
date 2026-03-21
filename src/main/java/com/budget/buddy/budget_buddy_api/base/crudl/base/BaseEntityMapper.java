@@ -45,16 +45,15 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    * Maps a list of items and pagination metadata to a page response.
    *
    * @param items the list of items
-   * @param meta  the pagination metadata
+   * @param meta the pagination metadata
    * @return the page response
    */
   L toPageResponse(List<R> items, PaginationMeta meta);
 
   /**
-   * Patches an existing entity with values from an update request.
-   * Null values in the update request are ignored.
+   * Patches an existing entity with values from an update request. Null values in the update request are ignored.
    *
-   * @param patchRequest   the update request
+   * @param patchRequest the update request
    * @param existingEntity the entity to patch
    */
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

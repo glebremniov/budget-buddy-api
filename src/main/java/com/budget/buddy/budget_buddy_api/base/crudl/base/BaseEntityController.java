@@ -6,14 +6,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Base controller class providing common internal methods for CRUD operations.
- * Designed to be extended by controllers that implement generated API interfaces.
+ * Base controller class providing common internal methods for CRUD operations. Designed to be extended by controllers that implement generated API interfaces.
  *
  * @param <ID> the identifier type
- * @param <R>  the read model type (DTO)
- * @param <C>  the create request type (DTO)
- * @param <U>  the update request type (DTO)
- * @param <L>  the list response type (DTO)
+ * @param <R> the read model type (DTO)
+ * @param <C> the create request type (DTO)
+ * @param <U> the update request type (DTO)
+ * @param <L> the list response type (DTO)
  */
 public abstract class BaseEntityController<ID, R, C, U, L> {
 
@@ -55,7 +54,7 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
   /**
    * Internal method to update an entity by ID.
    *
-   * @param id            the entity identifier
+   * @param id the entity identifier
    * @param updateRequest the update request
    * @return {@link ResponseEntity} with the updated entity
    */
@@ -78,7 +77,7 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
   /**
    * Internal method to list entities with limit and offset.
    *
-   * @param limit  the maximum number of items to return
+   * @param limit the maximum number of items to return
    * @param offset the page number (0-indexed)
    * @return {@link ResponseEntity} with the paginated response
    */

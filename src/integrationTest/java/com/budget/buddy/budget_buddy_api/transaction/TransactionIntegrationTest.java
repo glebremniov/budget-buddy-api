@@ -1,4 +1,3 @@
-
 package com.budget.buddy.budget_buddy_api.transaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
