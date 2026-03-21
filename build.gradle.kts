@@ -184,10 +184,8 @@ sonar {
     )
     property("sonar.tests", "src/test/java,src/integrationTest/java")
     property("sonar.coverage.exclusions", "**/generated/**")
-    property("sonar.issue.ignore.multicriteria", "S119,S6474")
+    property("sonar.issue.ignore.multicriteria", "S119")
     property("sonar.issue.ignore.multicriteria.S119.ruleKey", "java:S119")
     property("sonar.issue.ignore.multicriteria.S119.resourceKey", "**/*.java")
-    property("sonar.issue.ignore.multicriteria.S6474.ruleKey", "kotlin:S6474")
-    property("sonar.issue.ignore.multicriteria.S6474.resourceKey", "**/*.kts")
   }
 }
