@@ -9,7 +9,6 @@ plugins {
 }
 
 group = "com.budget.buddy"
-version = "0.0.1-SNAPSHOT"
 description = "API for Budget Buddy App"
 
 java {
