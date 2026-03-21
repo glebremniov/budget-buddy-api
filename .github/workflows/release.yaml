@@ -71,20 +71,27 @@ jobs:
       - name: Build and push Docker image
         if: steps.check_tag.outputs.exists == 'false'
         run: |
-          ./gradlew bootBuildImage \
-            --imageName=${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-amd64 
+          ./gradlew bootBuildImage -x test \
+            --imageName ${{ env.IMAGE_NAME }}:${{ env.VERSION }}-amd64 \
             --imagePlatform linux/amd64
-          docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-amd64
+          docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}-amd64
           
-          ./gradlew bootBuildImage \
-            --imageName ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-arm64 
+          ./gradlew bootBuildImage -x test \
+            --imageName ${{ env.IMAGE_NAME }}:${{ env.VERSION }}-arm64 \
             --imagePlatform linux/arm64
-          docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-arm64
+          docker push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}-arm64
           
-          docker manifest create ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest \
-            --amend ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-amd64 \
-            --amend ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest-arm64
-          docker manifest push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}:latest
+          # Create and push multi-platform manifest for versioned tag
+          docker manifest create ${{ env.IMAGE_NAME }}:${{ env.VERSION }} \
+            --amend ${{ env.IMAGE_NAME }}:${{ env.VERSION }}-amd64 \
+            --amend ${{ env.IMAGE_NAME }}:${{ env.VERSION }}-arm64
+          docker manifest push ${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          
+          # Create and push multi-platform manifest for latest tag
+          docker manifest create ${{ env.IMAGE_NAME }}:latest \
+            --amend ${{ env.IMAGE_NAME }}:${{ env.VERSION }}-amd64 \
+            --amend ${{ env.IMAGE_NAME }}:${{ env.VERSION }}-arm64
+          docker manifest push ${{ env.IMAGE_NAME }}:latest
 
 #      - name: Deploy to Raspberry Pi
 #        if: steps.check_tag.outputs.exists == 'false'
