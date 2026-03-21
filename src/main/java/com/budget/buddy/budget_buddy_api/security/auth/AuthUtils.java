@@ -11,6 +11,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 
+/**
+ * Utility class for security and authentication related operations.
+ */
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AuthUtils {
@@ -22,6 +25,14 @@ public final class AuthUtils {
     return Optional.empty();
   }
 
+  /**
+   * Retrieves the current authenticated user's ID using the provided converter.
+   *
+   * @param converter the converter to transform the subject (string) to the target type
+   * @param <T>       the target type of the user ID
+   * @return the current user ID
+   * @throws InvalidBearerTokenException if the user is not authenticated
+   */
   public static <T> T requireCurrentUserId(Converter<String, T> converter) {
     var authentication = SecurityContextHolder.getContext().getAuthentication();
 

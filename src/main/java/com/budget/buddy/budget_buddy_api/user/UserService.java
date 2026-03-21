@@ -14,6 +14,9 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service for managing users.
+ */
 @Transactional
 @Service
 public class UserService extends AbstractBaseEntityService<UserEntity, UUID, UserDto, RegisterRequest, Object> {
@@ -34,10 +37,22 @@ public class UserService extends AbstractBaseEntityService<UserEntity, UUID, Use
     this.authorityRepository = authorityRepository;
   }
 
+  /**
+   * Checks if a user exists by username.
+   *
+   * @param username the username to check
+   * @return true if the user exists, false otherwise
+   */
   public boolean existsByUsername(String username) {
     return repository.existsByUsername(username);
   }
 
+  /**
+   * Finds a user by username.
+   *
+   * @param username the username to find
+   * @return an {@link Optional} containing the user, or empty if not found
+   */
   public Optional<UserDto> findByUsername(String username) {
     return repository.findByUsername(username)
         .map(mapper::toModel);

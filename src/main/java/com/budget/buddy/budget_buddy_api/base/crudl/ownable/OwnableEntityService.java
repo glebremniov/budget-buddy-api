@@ -11,6 +11,15 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+/**
+ * Base class for services managing entities that belong to a user.
+ *
+ * @param <E>  the entity type
+ * @param <ID> the identifier type
+ * @param <R>  the read model type (DTO)
+ * @param <C>  the create request type (DTO)
+ * @param <U>  the update request type (DTO)
+ */
 @SuppressWarnings("java:S119")
 public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     extends AbstractBaseEntityService<E, ID, R, C, U> {
@@ -36,6 +45,11 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     this.idConverter = idConverter;
   }
 
+  /**
+   * Retrieves the current authenticated user's ID.
+   *
+   * @return the current user's ID
+   */
   protected ID getRequiredOwnerId() {
     return AuthUtils.requireCurrentUserId(idConverter);
   }

@@ -74,7 +74,10 @@ public interface BaseEntityService<ID, R, C, U> {
   long count();
 
   /**
+   * Checks if an entity exists by its unique identifier.
    *
+   * @param id the unique identifier
+   * @return true if the entity exists, false otherwise
    */
   boolean existsById(ID id);
 }

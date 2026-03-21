@@ -105,21 +105,47 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
     return existsByIdInternal(id);
   }
 
+  /**
+   * Checks if an entity exists by its unique identifier.
+   *
+   * @param id the unique identifier
+   * @return true if the entity exists, false otherwise
+   */
   protected boolean existsByIdInternal(ID id) {
     return repository.existsById(id);
   }
 
+  /**
+   * Logic to create a new entity.
+   *
+   * @param createRequest the create request
+   * @return the created entity
+   */
   protected E createInternal(C createRequest) {
     E entity = mapper.toEntity(createRequest);
     validate(entity);
     return repository.save(entity);
   }
 
+  /**
+   * Logic to read an entity by its unique identifier.
+   *
+   * @param id the unique identifier
+   * @return the entity
+   * @throws EntityNotFoundException if the entity is not found
+   */
   protected E readInternal(ID id) {
     return repository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
   }
 
+  /**
+   * Logic to update an entity.
+   *
+   * @param id            the unique identifier
+   * @param updateRequest the update request
+   * @return the updated entity
+   */
   protected E updateInternal(ID id, U updateRequest) {
     E existingEntity = readInternal(id);
     mapper.patchEntity(updateRequest, existingEntity);
@@ -127,23 +153,49 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
     return repository.save(existingEntity);
   }
 
+  /**
+   * Logic to delete an entity.
+   *
+   * @param id the unique identifier
+   */
   protected void deleteInternal(ID id) {
     var entity = readInternal(id);
     repository.delete(entity);
   }
 
+  /**
+   * Logic to list all entities.
+   *
+   * @return list of entities
+   */
   protected List<E> listInternal() {
     return repository.findAll();
   }
 
+  /**
+   * Logic to list entities with pagination.
+   *
+   * @param pageRequest the page request
+   * @return page of entities
+   */
   protected Page<E> listInternal(Pageable pageRequest) {
     return repository.findAll(pageRequest);
   }
 
+  /**
+   * Logic to count all entities.
+   *
+   * @return total count
+   */
   protected long countInternal() {
     return repository.count();
   }
 
+  /**
+   * Validates an entity using registered validators.
+   *
+   * @param entity the entity to validate
+   */
   protected void validate(E entity) {
     validators.forEach(v -> v.validate(entity));
   }

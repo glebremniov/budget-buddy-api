@@ -9,6 +9,9 @@ import com.budget.buddy.budget_buddy_api.user.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for creating complex authentication tokens (access + refresh).
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthTokenService implements TokenService<AuthToken> {

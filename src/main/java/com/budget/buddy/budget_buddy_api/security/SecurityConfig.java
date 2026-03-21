@@ -19,10 +19,20 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 
+/**
+ * Security configuration for the application.
+ * Configures HTTP security, authentication manager, password encoder, and user details manager.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+  /**
+   * Configures the security filter chain.
+   *
+   * @param http the {@link HttpSecurity} to configure
+   * @return the {@link SecurityFilterChain}
+   */
   @SuppressWarnings("java:S4502")
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) {

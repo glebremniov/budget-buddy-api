@@ -12,6 +12,11 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for managing user transactions.
+ * Extends {@link OwnableEntityService} to provide basic CRUD operations
+ * and includes custom filtering for transactions.
+ */
 @Service
 public class TransactionService extends
     OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate> {
@@ -25,6 +30,13 @@ public class TransactionService extends
     super(repository, mapper, validators, ownerIdConverter);
   }
 
+  /**
+   * List transactions with filtering and pagination.
+   *
+   * @param filter   the transaction filter
+   * @param pageable the page request
+   * @return list of transactions
+   */
   public List<Transaction> list(
       TransactionFilter filter,
       Pageable pageable
@@ -36,6 +48,12 @@ public class TransactionService extends
   }
 
 
+  /**
+   * Count transactions matching the provided filter.
+   *
+   * @param filter the transaction filter
+   * @return the total count
+   */
   public long count(TransactionFilter filter) {
     return getRepository()
         .countByFilter(filter.withOwnerId(getRequiredOwnerId()));
