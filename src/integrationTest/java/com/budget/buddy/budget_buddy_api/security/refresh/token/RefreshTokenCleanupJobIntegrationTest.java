@@ -10,7 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = {
     "security.refresh-token.cleanup.enabled=true",
-    "security.refresh-token.cleanup-cron=0 0 * * * *"
+    "security.refresh-token.cleanup.cron=0 0 * * * *"
 })
 class RefreshTokenCleanupJobIntegrationTest extends BaseIntegrationTest {
 

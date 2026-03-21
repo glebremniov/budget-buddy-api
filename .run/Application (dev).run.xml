@@ -1,21 +1,21 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" factoryName="Spring Boot" name="Application (dev)" type="SpringBootApplicationConfigurationType">
+  <configuration default="false" name="Application (dev)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="dev" />
+    <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UnknownPolicyInFreeMode" />
+    <module name="budget-buddy-api.main" />
+    <option name="PROGRAM_PARAMETERS" value="--security.access-token.secret=df187efc1d1805492852ea8c2742a8b16620143f000328d894af3d5242cdbcb9" />
+    <selectedOptions>
+      <option name="environmentVariables" />
+    </selectedOptions>
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.budget.buddy.budget_buddy_api.Application" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.budget.buddy.budget_buddy_api.*"/>
-        <option name="ENABLED" value="true"/>
+        <option name="PATTERN" value="com.budget.buddy.budget_buddy_api.*" />
+        <option name="ENABLED" value="true" />
       </pattern>
     </extension>
     <method v="2">
-      <option enabled="true" name="Make"/>
+      <option name="Make" enabled="true" />
     </method>
-    <module name="budget-buddy-api.main"/>
-    <option name="PROGRAM_PARAMETERS" value="--security.jwt.secret=df187efc1d1805492852ea8c2742a8b16620143f000328d894af3d5242cdbcb9"/>
-    <option name="SPRING_BOOT_MAIN_CLASS" value="com.budget.buddy.budget_buddy_api.Application"/>
-    <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UnknownPolicyInFreeMode"/>
-    <option name="ACTIVE_PROFILES" value="dev"/>
-    <selectedOptions>
-      <option name="environmentVariables"/>
-    </selectedOptions>
   </configuration>
 </component>

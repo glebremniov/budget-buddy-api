@@ -26,9 +26,9 @@ springdoc:
     enabled: false
 
 security:
-  jwt:
-    secret: ${BUDGET_BUDDY_API_JWT_SECRET}
-    validity-seconds: ${BUDGET_BUDDY_API_JWT_ACCESS_TOKEN_VALIDITY_SECONDS}
+  access-token:
+    secret: ${BUDGET_BUDDY_API_ACCESS_TOKEN_SECRET}
+    validity-seconds: ${BUDGET_BUDDY_API_ACCESS_TOKEN_VALIDITY_SECONDS}
   refresh-token:
     validity-seconds: ${BUDGET_BUDDY_API_REFRESH_TOKEN_VALIDITY_SECONDS}
     cleanup:

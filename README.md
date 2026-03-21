@@ -58,9 +58,9 @@ docker compose logs -f app
 | `DB_NAME` | PostgreSQL database name |
 | `DB_USER` | PostgreSQL username |
 | `DB_PASSWORD` | PostgreSQL password |
-| `BUDGET_BUDDY_API_JWT_SECRET` | JWT signing secret |
-| `BUDGET_BUDDY_API_JWT_ACCESS_TOKEN_VALIDITY_SECONDS` | Access token validity in seconds |
-| `BUDGET_BUDDY_API_JWT_REFRESH_TOKEN_VALIDITY_SECONDS` | Refresh token validity in seconds |
+| `BUDGET_BUDDY_API_ACCESS_TOKEN_SECRET` | JWT signing secret |
+| `BUDGET_BUDDY_API_ACCESS_TOKEN_VALIDITY_SECONDS` | Access token validity in seconds |
+| `BUDGET_BUDDY_API_REFRESH_TOKEN_VALIDITY_SECONDS` | Refresh token validity in seconds |
 
 ## API
 

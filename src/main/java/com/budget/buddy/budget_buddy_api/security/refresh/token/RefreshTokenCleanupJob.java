@@ -18,7 +18,7 @@ public class RefreshTokenCleanupJob {
 
   private final RefreshTokenService refreshTokenService;
 
-  @Scheduled(cron = "${security.refresh-token.cleanup-cron}")
+  @Scheduled(cron = "${security.refresh-token.cleanup.cron}")
   public void cleanupExpiredTokens() {
     log.info("Starting expired refresh tokens cleanup");
     refreshTokenService.deleteExpired();

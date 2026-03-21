@@ -13,7 +13,7 @@ management:
         include: "*"
 
 security:
-  jwt:
+  access-token:
     validity-seconds: 86400 # 1 day
   refresh-token:
     validity-seconds: 1209600 # 14 days
