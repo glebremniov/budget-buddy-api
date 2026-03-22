@@ -27,7 +27,7 @@ class UserMapperTest {
   class ToEntity {
 
     @Test
-    void shouldMapRegisterRequestToUserEntity() {
+    void should_MapRegisterRequestToUserEntity() {
       // Given
       var request = new RegisterRequest();
       request.setUsername("testuser");
@@ -40,10 +40,12 @@ class UserMapperTest {
       var entity = userMapper.toEntity(request);
 
       // Then
-      assertThat(entity).isNotNull();
-      assertThat(entity.getUsername()).isEqualTo(request.getUsername());
-      assertThat(entity.getPassword()).isEqualTo(encodedPassword);
-      assertThat(entity.isEnabled()).isTrue();
+      assertThat(entity)
+          .as("Mapped user entity should have correct values and be enabled by default")
+          .isNotNull()
+          .returns(request.getUsername(), UserEntity::getUsername)
+          .returns(encodedPassword, UserEntity::getPassword)
+          .returns(true, UserEntity::isEnabled);
     }
   }
 
@@ -51,7 +53,7 @@ class UserMapperTest {
   class ToModel {
 
     @Test
-    void shouldMapUserEntityToUserDto() {
+    void should_MapUserEntityToUserDto() {
       // Given
       var userId = UUID.randomUUID();
       var entity = UserEntity.builder()
@@ -65,10 +67,12 @@ class UserMapperTest {
       var dto = userMapper.toModel(entity);
 
       // Then
-      assertThat(dto).isNotNull();
-      assertThat(dto.id()).isEqualTo(userId);
-      assertThat(dto.username()).isEqualTo(entity.getUsername());
-      assertThat(dto.enabled()).isTrue();
+      assertThat(dto)
+          .as("Mapped UserDto should match the entity values")
+          .isNotNull()
+          .returns(userId, UserDto::id)
+          .returns(entity.getUsername(), UserDto::username)
+          .returns(true, UserDto::enabled);
     }
   }
 
@@ -76,23 +80,26 @@ class UserMapperTest {
   class UnsupportedOperations {
 
     @Test
-    void toModelListShouldThrowException() {
+    void should_ThrowException_On_ToModelList() {
       // When & Then
       assertThatThrownBy(() -> userMapper.toModelList(null))
+          .as("toModelList operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
-    void toPageResponseShouldThrowException() {
+    void should_ThrowException_On_ToPageResponse() {
       // When & Then
       assertThatThrownBy(() -> userMapper.toPageResponse(null, null))
+          .as("toPageResponse operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
-    void patchEntityShouldThrowException() {
+    void should_ThrowException_On_PatchEntity() {
       // When & Then
       assertThatThrownBy(() -> userMapper.patchEntity(null, null))
+          .as("patchEntity operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
     }
   }

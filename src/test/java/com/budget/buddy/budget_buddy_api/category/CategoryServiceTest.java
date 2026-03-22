@@ -65,15 +65,20 @@ class CategoryServiceTest {
       // Given
       var createRequest = new CategoryCreate("Groceries");
       var entity = new CategoryEntity();
+      var model = new Category();
+
       when(mapper.toEntity(createRequest)).thenReturn(entity);
       when(repository.save(entity)).thenReturn(entity);
-      when(mapper.toModel(entity)).thenReturn(new Category());
+      when(mapper.toModel(entity)).thenReturn(model);
 
       // When
       categoryService.create(createRequest);
 
       // Then
-      assertThat(entity.getOwnerId()).isEqualTo(currentUserId);
+      assertThat(entity.getOwnerId())
+          .as("Category owner ID should be set to the current user ID")
+          .isEqualTo(currentUserId);
+
       verify(repository).save(entity);
     }
 
@@ -82,14 +87,20 @@ class CategoryServiceTest {
       // Given
       var categoryId = UUID.randomUUID();
       var entity = new CategoryEntity();
+      var model = new Category();
+
       when(repository.findByIdAndOwnerId(categoryId, currentUserId)).thenReturn(Optional.of(entity));
-      when(mapper.toModel(entity)).thenReturn(new Category());
+      when(mapper.toModel(entity)).thenReturn(model);
 
       // When
       var result = categoryService.read(categoryId);
 
       // Then
-      assertThat(result).isNotNull();
+      assertThat(result)
+          .as("The returned category should match the expected model")
+          .isNotNull()
+          .isEqualTo(model);
+
       verify(repository).findByIdAndOwnerId(categoryId, currentUserId);
     }
 
@@ -101,6 +112,7 @@ class CategoryServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> categoryService.read(categoryId))
+          .as("Should throw EntityNotFoundException when the category is not found or not owned by user")
           .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -110,14 +122,20 @@ class CategoryServiceTest {
       var categoryId = UUID.randomUUID();
       var updateRequest = new CategoryUpdate().name("New Name");
       var entity = new CategoryEntity();
+      var model = new Category();
+
       when(repository.findByIdAndOwnerId(categoryId, currentUserId)).thenReturn(Optional.of(entity));
       when(repository.save(entity)).thenReturn(entity);
-      when(mapper.toModel(entity)).thenReturn(new Category());
+      when(mapper.toModel(entity)).thenReturn(model);
 
       // When
-      categoryService.update(categoryId, updateRequest);
+      var result = categoryService.update(categoryId, updateRequest);
 
       // Then
+      assertThat(result)
+          .as("Update result should match the mapped model")
+          .isEqualTo(model);
+
       verify(mapper).patchEntity(updateRequest, entity);
       verify(repository).save(entity);
     }

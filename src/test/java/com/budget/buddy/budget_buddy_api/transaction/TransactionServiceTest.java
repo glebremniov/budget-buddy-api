@@ -68,15 +68,20 @@ class TransactionServiceTest {
       // Given
       var createRequest = new TransactionCreate();
       var entity = new TransactionEntity();
+      var model = new Transaction();
+
       when(mapper.toEntity(createRequest)).thenReturn(entity);
       when(repository.save(entity)).thenReturn(entity);
-      when(mapper.toModel(entity)).thenReturn(new Transaction());
+      when(mapper.toModel(entity)).thenReturn(model);
 
       // When
       transactionService.create(createRequest);
 
       // Then
-      assertThat(entity.getOwnerId()).isEqualTo(currentUserId);
+      assertThat(entity.getOwnerId())
+          .as("Transaction owner ID should be set to the current user ID")
+          .isEqualTo(currentUserId);
+
       verify(repository).save(entity);
     }
   }
@@ -100,30 +105,45 @@ class TransactionServiceTest {
       var result = transactionService.list(filter, pageable);
 
       // Then
-      assertThat(result).isEqualTo(models);
+      assertThat(result)
+          .as("Filtered transactions should match the mocked models")
+          .isEqualTo(models);
 
       var filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
       var pageableCaptor = ArgumentCaptor.forClass(PageRequest.class);
+
       verify(repository).findAllByFilter(filterCaptor.capture(), pageableCaptor.capture());
-      assertThat(filterCaptor.getValue().ownerId()).isEqualTo(currentUserId);
-      assertThat(pageableCaptor.getValue()).isEqualTo(pageable);
+
+      assertThat(filterCaptor.getValue().ownerId())
+          .as("Filter owner ID should be set to the current user ID")
+          .isEqualTo(currentUserId);
+
+      assertThat(pageableCaptor.getValue())
+          .as("Pageable should be passed correctly to the repository")
+          .isEqualTo(pageable);
     }
 
     @Test
     void should_CountWithFilter() {
       // Given
       var filter = TransactionFilter.of(null, null, null);
-      when(repository.countByFilter(any(TransactionFilter.class))).thenReturn(5L);
+      var expectedCount = 5L;
+      when(repository.countByFilter(any(TransactionFilter.class))).thenReturn(expectedCount);
 
       // When
       var result = transactionService.count(filter);
 
       // Then
-      assertThat(result).isEqualTo(5L);
+      assertThat(result)
+          .as("Count result should match the repository response")
+          .isEqualTo(expectedCount);
 
       var filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
       verify(repository).countByFilter(filterCaptor.capture());
-      assertThat(filterCaptor.getValue().ownerId()).isEqualTo(currentUserId);
+
+      assertThat(filterCaptor.getValue().ownerId())
+          .as("Filter owner ID should be set to the current user ID")
+          .isEqualTo(currentUserId);
     }
   }
 }

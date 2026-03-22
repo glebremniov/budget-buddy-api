@@ -53,6 +53,7 @@ class RefreshTokenServiceTest {
       var userId = UUID.randomUUID();
       var userDto = new UserDto(userId, "testuser", true);
       var generatedToken = "new-refresh-token";
+      var now = OffsetDateTime.now(clock);
 
       when(tokenProvider.get()).thenReturn(generatedToken);
       when(properties.validitySeconds()).thenReturn(VALIDITY_SECONDS);
@@ -65,16 +66,20 @@ class RefreshTokenServiceTest {
       var result = refreshTokenService.createToken(userDto);
 
       // Then
-      assertThat(result).isEqualTo(generatedToken);
+      assertThat(result)
+          .as("Resulting token should match the generated token")
+          .isEqualTo(generatedToken);
 
       var captor = ArgumentCaptor.forClass(RefreshTokenEntity.class);
       verify(repository).save(captor.capture());
 
       var savedEntity = captor.getValue();
-      assertThat(savedEntity.getToken()).isEqualTo(generatedToken);
-      assertThat(savedEntity.getUserId()).isEqualTo(userId);
-      assertThat(savedEntity.getCreatedAt()).isEqualTo(OffsetDateTime.now(clock));
-      assertThat(savedEntity.getExpiresAt()).isEqualTo(OffsetDateTime.now(clock).plusSeconds(VALIDITY_SECONDS));
+      assertThat(savedEntity)
+          .as("Saved entity should have correct token, user ID, and expiration")
+          .returns(generatedToken, RefreshTokenEntity::getToken)
+          .returns(userId, RefreshTokenEntity::getUserId)
+          .returns(now, RefreshTokenEntity::getCreatedAt)
+          .returns(now.plusSeconds(VALIDITY_SECONDS), RefreshTokenEntity::getExpiresAt);
     }
   }
 
@@ -95,7 +100,10 @@ class RefreshTokenServiceTest {
       var result = refreshTokenService.rotate(oldToken);
 
       // Then
-      assertThat(result).isSameAs(tokenEntity);
+      assertThat(result)
+          .as("Rotate result should be the valid token entity")
+          .isSameAs(tokenEntity);
+
       verify(repository).delete(tokenEntity);
     }
 
@@ -108,6 +116,7 @@ class RefreshTokenServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> refreshTokenService.rotate(invalidToken))
+          .as("Should throw BadCredentialsException when an invalid refresh token is rotated")
           .isInstanceOf(BadCredentialsException.class)
           .hasMessage("Refresh token is invalid");
     }

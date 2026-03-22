@@ -72,6 +72,7 @@ class AuthServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> authService.register(request))
+          .as("Should throw DataIntegrityViolationException when the username is already taken")
           .isInstanceOf(DataIntegrityViolationException.class)
           .hasMessageContaining("Username already taken: takenuser");
 
@@ -88,7 +89,8 @@ class AuthServiceTest {
       // Given
       var username = "user";
       var password = "password";
-      var userDto = new UserDto(UUID.randomUUID(), username, true);
+      var userId = UUID.randomUUID();
+      var userDto = new UserDto(userId, username, true);
       var authToken = new AuthToken();
 
       when(userService.findByUsername(username)).thenReturn(Optional.of(userDto));
@@ -98,11 +100,20 @@ class AuthServiceTest {
       var result = authService.login(username, password);
 
       // Then
-      assertThat(result).isSameAs(authToken);
+      assertThat(result)
+          .as("Login result should be the expected auth token")
+          .isSameAs(authToken);
+
       var authCaptor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
       verify(authenticationManager).authenticate(authCaptor.capture());
-      assertThat(authCaptor.getValue().getPrincipal()).isEqualTo(username);
-      assertThat(authCaptor.getValue().getCredentials()).isEqualTo(password);
+
+      assertThat(authCaptor.getValue().getPrincipal())
+          .as("Authentication principal should be the username")
+          .isEqualTo(username);
+
+      assertThat(authCaptor.getValue().getCredentials())
+          .as("Authentication credentials should be the password")
+          .isEqualTo(password);
 
       verify(userService).findByUsername(username);
       verify(authTokenService).createToken(userDto);
@@ -117,6 +128,7 @@ class AuthServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> authService.login(username, password))
+          .as("Should throw UsernameNotFoundException if user is not found after authentication")
           .isInstanceOf(UsernameNotFoundException.class);
     }
   }
@@ -141,7 +153,10 @@ class AuthServiceTest {
       var result = authService.refresh(refreshToken);
 
       // Then
-      assertThat(result).isSameAs(newAuthToken);
+      assertThat(result)
+          .as("Refresh result should be the new auth token")
+          .isSameAs(newAuthToken);
+
       verify(refreshTokenService).rotate(refreshToken);
       verify(userService).requireEnabledUser(userId);
       verify(authTokenService).createToken(userDto);

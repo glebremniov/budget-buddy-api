@@ -78,13 +78,14 @@ class OwnableEntityServiceTest {
   class GetRequiredOwnerIdTests {
 
     @Test
-    @DisplayName("should return current user ID")
-    void shouldReturnCurrentUserId() {
+    void should_ReturnCurrentUserId() {
       // When
       var result = service.getRequiredOwnerId();
 
       // Then
-      assertThat(result).isEqualTo(ownerId);
+      assertThat(result)
+          .as("Result should be the current owner ID")
+          .isEqualTo(ownerId);
     }
   }
 
@@ -93,8 +94,7 @@ class OwnableEntityServiceTest {
   class ListInternalTests {
 
     @Test
-    @DisplayName("should call repository.findAllByOwnerId")
-    void shouldCallRepositoryFindAllByOwnerId() {
+    void should_CallRepositoryFindAllByOwnerId() {
       // Given
       var pageRequest = PageRequest.of(0, 10);
       var expectedPage = new PageImpl<>(List.of(new DummyOwnableEntity()));
@@ -104,7 +104,10 @@ class OwnableEntityServiceTest {
       var result = service.listInternal(pageRequest);
 
       // Then
-      assertThat(result).isEqualTo(expectedPage);
+      assertThat(result)
+          .as("Resulting page should match the one returned by the repository")
+          .isEqualTo(expectedPage);
+
       verify(repository).findAllByOwnerId(ownerId, pageRequest);
     }
   }
@@ -114,8 +117,7 @@ class OwnableEntityServiceTest {
   class ReadInternalTests {
 
     @Test
-    @DisplayName("should return entity when found by ID and owner ID")
-    void shouldReturnEntityWhenFound() {
+    void should_ReturnEntity_When_Found() {
       // Given
       var id = "123";
       var entity = new DummyOwnableEntity();
@@ -125,18 +127,20 @@ class OwnableEntityServiceTest {
       var result = service.readInternal(id);
 
       // Then
-      assertThat(result).isEqualTo(entity);
+      assertThat(result)
+          .as("Result should be the entity found by ID and owner ID")
+          .isEqualTo(entity);
     }
 
     @Test
-    @DisplayName("should throw EntityNotFoundException when not found")
-    void shouldThrowExceptionWhenNotFound() {
+    void should_ThrowException_When_NotFound() {
       // Given
       var id = "123";
       when(repository.findByIdAndOwnerId(id, ownerId)).thenReturn(Optional.empty());
 
       // When & Then
       assertThatThrownBy(() -> service.readInternal(id))
+          .as("Should throw EntityNotFoundException when entity is not found or not owned by the current user")
           .isInstanceOf(EntityNotFoundException.class)
           .hasMessageContaining("Entity not found with id: " + id);
     }
@@ -147,8 +151,7 @@ class OwnableEntityServiceTest {
   class DeleteInternalTests {
 
     @Test
-    @DisplayName("should delete entity when found")
-    void shouldDeleteWhenFound() {
+    void should_Delete_When_Found() {
       // Given
       var id = "123";
       var entity = new DummyOwnableEntity();
@@ -167,8 +170,7 @@ class OwnableEntityServiceTest {
   class UpdateInternalTests {
 
     @Test
-    @DisplayName("should patch and save entity")
-    void shouldPatchAndSave() {
+    void should_PatchAndSave() {
       // Given
       var id = "123";
       var updateRequest = new Object();
@@ -180,7 +182,10 @@ class OwnableEntityServiceTest {
       var result = service.updateInternal(id, updateRequest);
 
       // Then
-      assertThat(result).isEqualTo(existingEntity);
+      assertThat(result)
+          .as("Result should be the updated entity")
+          .isEqualTo(existingEntity);
+
       verify(mapper).patchEntity(updateRequest, existingEntity);
       verify(repository).save(existingEntity);
     }

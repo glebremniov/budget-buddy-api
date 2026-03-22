@@ -24,10 +24,10 @@ class AuthUtilsTest {
   }
 
   @Test
-  @DisplayName("should return converted user ID when authenticated with JWT")
-  void shouldReturnUserIdWhenAuthenticatedWithJwt() {
+  void should_ReturnUserId_When_AuthenticatedWithJwt() {
     // Given
-    var userIdString = UUID.randomUUID().toString();
+    var userId = UUID.randomUUID();
+    var userIdString = userId.toString();
     var jwt = mock(Jwt.class);
     when(jwt.getSubject()).thenReturn(userIdString);
 
@@ -43,24 +43,25 @@ class AuthUtilsTest {
     var actual = AuthUtils.requireCurrentUserId(UUID::fromString);
 
     // Then
-    assertThat(actual).isEqualTo(UUID.fromString(userIdString));
+    assertThat(actual)
+        .as("Converted user ID should match the JWT subject")
+        .isEqualTo(userId);
   }
 
   @Test
-  @DisplayName("should throw InvalidBearerTokenException when security context is empty")
-  void shouldThrowWhenNoAuthentication() {
+  void should_ThrowException_When_NoAuthentication() {
     // Given
     SecurityContextHolder.clearContext();
 
     // When & Then
     assertThatThrownBy(() -> AuthUtils.requireCurrentUserId(UUID::fromString))
+        .as("Should throw InvalidBearerTokenException when no authentication is present in the context")
         .isInstanceOf(InvalidBearerTokenException.class)
         .hasMessage("Current user is not authenticated.");
   }
 
   @Test
-  @DisplayName("should throw InvalidBearerTokenException when principal is not a Jwt")
-  void shouldThrowWhenPrincipalIsNotJwt() {
+  void should_ThrowException_When_PrincipalIsNotJwt() {
     // Given
     var authentication = mock(Authentication.class);
     when(authentication.getPrincipal()).thenReturn("not-a-jwt");
@@ -72,13 +73,13 @@ class AuthUtilsTest {
 
     // When & Then
     assertThatThrownBy(() -> AuthUtils.requireCurrentUserId(UUID::fromString))
+        .as("Should throw InvalidBearerTokenException when authentication principal is not a JWT")
         .isInstanceOf(InvalidBearerTokenException.class)
         .hasMessage("Current user is not authenticated.");
   }
 
   @Test
-  @DisplayName("should throw InvalidBearerTokenException when Jwt has no subject")
-  void shouldThrowWhenJwtHasNoSubject() {
+  void should_ThrowException_When_JwtHasNoSubject() {
     // Given
     var jwt = mock(Jwt.class);
     when(jwt.getSubject()).thenReturn(null);
@@ -93,6 +94,7 @@ class AuthUtilsTest {
 
     // When & Then
     assertThatThrownBy(() -> AuthUtils.requireCurrentUserId(UUID::fromString))
+        .as("Should throw InvalidBearerTokenException when JWT has no subject claim")
         .isInstanceOf(InvalidBearerTokenException.class)
         .hasMessage("Current user is not authenticated.");
   }
