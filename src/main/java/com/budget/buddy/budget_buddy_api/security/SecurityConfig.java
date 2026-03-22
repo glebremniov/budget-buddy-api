@@ -32,7 +32,6 @@ public class SecurityConfig {
    * @param http the {@link HttpSecurity} to configure
    * @return the {@link SecurityFilterChain}
    */
-  @SuppressWarnings("java:S4502")
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) {
     http
@@ -47,7 +46,7 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .passwordManagement(Customizer.withDefaults())
         .httpBasic(AbstractHttpConfigurer::disable)
-        .csrf(AbstractHttpConfigurer::disable)
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/v1/**", "/actuator/**"))
         .formLogin(AbstractHttpConfigurer::disable);
 
     return http.build();
