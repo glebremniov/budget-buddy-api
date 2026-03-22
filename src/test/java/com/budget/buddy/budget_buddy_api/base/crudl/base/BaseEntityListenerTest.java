@@ -1,7 +1,6 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -26,14 +25,14 @@ class BaseEntityListenerTest {
   void onBeforeConvert_ShouldSetId_When_NewEntity() {
     // Given
     var entity = new DummyEntity();
-    when(idGenerator.get()).thenReturn("newId");
+    var newId = "newId";
+    when(idGenerator.get()).thenReturn(newId);
 
     // When
-    assertThatNoException()
-        .isThrownBy(() -> listener.onBeforeConvert(entity));
+    listener.onBeforeConvert(entity);
 
     // Then
-    assertThat(entity.getId()).isEqualTo("newId");
+    assertThat(entity.getId()).isEqualTo(newId);
     verify(idGenerator).get();
   }
 
@@ -41,14 +40,14 @@ class BaseEntityListenerTest {
   void onBeforeConvert_ShouldNotSetId_When_ExistingEntity() {
     // Given
     var entity = new DummyEntity();
-    entity.setId("existingId");
+    var existingId = "existingId";
+    entity.setId(existingId);
 
     // When
-    assertThatNoException()
-        .isThrownBy(() -> listener.onBeforeConvert(entity));
+    listener.onBeforeConvert(entity);
 
     // Then
-    assertThat(entity.getId()).isEqualTo("existingId");
+    assertThat(entity.getId()).isEqualTo(existingId);
     verifyNoInteractions(idGenerator);
   }
 

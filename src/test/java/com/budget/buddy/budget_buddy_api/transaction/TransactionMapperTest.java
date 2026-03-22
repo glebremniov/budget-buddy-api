@@ -2,7 +2,6 @@ package com.budget.buddy.budget_buddy_api.transaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
 import java.time.LocalDate;
@@ -23,8 +22,8 @@ class TransactionMapperTest {
     @Test
     void shouldMapTransactionCreateToTransactionEntity() {
       // Given
-      UUID categoryId = UUID.randomUUID();
-      TransactionCreate create = new TransactionCreate(
+      var categoryId = UUID.randomUUID();
+      var create = new TransactionCreate(
           categoryId,
           1000,
           TransactionCreate.TypeEnum.EXPENSE,
@@ -34,7 +33,7 @@ class TransactionMapperTest {
       create.setDescription("Test transaction");
 
       // When
-      TransactionEntity entity = transactionMapper.toEntity(create);
+      var entity = transactionMapper.toEntity(create);
 
       // Then
       assertThat(entity).isNotNull();
@@ -53,13 +52,13 @@ class TransactionMapperTest {
     @Test
     void shouldMapTransactionEntityToTransaction() {
       // Given
-      UUID id = UUID.randomUUID();
-      UUID categoryId = UUID.randomUUID();
-      UUID ownerId = UUID.randomUUID();
-      LocalDate date = LocalDate.now();
-      OffsetDateTime now = OffsetDateTime.now();
+      var id = UUID.randomUUID();
+      var categoryId = UUID.randomUUID();
+      var ownerId = UUID.randomUUID();
+      var date = LocalDate.now();
+      var now = OffsetDateTime.now();
 
-      TransactionEntity entity = new TransactionEntity(
+      var entity = new TransactionEntity(
           id,
           categoryId,
           500,
@@ -73,7 +72,7 @@ class TransactionMapperTest {
       entity.setUpdatedAt(now);
 
       // When
-      Transaction model = transactionMapper.toModel(entity);
+      var model = transactionMapper.toModel(entity);
 
       // Then
       assertThat(model).isNotNull();
@@ -95,11 +94,11 @@ class TransactionMapperTest {
     @Test
     void shouldMapEntitiesToModels() {
       // Given
-      TransactionEntity e1 = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "D1", UUID.randomUUID());
-      TransactionEntity e2 = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 200, TransactionType.INCOME, "USD", LocalDate.now(), "D2", UUID.randomUUID());
+      var e1 = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "D1", UUID.randomUUID());
+      var e2 = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 200, TransactionType.INCOME, "USD", LocalDate.now(), "D2", UUID.randomUUID());
 
       // When
-      List<Transaction> models = transactionMapper.toModelList(List.of(e1, e2));
+      var models = transactionMapper.toModelList(List.of(e1, e2));
 
       // Then
       assertThat(models).hasSize(2);
@@ -114,8 +113,8 @@ class TransactionMapperTest {
     @Test
     void shouldUpdateOnlyProvidedFields() {
       // Given
-      TransactionEntity entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "Old Desc", UUID.randomUUID());
-      TransactionUpdate update = new TransactionUpdate();
+      var entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "Old Desc", UUID.randomUUID());
+      var update = new TransactionUpdate();
       update.setAmount(500);
       update.setDescription("New Desc");
 
@@ -131,8 +130,8 @@ class TransactionMapperTest {
     @Test
     void shouldNotUpdateIfNull() {
       // Given
-      TransactionEntity entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "Keep Me", UUID.randomUUID());
-      TransactionUpdate update = new TransactionUpdate();
+      var entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "Keep Me", UUID.randomUUID());
+      var update = new TransactionUpdate();
       update.setAmount(null);
       update.setDescription(null);
 

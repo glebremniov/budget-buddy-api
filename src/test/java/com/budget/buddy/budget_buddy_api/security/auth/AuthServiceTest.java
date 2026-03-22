@@ -2,7 +2,6 @@ package com.budget.buddy.budget_buddy_api.security.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -99,7 +99,11 @@ class AuthServiceTest {
 
       // Then
       assertThat(result).isSameAs(authToken);
-      verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+      var authCaptor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+      verify(authenticationManager).authenticate(authCaptor.capture());
+      assertThat(authCaptor.getValue().getPrincipal()).isEqualTo(username);
+      assertThat(authCaptor.getValue().getCredentials()).isEqualTo(password);
+
       verify(userService).findByUsername(username);
       verify(authTokenService).createToken(userDto);
     }

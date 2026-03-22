@@ -80,7 +80,10 @@ class OwnableEntityServiceTest {
     @Test
     @DisplayName("should return current user ID")
     void shouldReturnCurrentUserId() {
+      // When
       var result = service.getRequiredOwnerId();
+
+      // Then
       assertThat(result).isEqualTo(ownerId);
     }
   }
@@ -92,12 +95,15 @@ class OwnableEntityServiceTest {
     @Test
     @DisplayName("should call repository.findAllByOwnerId")
     void shouldCallRepositoryFindAllByOwnerId() {
+      // Given
       var pageRequest = PageRequest.of(0, 10);
       var expectedPage = new PageImpl<>(List.of(new DummyOwnableEntity()));
       when(repository.findAllByOwnerId(ownerId, pageRequest)).thenReturn(expectedPage);
 
+      // When
       var result = service.listInternal(pageRequest);
 
+      // Then
       assertThat(result).isEqualTo(expectedPage);
       verify(repository).findAllByOwnerId(ownerId, pageRequest);
     }
@@ -110,21 +116,26 @@ class OwnableEntityServiceTest {
     @Test
     @DisplayName("should return entity when found by ID and owner ID")
     void shouldReturnEntityWhenFound() {
+      // Given
       var id = "123";
       var entity = new DummyOwnableEntity();
       when(repository.findByIdAndOwnerId(id, ownerId)).thenReturn(Optional.of(entity));
 
+      // When
       var result = service.readInternal(id);
 
+      // Then
       assertThat(result).isEqualTo(entity);
     }
 
     @Test
     @DisplayName("should throw EntityNotFoundException when not found")
     void shouldThrowExceptionWhenNotFound() {
+      // Given
       var id = "123";
       when(repository.findByIdAndOwnerId(id, ownerId)).thenReturn(Optional.empty());
 
+      // When & Then
       assertThatThrownBy(() -> service.readInternal(id))
           .isInstanceOf(EntityNotFoundException.class)
           .hasMessageContaining("Entity not found with id: " + id);
@@ -138,12 +149,15 @@ class OwnableEntityServiceTest {
     @Test
     @DisplayName("should delete entity when found")
     void shouldDeleteWhenFound() {
+      // Given
       var id = "123";
       var entity = new DummyOwnableEntity();
       when(repository.findByIdAndOwnerId(id, ownerId)).thenReturn(Optional.of(entity));
 
+      // When
       service.deleteInternal(id);
 
+      // Then
       verify(repository).delete(entity);
     }
   }
@@ -155,14 +169,17 @@ class OwnableEntityServiceTest {
     @Test
     @DisplayName("should patch and save entity")
     void shouldPatchAndSave() {
+      // Given
       var id = "123";
       var updateRequest = new Object();
       var existingEntity = new DummyOwnableEntity();
       when(repository.findByIdAndOwnerId(id, ownerId)).thenReturn(Optional.of(existingEntity));
       when(repository.save(existingEntity)).thenReturn(existingEntity);
 
+      // When
       var result = service.updateInternal(id, updateRequest);
 
+      // Then
       assertThat(result).isEqualTo(existingEntity);
       verify(mapper).patchEntity(updateRequest, existingEntity);
       verify(repository).save(existingEntity);
@@ -176,11 +193,14 @@ class OwnableEntityServiceTest {
     @Test
     @DisplayName("should return repository result")
     void shouldReturnRepositoryResult() {
+      // Given
       var id = "123";
       when(repository.existsByIdAndOwnerId(id, ownerId)).thenReturn(true);
 
+      // When
       var result = service.existsByIdInternal(id);
 
+      // Then
       assertThat(result).isTrue();
       verify(repository).existsByIdAndOwnerId(id, ownerId);
     }
@@ -193,13 +213,16 @@ class OwnableEntityServiceTest {
     @Test
     @DisplayName("should map to entity, set owner ID, and save")
     void shouldCreateEntity() {
+      // Given
       var createRequest = new Object();
       var entity = new DummyOwnableEntity();
       when(mapper.toEntity(createRequest)).thenReturn(entity);
       when(repository.save(entity)).thenReturn(entity);
 
+      // When
       var result = service.createInternal(createRequest);
 
+      // Then
       assertThat(result).isEqualTo(entity);
       assertThat(entity.getOwnerId()).isEqualTo(ownerId);
       verify(repository).save(entity);
@@ -213,10 +236,13 @@ class OwnableEntityServiceTest {
     @Test
     @DisplayName("should return count by owner ID")
     void shouldReturnCount() {
+      // Given
       when(repository.countByOwnerId(ownerId)).thenReturn(5L);
 
+      // When
       var result = service.countInternal();
 
+      // Then
       assertThat(result).isEqualTo(5L);
       verify(repository).countByOwnerId(ownerId);
     }

@@ -2,7 +2,6 @@ package com.budget.buddy.budget_buddy_api.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
@@ -35,7 +34,7 @@ class UserMapperTest {
       request.setPassword("password123");
       var encodedPassword = "encoded_password";
 
-      when(passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
+      when(passwordEncoder.encode(request.getPassword())).thenReturn(encodedPassword);
 
       // When
       var entity = userMapper.toEntity(request);
@@ -78,18 +77,21 @@ class UserMapperTest {
 
     @Test
     void toModelListShouldThrowException() {
+      // When & Then
       assertThatThrownBy(() -> userMapper.toModelList(null))
           .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
     void toPageResponseShouldThrowException() {
+      // When & Then
       assertThatThrownBy(() -> userMapper.toPageResponse(null, null))
           .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
     void patchEntityShouldThrowException() {
+      // When & Then
       assertThatThrownBy(() -> userMapper.patchEntity(null, null))
           .isInstanceOf(UnsupportedOperationException.class);
     }

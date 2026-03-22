@@ -33,16 +33,21 @@ class TransactionValidatorTest {
 
     @Test
     void should_PassValidation_When_CategoryExistsAndBelongsToCurrentUser() {
+      // Given
       var categoryId = UUID.randomUUID();
       when(categoryService.existsById(categoryId)).thenReturn(true);
 
+      // When & Then
       assertThatNoException()
           .isThrownBy(() -> validator.validate(entityWithCategory(categoryId)));
     }
 
     @Test
     void should_Throw_When_CategoryIdIsNull() {
+      // Given
       var entity = entityWithCategory(null);
+
+      // When & Then
       assertThatThrownBy(() -> validator.validate(entity))
           .isInstanceOf(IllegalArgumentException.class)
           .hasMessage("Category ID must be set");
@@ -50,11 +55,13 @@ class TransactionValidatorTest {
 
     @Test
     void should_Throw_When_CategoryDoesNotExist() {
+      // Given
       var categoryId = UUID.randomUUID();
       when(categoryService.existsById(categoryId)).thenReturn(false);
 
       var entity = entityWithCategory(categoryId);
 
+      // When & Then
       assertThatThrownBy(() -> validator.validate(entity))
           .isInstanceOf(IllegalArgumentException.class)
           .hasMessage("Unknown category with id: " + categoryId);

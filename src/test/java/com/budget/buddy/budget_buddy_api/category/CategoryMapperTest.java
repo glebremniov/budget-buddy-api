@@ -2,7 +2,6 @@ package com.budget.buddy.budget_buddy_api.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.budget.buddy.budget_buddy_api.generated.model.Category;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
 import java.time.OffsetDateTime;
@@ -22,15 +21,17 @@ class CategoryMapperTest {
     @Test
     void shouldMapCategoryCreateToCategoryEntity() {
       // Given
-      CategoryCreate create = new CategoryCreate("Groceries");
+      var create = new CategoryCreate("Groceries");
 
       // When
-      CategoryEntity entity = categoryMapper.toEntity(create);
+      var entity = categoryMapper.toEntity(create);
 
       // Then
-      assertThat(entity).isNotNull();
-      assertThat(entity.getName()).isEqualTo("Groceries");
-      assertThat(entity.getId()).isNull();
+      assertThat(entity)
+          .as("Mapped entity should not be null")
+          .isNotNull()
+          .returns("Groceries", CategoryEntity::getName)
+          .returns(null, CategoryEntity::getId);
     }
   }
 
@@ -40,21 +41,23 @@ class CategoryMapperTest {
     @Test
     void shouldMapCategoryEntityToCategory() {
       // Given
-      UUID id = UUID.randomUUID();
-      OffsetDateTime now = OffsetDateTime.now();
-      CategoryEntity entity = new CategoryEntity(id, "Groceries", UUID.randomUUID());
+      var id = UUID.randomUUID();
+      var now = OffsetDateTime.now();
+      var entity = new CategoryEntity(id, "Groceries", UUID.randomUUID());
       entity.setCreatedAt(now);
       entity.setUpdatedAt(now);
 
       // When
-      Category model = categoryMapper.toModel(entity);
+      var model = categoryMapper.toModel(entity);
 
       // Then
-      assertThat(model).isNotNull();
-      assertThat(model.getId()).isEqualTo(id);
-      assertThat(model.getName()).isEqualTo("Groceries");
-      assertThat(model.getCreatedAt()).isEqualTo(now);
-      assertThat(model.getUpdatedAt()).isEqualTo(now);
+      assertThat(model)
+          .as("Mapped model should not be null")
+          .isNotNull()
+          .returns(id, com.budget.buddy.budget_buddy_api.generated.model.Category::getId)
+          .returns("Groceries", com.budget.buddy.budget_buddy_api.generated.model.Category::getName)
+          .returns(now, com.budget.buddy.budget_buddy_api.generated.model.Category::getCreatedAt)
+          .returns(now, com.budget.buddy.budget_buddy_api.generated.model.Category::getUpdatedAt);
     }
   }
 
@@ -64,11 +67,11 @@ class CategoryMapperTest {
     @Test
     void shouldMapEntitiesToModels() {
       // Given
-      CategoryEntity entity1 = new CategoryEntity(UUID.randomUUID(), "Cat 1", UUID.randomUUID());
-      CategoryEntity entity2 = new CategoryEntity(UUID.randomUUID(), "Cat 2", UUID.randomUUID());
+      var entity1 = new CategoryEntity(UUID.randomUUID(), "Cat 1", UUID.randomUUID());
+      var entity2 = new CategoryEntity(UUID.randomUUID(), "Cat 2", UUID.randomUUID());
 
       // When
-      List<Category> models = categoryMapper.toModelList(List.of(entity1, entity2));
+      var models = categoryMapper.toModelList(List.of(entity1, entity2));
 
       // Then
       assertThat(models).hasSize(2);
@@ -83,8 +86,8 @@ class CategoryMapperTest {
     @Test
     void shouldUpdateOnlyProvidedFields() {
       // Given
-      CategoryEntity entity = new CategoryEntity(UUID.randomUUID(), "Old Name", UUID.randomUUID());
-      CategoryUpdate update = new CategoryUpdate();
+      var entity = new CategoryEntity(UUID.randomUUID(), "Old Name", UUID.randomUUID());
+      var update = new CategoryUpdate();
       update.setName("New Name");
 
       // When
@@ -97,8 +100,8 @@ class CategoryMapperTest {
     @Test
     void shouldNotUpdateIfNull() {
       // Given
-      CategoryEntity entity = new CategoryEntity(UUID.randomUUID(), "Keep Me", UUID.randomUUID());
-      CategoryUpdate update = new CategoryUpdate();
+      var entity = new CategoryEntity(UUID.randomUUID(), "Keep Me", UUID.randomUUID());
+      var update = new CategoryUpdate();
       update.setName(null);
 
       // When

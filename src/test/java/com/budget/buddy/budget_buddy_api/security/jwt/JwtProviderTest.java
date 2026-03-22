@@ -44,7 +44,7 @@ class JwtProviderTest {
   void create_Should_CallEncoderWithCorrectClaims() {
     // Given
     var expectedToken = "expected token";
-    when(jwtEncoder.encode(any())).thenReturn(jwt);
+    when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenReturn(jwt);
     when(jwt.getTokenValue()).thenReturn(expectedToken);
 
     // When
@@ -53,10 +53,10 @@ class JwtProviderTest {
     // Then
     assertThat(actual).isEqualTo(expectedToken);
 
-    var claimsCaptor = ArgumentCaptor.forClass(JwtEncoderParameters.class);
-    verify(jwtEncoder).encode(claimsCaptor.capture());
+    var parametersCaptor = ArgumentCaptor.forClass(JwtEncoderParameters.class);
+    verify(jwtEncoder).encode(parametersCaptor.capture());
 
-    assertThat(claimsCaptor.getValue())
+    assertThat(parametersCaptor.getValue())
         .extracting(JwtEncoderParameters::getClaims)
         .returns(SUBJECT, JwtClaimAccessor::getSubject)
         .returns(NOW, JwtClaimAccessor::getIssuedAt)
