@@ -1,6 +1,7 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:${DB_IMAGE_TAG:-18.3-alpine}
+    platform: ${DOCKER_PLATFORM:-linux/arm64}
     environment:
       - POSTGRES_DB=budgetbuddy
       - POSTGRES_USER=budgetbuddy
