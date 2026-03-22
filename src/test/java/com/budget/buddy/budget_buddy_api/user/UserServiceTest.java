@@ -48,7 +48,10 @@ class UserServiceTest {
       var exists = userService.existsByUsername(username);
 
       // Then
-      assertThat(exists).isTrue();
+      assertThat(exists)
+          .as("Username should exist in the repository")
+          .isTrue();
+
       verify(repository).existsByUsername(username);
     }
   }
@@ -70,7 +73,10 @@ class UserServiceTest {
       var result = userService.findByUsername(username);
 
       // Then
-      assertThat(result).contains(dto);
+      assertThat(result)
+          .as("Result should contain the expected UserDto")
+          .contains(dto);
+
       verify(repository).findByUsername(username);
       verify(mapper).toModel(entity);
     }
@@ -82,9 +88,10 @@ class UserServiceTest {
     @Test
     void should_CreateUserAndAddAuthority() {
       // Given
-      var request = new RegisterRequest("newuser", "password");
+      var username = "newuser";
+      var request = new RegisterRequest(username, "password");
       var entity = new UserEntity();
-      entity.setUsername("newuser");
+      entity.setUsername(username);
 
       when(repository.save(any(UserEntity.class))).thenReturn(entity);
       when(mapper.toEntity(request)).thenReturn(new UserEntity());
@@ -93,9 +100,12 @@ class UserServiceTest {
       var result = userService.createInternal(request);
 
       // Then
-      assertThat(result).isNotNull();
+      assertThat(result)
+          .as("Created user should not be null")
+          .isNotNull();
+
       verify(repository).save(any(UserEntity.class));
-      verify(authorityRepository).addDefaultAuthorityToUser("newuser");
+      verify(authorityRepository).addDefaultAuthorityToUser(username);
     }
   }
 
@@ -117,7 +127,9 @@ class UserServiceTest {
       var result = userService.requireEnabledUser(userId);
 
       // Then
-      assertThat(result).isEqualTo(dto);
+      assertThat(result)
+          .as("Should return the UserDto for an enabled user")
+          .isEqualTo(dto);
     }
 
     @Test
@@ -131,6 +143,7 @@ class UserServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> userService.requireEnabledUser(userId))
+          .as("Should throw DisabledException for a disabled user")
           .isInstanceOf(DisabledException.class)
           .hasMessage("User is disabled");
     }
@@ -147,6 +160,7 @@ class UserServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> userService.update(id, patch))
+          .as("Update operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
     }
 
@@ -157,6 +171,7 @@ class UserServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> userService.delete(id))
+          .as("Delete operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
     }
 

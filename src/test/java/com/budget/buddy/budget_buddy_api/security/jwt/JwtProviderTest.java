@@ -41,23 +41,25 @@ class JwtProviderTest {
   private JwtProvider jwtProvider;
 
   @Test
-  void create_Should_CallEncoderWithCorrectClaims() {
+  void should_CreateTokenWithCorrectClaims() {
     // Given
     var expectedToken = "expected token";
-    when(jwtEncoder.encode(any())).thenReturn(jwt);
+    when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenReturn(jwt);
     when(jwt.getTokenValue()).thenReturn(expectedToken);
 
     // When
     var actual = jwtProvider.create(SUBJECT, VALIDITY_SECONDS);
 
     // Then
-    assertThat(actual).isEqualTo(expectedToken);
+    assertThat(actual)
+        .as("The returned token value should match the one from the encoder")
+        .isEqualTo(expectedToken);
 
-    var claimsCaptor = ArgumentCaptor.forClass(JwtEncoderParameters.class);
-    verify(jwtEncoder).encode(claimsCaptor.capture());
+    var parametersCaptor = ArgumentCaptor.forClass(JwtEncoderParameters.class);
+    verify(jwtEncoder).encode(parametersCaptor.capture());
 
-    assertThat(claimsCaptor.getValue())
-        .extracting(JwtEncoderParameters::getClaims)
+    assertThat(parametersCaptor.getValue().getClaims())
+        .as("JWT claims should contain correct subject, issued at, and expiration times")
         .returns(SUBJECT, JwtClaimAccessor::getSubject)
         .returns(NOW, JwtClaimAccessor::getIssuedAt)
         .returns(EXPIRE_AT, JwtClaimAccessor::getExpiresAt);

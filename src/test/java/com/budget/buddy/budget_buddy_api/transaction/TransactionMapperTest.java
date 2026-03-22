@@ -21,29 +21,32 @@ class TransactionMapperTest {
   class ToEntity {
 
     @Test
-    void shouldMapTransactionCreateToTransactionEntity() {
+    void should_MapTransactionCreateToTransactionEntity() {
       // Given
-      UUID categoryId = UUID.randomUUID();
-      TransactionCreate create = new TransactionCreate(
+      var categoryId = UUID.randomUUID();
+      var date = LocalDate.now();
+      var create = new TransactionCreate(
           categoryId,
           1000,
           TransactionCreate.TypeEnum.EXPENSE,
           "EUR",
-          LocalDate.now()
+          date
       );
       create.setDescription("Test transaction");
 
       // When
-      TransactionEntity entity = transactionMapper.toEntity(create);
+      var entity = transactionMapper.toEntity(create);
 
       // Then
-      assertThat(entity).isNotNull();
-      assertThat(entity.getCategoryId()).isEqualTo(categoryId);
-      assertThat(entity.getAmount()).isEqualTo(1000);
-      assertThat(entity.getType().name()).isEqualTo("EXPENSE");
-      assertThat(entity.getCurrency()).isEqualTo("EUR");
-      assertThat(entity.getDate()).isEqualTo(create.getDate());
-      assertThat(entity.getDescription()).isEqualTo("Test transaction");
+      assertThat(entity)
+          .as("Mapped transaction entity should have correct values")
+          .isNotNull()
+          .returns(categoryId, TransactionEntity::getCategoryId)
+          .returns(1000, TransactionEntity::getAmount)
+          .returns(TransactionType.EXPENSE, TransactionEntity::getType)
+          .returns("EUR", TransactionEntity::getCurrency)
+          .returns(date, TransactionEntity::getDate)
+          .returns("Test transaction", TransactionEntity::getDescription);
     }
   }
 
@@ -51,15 +54,15 @@ class TransactionMapperTest {
   class ToModel {
 
     @Test
-    void shouldMapTransactionEntityToTransaction() {
+    void should_MapTransactionEntityToTransaction() {
       // Given
-      UUID id = UUID.randomUUID();
-      UUID categoryId = UUID.randomUUID();
-      UUID ownerId = UUID.randomUUID();
-      LocalDate date = LocalDate.now();
-      OffsetDateTime now = OffsetDateTime.now();
+      var id = UUID.randomUUID();
+      var categoryId = UUID.randomUUID();
+      var ownerId = UUID.randomUUID();
+      var date = LocalDate.now();
+      var now = OffsetDateTime.now();
 
-      TransactionEntity entity = new TransactionEntity(
+      var entity = new TransactionEntity(
           id,
           categoryId,
           500,
@@ -73,19 +76,21 @@ class TransactionMapperTest {
       entity.setUpdatedAt(now);
 
       // When
-      Transaction model = transactionMapper.toModel(entity);
+      var model = transactionMapper.toModel(entity);
 
       // Then
-      assertThat(model).isNotNull();
-      assertThat(model.getId()).isEqualTo(id);
-      assertThat(model.getCategoryId()).isEqualTo(categoryId);
-      assertThat(model.getAmount()).isEqualTo(500);
-      assertThat(model.getType().getValue()).isEqualTo("INCOME");
-      assertThat(model.getCurrency()).isEqualTo("USD");
-      assertThat(model.getDate()).isEqualTo(date);
-      assertThat(model.getDescription()).isEqualTo("Income description");
-      assertThat(model.getCreatedAt()).isEqualTo(now);
-      assertThat(model.getUpdatedAt()).isEqualTo(now);
+      assertThat(model)
+          .as("Mapped transaction model should have correct values")
+          .isNotNull()
+          .returns(id, Transaction::getId)
+          .returns(categoryId, Transaction::getCategoryId)
+          .returns(500, Transaction::getAmount)
+          .returns("INCOME", m -> m.getType().getValue())
+          .returns("USD", Transaction::getCurrency)
+          .returns(date, Transaction::getDate)
+          .returns("Income description", Transaction::getDescription)
+          .returns(now, Transaction::getCreatedAt)
+          .returns(now, Transaction::getUpdatedAt);
     }
   }
 
@@ -93,18 +98,30 @@ class TransactionMapperTest {
   class ToModelList {
 
     @Test
-    void shouldMapEntitiesToModels() {
+    void should_MapEntitiesToModels() {
       // Given
-      TransactionEntity e1 = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "D1", UUID.randomUUID());
-      TransactionEntity e2 = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 200, TransactionType.INCOME, "USD", LocalDate.now(), "D2", UUID.randomUUID());
+      var id1 = UUID.randomUUID();
+      var id2 = UUID.randomUUID();
+      var e1 = new TransactionEntity(id1, UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "D1", UUID.randomUUID());
+      var e2 = new TransactionEntity(id2, UUID.randomUUID(), 200, TransactionType.INCOME, "USD", LocalDate.now(), "D2", UUID.randomUUID());
 
       // When
-      List<Transaction> models = transactionMapper.toModelList(List.of(e1, e2));
+      var models = transactionMapper.toModelList(List.of(e1, e2));
 
       // Then
-      assertThat(models).hasSize(2);
-      assertThat(models.get(0).getAmount()).isEqualTo(100);
-      assertThat(models.get(1).getAmount()).isEqualTo(200);
+      assertThat(models)
+          .as("Mapped model list should have correct size and elements")
+          .hasSize(2);
+
+      assertThat(models.get(0))
+          .as("First model should match first entity")
+          .returns(id1, Transaction::getId)
+          .returns(100, Transaction::getAmount);
+
+      assertThat(models.get(1))
+          .as("Second model should match second entity")
+          .returns(id2, Transaction::getId)
+          .returns(200, Transaction::getAmount);
     }
   }
 
@@ -112,10 +129,15 @@ class TransactionMapperTest {
   class PatchEntity {
 
     @Test
-    void shouldUpdateOnlyProvidedFields() {
+    void should_UpdateOnlyProvidedFields() {
       // Given
-      TransactionEntity entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "Old Desc", UUID.randomUUID());
-      TransactionUpdate update = new TransactionUpdate();
+      var originalId = UUID.randomUUID();
+      var categoryId = UUID.randomUUID();
+      var ownerId = UUID.randomUUID();
+      var date = LocalDate.now();
+      var entity = new TransactionEntity(originalId, categoryId, 100, TransactionType.EXPENSE, "EUR", date, "Old Desc", ownerId);
+
+      var update = new TransactionUpdate();
       update.setAmount(500);
       update.setDescription("New Desc");
 
@@ -123,16 +145,24 @@ class TransactionMapperTest {
       transactionMapper.patchEntity(update, entity);
 
       // Then
-      assertThat(entity.getAmount()).isEqualTo(500);
-      assertThat(entity.getDescription()).isEqualTo("New Desc");
-      assertThat(entity.getCurrency()).isEqualTo("EUR"); // Unchanged
+      assertThat(entity)
+          .as("Updated entity should have correct updated and original values")
+          .returns(500, TransactionEntity::getAmount)
+          .returns("New Desc", TransactionEntity::getDescription)
+          .returns("EUR", TransactionEntity::getCurrency)
+          .returns(originalId, TransactionEntity::getId)
+          .returns(categoryId, TransactionEntity::getCategoryId)
+          .returns(date, TransactionEntity::getDate);
     }
 
     @Test
-    void shouldNotUpdateIfNull() {
+    void should_NotUpdateIfNull() {
       // Given
-      TransactionEntity entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "Keep Me", UUID.randomUUID());
-      TransactionUpdate update = new TransactionUpdate();
+      var originalAmount = 100;
+      var originalDesc = "Keep Me";
+      var entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), originalAmount, TransactionType.EXPENSE, "EUR", LocalDate.now(), originalDesc, UUID.randomUUID());
+
+      var update = new TransactionUpdate();
       update.setAmount(null);
       update.setDescription(null);
 
@@ -140,8 +170,10 @@ class TransactionMapperTest {
       transactionMapper.patchEntity(update, entity);
 
       // Then
-      assertThat(entity.getAmount()).isEqualTo(100);
-      assertThat(entity.getDescription()).isEqualTo("Keep Me");
+      assertThat(entity)
+          .as("Entity should remain unchanged when the update request contains nulls")
+          .returns(originalAmount, TransactionEntity::getAmount)
+          .returns(originalDesc, TransactionEntity::getDescription);
     }
   }
 }

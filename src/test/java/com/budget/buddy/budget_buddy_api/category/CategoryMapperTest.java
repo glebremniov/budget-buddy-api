@@ -20,17 +20,19 @@ class CategoryMapperTest {
   class ToEntity {
 
     @Test
-    void shouldMapCategoryCreateToCategoryEntity() {
+    void should_MapCategoryCreateToCategoryEntity() {
       // Given
-      CategoryCreate create = new CategoryCreate("Groceries");
+      var create = new CategoryCreate("Groceries");
 
       // When
-      CategoryEntity entity = categoryMapper.toEntity(create);
+      var entity = categoryMapper.toEntity(create);
 
       // Then
-      assertThat(entity).isNotNull();
-      assertThat(entity.getName()).isEqualTo("Groceries");
-      assertThat(entity.getId()).isNull();
+      assertThat(entity)
+          .as("Mapped entity should not be null")
+          .isNotNull()
+          .returns("Groceries", CategoryEntity::getName)
+          .returns(null, CategoryEntity::getId);
     }
   }
 
@@ -38,23 +40,25 @@ class CategoryMapperTest {
   class ToModel {
 
     @Test
-    void shouldMapCategoryEntityToCategory() {
+    void should_MapCategoryEntityToCategory() {
       // Given
-      UUID id = UUID.randomUUID();
-      OffsetDateTime now = OffsetDateTime.now();
-      CategoryEntity entity = new CategoryEntity(id, "Groceries", UUID.randomUUID());
+      var id = UUID.randomUUID();
+      var now = OffsetDateTime.now();
+      var entity = new CategoryEntity(id, "Groceries", UUID.randomUUID());
       entity.setCreatedAt(now);
       entity.setUpdatedAt(now);
 
       // When
-      Category model = categoryMapper.toModel(entity);
+      var model = categoryMapper.toModel(entity);
 
       // Then
-      assertThat(model).isNotNull();
-      assertThat(model.getId()).isEqualTo(id);
-      assertThat(model.getName()).isEqualTo("Groceries");
-      assertThat(model.getCreatedAt()).isEqualTo(now);
-      assertThat(model.getUpdatedAt()).isEqualTo(now);
+      assertThat(model)
+          .as("Mapped model should not be null")
+          .isNotNull()
+          .returns(id, Category::getId)
+          .returns("Groceries", Category::getName)
+          .returns(now, Category::getCreatedAt)
+          .returns(now, Category::getUpdatedAt);
     }
   }
 
@@ -62,18 +66,30 @@ class CategoryMapperTest {
   class ToModelList {
 
     @Test
-    void shouldMapEntitiesToModels() {
+    void should_MapEntitiesToModels() {
       // Given
-      CategoryEntity entity1 = new CategoryEntity(UUID.randomUUID(), "Cat 1", UUID.randomUUID());
-      CategoryEntity entity2 = new CategoryEntity(UUID.randomUUID(), "Cat 2", UUID.randomUUID());
+      var id1 = UUID.randomUUID();
+      var id2 = UUID.randomUUID();
+      var entity1 = new CategoryEntity(id1, "Cat 1", UUID.randomUUID());
+      var entity2 = new CategoryEntity(id2, "Cat 2", UUID.randomUUID());
 
       // When
-      List<Category> models = categoryMapper.toModelList(List.of(entity1, entity2));
+      var models = categoryMapper.toModelList(List.of(entity1, entity2));
 
       // Then
-      assertThat(models).hasSize(2);
-      assertThat(models.get(0).getName()).isEqualTo("Cat 1");
-      assertThat(models.get(1).getName()).isEqualTo("Cat 2");
+      assertThat(models)
+          .as("Mapped model list should have correct size and elements")
+          .hasSize(2);
+
+      assertThat(models.get(0))
+          .as("First model should match first entity")
+          .returns(id1, Category::getId)
+          .returns("Cat 1", Category::getName);
+
+      assertThat(models.get(1))
+          .as("Second model should match second entity")
+          .returns(id2, Category::getId)
+          .returns("Cat 2", Category::getName);
     }
   }
 
@@ -81,31 +97,40 @@ class CategoryMapperTest {
   class PatchEntity {
 
     @Test
-    void shouldUpdateOnlyProvidedFields() {
+    void should_UpdateOnlyProvidedFields() {
       // Given
-      CategoryEntity entity = new CategoryEntity(UUID.randomUUID(), "Old Name", UUID.randomUUID());
-      CategoryUpdate update = new CategoryUpdate();
+      var originalId = UUID.randomUUID();
+      var ownerId = UUID.randomUUID();
+      var entity = new CategoryEntity(originalId, "Old Name", ownerId);
+      var update = new CategoryUpdate();
       update.setName("New Name");
 
       // When
       categoryMapper.patchEntity(update, entity);
 
       // Then
-      assertThat(entity.getName()).isEqualTo("New Name");
+      assertThat(entity)
+          .as("Entity name should be updated while other fields remain unchanged")
+          .returns("New Name", CategoryEntity::getName)
+          .returns(originalId, CategoryEntity::getId)
+          .returns(ownerId, CategoryEntity::getOwnerId);
     }
 
     @Test
-    void shouldNotUpdateIfNull() {
+    void should_NotUpdateIfNull() {
       // Given
-      CategoryEntity entity = new CategoryEntity(UUID.randomUUID(), "Keep Me", UUID.randomUUID());
-      CategoryUpdate update = new CategoryUpdate();
+      var originalName = "Keep Me";
+      var entity = new CategoryEntity(UUID.randomUUID(), originalName, UUID.randomUUID());
+      var update = new CategoryUpdate();
       update.setName(null);
 
       // When
       categoryMapper.patchEntity(update, entity);
 
       // Then
-      assertThat(entity.getName()).isEqualTo("Keep Me");
+      assertThat(entity.getName())
+          .as("Entity name should remain unchanged when the update request contains null")
+          .isEqualTo(originalName);
     }
   }
 }

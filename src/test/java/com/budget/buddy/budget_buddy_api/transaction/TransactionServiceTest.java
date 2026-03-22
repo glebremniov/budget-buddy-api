@@ -2,7 +2,6 @@ package com.budget.buddy.budget_buddy_api.transaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,11 +15,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,14 +48,14 @@ class TransactionServiceTest {
   }
 
   private void setupMockAuthentication() {
-    Jwt jwt = mock(Jwt.class);
+    var jwt = mock(Jwt.class);
     when(jwt.getSubject()).thenReturn(currentUserId.toString());
     when(ownerIdConverter.convert(currentUserId.toString())).thenReturn(currentUserId);
 
-    Authentication authentication = mock(Authentication.class);
+    var authentication = mock(Authentication.class);
     when(authentication.getPrincipal()).thenReturn(jwt);
 
-    SecurityContext securityContext = mock(SecurityContext.class);
+    var securityContext = mock(SecurityContext.class);
     when(securityContext.getAuthentication()).thenReturn(authentication);
     SecurityContextHolder.setContext(securityContext);
   }
@@ -64,17 +66,22 @@ class TransactionServiceTest {
     @Test
     void should_CreateTransaction_WithOwnerId() {
       // Given
-      TransactionCreate createRequest = new TransactionCreate();
-      TransactionEntity entity = new TransactionEntity();
+      var createRequest = new TransactionCreate();
+      var entity = new TransactionEntity();
+      var model = new Transaction();
+
       when(mapper.toEntity(createRequest)).thenReturn(entity);
       when(repository.save(entity)).thenReturn(entity);
-      when(mapper.toModel(entity)).thenReturn(new Transaction());
+      when(mapper.toModel(entity)).thenReturn(model);
 
       // When
       transactionService.create(createRequest);
 
       // Then
-      assertThat(entity.getOwnerId()).isEqualTo(currentUserId);
+      assertThat(entity.getOwnerId())
+          .as("Transaction owner ID should be set to the current user ID")
+          .isEqualTo(currentUserId);
+
       verify(repository).save(entity);
     }
   }
@@ -82,37 +89,61 @@ class TransactionServiceTest {
   @Nested
   class FilteredTests {
 
-    @Test
-    void should_ListWithFilter() {
+    @ParameterizedTest
+    @EnumSource(Direction.class)
+    void should_ListWithFilter(Direction direction) {
       // Given
-      TransactionFilter filter = TransactionFilter.of(null, null, null);
-      Pageable pageable = PageRequest.of(0, 10);
-      List<TransactionEntity> entities = List.of(new TransactionEntity());
-      List<Transaction> models = List.of(new Transaction());
+      var filter = TransactionFilter.of(null, null, null);
+      var pageable = PageRequest.of(0, 10, direction, "date");
+      var entities = List.of(new TransactionEntity());
+      var models = List.of(new Transaction());
 
-      when(repository.findAllByFilter(any(TransactionFilter.class), eq(pageable))).thenReturn(entities);
+      when(repository.findAllByFilter(any(TransactionFilter.class), any())).thenReturn(entities);
       when(mapper.toModelList(entities)).thenReturn(models);
 
       // When
-      List<Transaction> result = transactionService.list(filter, pageable);
+      var result = transactionService.list(filter, pageable);
 
       // Then
-      assertThat(result).isEqualTo(models);
-      verify(repository).findAllByFilter(any(TransactionFilter.class), eq(pageable));
+      assertThat(result)
+          .as("Filtered transactions should match the mocked models")
+          .isEqualTo(models);
+
+      var filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
+      var pageableCaptor = ArgumentCaptor.forClass(PageRequest.class);
+
+      verify(repository).findAllByFilter(filterCaptor.capture(), pageableCaptor.capture());
+
+      assertThat(filterCaptor.getValue().ownerId())
+          .as("Filter owner ID should be set to the current user ID")
+          .isEqualTo(currentUserId);
+
+      assertThat(pageableCaptor.getValue())
+          .as("Pageable should be passed correctly to the repository")
+          .isEqualTo(pageable);
     }
 
     @Test
     void should_CountWithFilter() {
       // Given
-      TransactionFilter filter = TransactionFilter.of(null, null, null);
-      when(repository.countByFilter(any(TransactionFilter.class))).thenReturn(5L);
+      var filter = TransactionFilter.of(null, null, null);
+      var expectedCount = 5L;
+      when(repository.countByFilter(any(TransactionFilter.class))).thenReturn(expectedCount);
 
       // When
-      long result = transactionService.count(filter);
+      var result = transactionService.count(filter);
 
       // Then
-      assertThat(result).isEqualTo(5L);
-      verify(repository).countByFilter(any(TransactionFilter.class));
+      assertThat(result)
+          .as("Count result should match the repository response")
+          .isEqualTo(expectedCount);
+
+      var filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
+      verify(repository).countByFilter(filterCaptor.capture());
+
+      assertThat(filterCaptor.getValue().ownerId())
+          .as("Filter owner ID should be set to the current user ID")
+          .isEqualTo(currentUserId);
     }
   }
 }
