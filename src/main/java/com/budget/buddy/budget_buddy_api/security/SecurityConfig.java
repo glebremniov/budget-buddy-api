@@ -47,7 +47,7 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .passwordManagement(Customizer.withDefaults())
         .httpBasic(AbstractHttpConfigurer::disable)
-        .csrf(AbstractHttpConfigurer::disable)
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/v1/**", "/actuator/**"))
         .formLogin(AbstractHttpConfigurer::disable);
 
     return http.build();
