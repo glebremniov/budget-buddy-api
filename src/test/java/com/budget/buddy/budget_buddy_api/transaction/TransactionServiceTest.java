@@ -16,11 +16,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -82,11 +85,12 @@ class TransactionServiceTest {
   @Nested
   class FilteredTests {
 
-    @Test
-    void should_ListWithFilter() {
+    @ParameterizedTest
+    @EnumSource(Direction.class)
+    void should_ListWithFilter(Direction direction) {
       // Given
       TransactionFilter filter = TransactionFilter.of(null, null, null);
-      Pageable pageable = PageRequest.of(0, 10);
+      Pageable pageable = PageRequest.of(0, 10, direction, "date");
       List<TransactionEntity> entities = List.of(new TransactionEntity());
       List<Transaction> models = List.of(new Transaction());
 

@@ -12,8 +12,11 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 
 @DisplayName("TransactionRepository Integration Tests")
 class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
@@ -45,9 +48,10 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
     categoryId = categoryRepository.save(category).getId();
   }
 
-  @Test
+  @ParameterizedTest
+  @EnumSource(Direction.class)
   @DisplayName("should filter transactions by owner, date and category")
-  void shouldFilterTransactions() {
+  void shouldFilterTransactions(Direction direction) {
     // Given
     var t1 = new TransactionEntity();
     t1.setAmount(100);
@@ -69,7 +73,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
 
     // When
     var filter = new TransactionFilter(ownerId, categoryId, LocalDate.now(), null);
-    var filtered = transactionRepository.findAllByFilter(filter, PageRequest.of(0, 10));
+    var filtered = transactionRepository.findAllByFilter(filter, PageRequest.of(0, 10, direction, "date"));
 
     // Then
     assertThat(filtered)
