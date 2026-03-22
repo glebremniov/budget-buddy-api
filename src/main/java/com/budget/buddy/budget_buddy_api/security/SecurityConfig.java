@@ -32,7 +32,6 @@ public class SecurityConfig {
    * @param http the {@link HttpSecurity} to configure
    * @return the {@link SecurityFilterChain}
    */
-  @SuppressWarnings("java:S4502")
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) {
     http
