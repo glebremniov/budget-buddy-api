@@ -8,7 +8,11 @@ import com.budget.buddy.budget_buddy_api.generated.model.LoginRequest;
 import com.budget.buddy.budget_buddy_api.generated.model.RefreshTokenRequest;
 import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenRepository;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
+import java.util.HexFormat;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,15 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
   RefreshTokenRepository refreshTokenRepository;
 
   // ── helpers ────────────────────────────────────────────────────────────────
+
+  private static String sha256(String input) {
+    try {
+      return HexFormat.of().formatHex(
+          MessageDigest.getInstance("SHA-256").digest(input.getBytes(StandardCharsets.UTF_8)));
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 not available", e);
+    }
+  }
 
   AuthToken refresh(String refreshToken) throws Exception {
     var exchange = mvc.post().uri("/v1/auth/refresh")
@@ -187,11 +200,17 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
 
       // When
       var token = login(USERNAME, PASSWORD);
+      var rawToken = token.getRefreshToken();
 
       // Then
-      assertThat(refreshTokenRepository.findValidToken(token.getRefreshToken(), OffsetDateTime.now()))
-          .as("Refresh token should be persisted in database")
+      var stored = refreshTokenRepository.findValidToken(sha256(rawToken), OffsetDateTime.now());
+      assertThat(stored)
+          .as("Refresh token hash should be persisted in database")
           .isPresent();
+      assertThat(stored.get().getTokenHash())
+          .as("Stored value must be the hash, not the raw token")
+          .isNotEqualTo(rawToken)
+          .hasSize(64);
     }
   }
 
@@ -227,11 +246,11 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
       var newToken = refresh(oldRefreshToken);
 
       // Then
-      assertThat(refreshTokenRepository.findValidToken(oldRefreshToken, OffsetDateTime.now()))
+      assertThat(refreshTokenRepository.findValidToken(sha256(oldRefreshToken), OffsetDateTime.now()))
           .as("Old refresh token should be invalidated")
           .isEmpty();
 
-      assertThat(refreshTokenRepository.findValidToken(newToken.getRefreshToken(), OffsetDateTime.now()))
+      assertThat(refreshTokenRepository.findValidToken(sha256(newToken.getRefreshToken()), OffsetDateTime.now()))
           .as("New refresh token should be persisted")
           .isPresent();
     }

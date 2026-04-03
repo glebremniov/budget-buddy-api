@@ -5,7 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
 import com.budget.buddy.budget_buddy_api.user.UserEntity;
 import com.budget.buddy.budget_buddy_api.user.UserRepository;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
+import java.util.HexFormat;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,11 +42,11 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
   void shouldFindValidToken() {
     // Given
     var now = OffsetDateTime.now();
-    var validToken = "valid_" + UUID.randomUUID();
-    var expiredToken = "expired_" + UUID.randomUUID();
+    var validHash = sha256(UUID.randomUUID().toString());
+    var expiredHash = sha256(UUID.randomUUID().toString());
 
     var validEntity = RefreshTokenEntity.builder()
-        .token(validToken)
+        .tokenHash(validHash)
         .userId(userId)
         .createdAt(now)
         .expiresAt(now.plusDays(1))
@@ -50,7 +54,7 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
     refreshTokenRepository.save(validEntity);
 
     var expiredEntity = RefreshTokenEntity.builder()
-        .token(expiredToken)
+        .tokenHash(expiredHash)
         .userId(userId)
         .createdAt(now.minusDays(2))
         .expiresAt(now.minusDays(1))
@@ -58,12 +62,12 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
     refreshTokenRepository.save(expiredEntity);
 
     // When
-    var foundValid = refreshTokenRepository.findValidToken(validToken, now);
-    var foundExpired = refreshTokenRepository.findValidToken(expiredToken, now);
+    var foundValid = refreshTokenRepository.findValidToken(validHash, now);
+    var foundExpired = refreshTokenRepository.findValidToken(expiredHash, now);
 
     // Then
     assertThat(foundValid).isPresent();
-    assertThat(foundValid.get().getToken()).isEqualTo(validToken);
+    assertThat(foundValid.get().getTokenHash()).isEqualTo(validHash);
     assertThat(foundExpired).isEmpty();
   }
 
@@ -71,8 +75,9 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
   @DisplayName("should delete all tokens by user ID")
   void shouldDeleteAllByUserId() {
     // Given
+    var t1Hash = sha256(UUID.randomUUID().toString());
     var t1 = RefreshTokenEntity.builder()
-        .token("t1_" + UUID.randomUUID())
+        .tokenHash(t1Hash)
         .userId(userId)
         .createdAt(OffsetDateTime.now())
         .expiresAt(OffsetDateTime.now().plusDays(1))
@@ -84,8 +89,9 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
         .password("password")
         .enabled(true)
         .build()).getId();
+    var t2Hash = sha256(UUID.randomUUID().toString());
     var t2 = RefreshTokenEntity.builder()
-        .token("t2_" + UUID.randomUUID())
+        .tokenHash(t2Hash)
         .userId(otherUserId)
         .createdAt(OffsetDateTime.now())
         .expiresAt(OffsetDateTime.now().plusDays(1))
@@ -97,8 +103,8 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
 
     // Then
     assertThat(refreshTokenRepository.findAll()).hasSize(1);
-    assertThat(refreshTokenRepository.findValidToken(t2.getToken(), OffsetDateTime.now())).isPresent();
-    assertThat(refreshTokenRepository.findValidToken(t1.getToken(), OffsetDateTime.now())).isEmpty();
+    assertThat(refreshTokenRepository.findValidToken(t2Hash, OffsetDateTime.now())).isPresent();
+    assertThat(refreshTokenRepository.findValidToken(t1Hash, OffsetDateTime.now())).isEmpty();
   }
 
   @Test
@@ -106,16 +112,18 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
   void shouldDeleteAllExpired() {
     // Given
     var now = OffsetDateTime.now();
+    var e1Hash = sha256(UUID.randomUUID().toString());
     var e1 = RefreshTokenEntity.builder()
-        .token("e1_" + UUID.randomUUID())
+        .tokenHash(e1Hash)
         .userId(userId)
         .createdAt(now.minusDays(5))
         .expiresAt(now.minusDays(1))
         .build();
     refreshTokenRepository.save(e1);
 
+    var v1Hash = sha256(UUID.randomUUID().toString());
     var v1 = RefreshTokenEntity.builder()
-        .token("v1_" + UUID.randomUUID())
+        .tokenHash(v1Hash)
         .userId(userId)
         .createdAt(now)
         .expiresAt(now.plusDays(1))
@@ -127,7 +135,16 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
 
     // Then
     assertThat(refreshTokenRepository.findAll()).hasSize(1);
-    assertThat(refreshTokenRepository.findValidToken(v1.getToken(), now)).isPresent();
-    assertThat(refreshTokenRepository.findValidToken(e1.getToken(), now)).isEmpty();
+    assertThat(refreshTokenRepository.findValidToken(v1Hash, now)).isPresent();
+    assertThat(refreshTokenRepository.findValidToken(e1Hash, now)).isEmpty();
+  }
+
+  private static String sha256(String input) {
+    try {
+      return HexFormat.of().formatHex(
+          MessageDigest.getInstance("SHA-256").digest(input.getBytes(StandardCharsets.UTF_8)));
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 not available", e);
+    }
   }
 }

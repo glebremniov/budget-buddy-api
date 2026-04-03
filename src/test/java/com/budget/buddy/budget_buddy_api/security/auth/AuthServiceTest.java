@@ -141,7 +141,7 @@ class AuthServiceTest {
       // Given
       var refreshToken = "valid-refresh-token";
       var userId = UUID.randomUUID();
-      var tokenEntity = RefreshTokenEntity.builder().userId(userId).token(refreshToken).build();
+      var tokenEntity = RefreshTokenEntity.builder().userId(userId).build();
       var userDto = new UserDto(userId, "user", true);
       var newAuthToken = new AuthToken();
 

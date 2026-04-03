@@ -2,8 +2,12 @@ package com.budget.buddy.budget_buddy_api.security.refresh.token;
 
 import com.budget.buddy.budget_buddy_api.security.TokenService;
 import com.budget.buddy.budget_buddy_api.user.UserDto;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.HexFormat;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,28 +27,32 @@ public class RefreshTokenService implements TokenService<String> {
   private final RefreshTokenProperties properties;
 
   /**
-   * Create and persist a new refresh token for the given user
+   * Create and persist a new refresh token for the given user.
+   * The raw token is returned to the caller; only its SHA-256 hash is stored.
    *
-   * @param user user ID
-   * @return opaque refresh token string
+   * @param user user DTO
+   * @return raw opaque refresh token string
    */
   @Transactional
   @Override
   public String createToken(UserDto user) {
+    var rawToken = tokenProvider.get();
     var now = OffsetDateTime.now(clock);
+
     var entity = new RefreshTokenEntity();
-    entity.setToken(tokenProvider.get());
+    entity.setTokenHash(hash(rawToken));
     entity.setUserId(user.id());
     entity.setCreatedAt(now);
     entity.setExpiresAt(now.plusSeconds(properties.validitySeconds()));
 
-    return repository.save(entity).getToken();
+    repository.save(entity);
+    return rawToken;
   }
 
   /**
-   * Validate refresh token and rotate. Deletes old token and returns entity for issuing new tokens.
+   * Validate refresh token and rotate. Atomically deletes old token and returns entity for issuing new tokens.
    *
-   * @param refreshToken opaque refresh token
+   * @param refreshToken raw opaque refresh token presented by the client
    * @return validated RefreshTokenEntity
    * @throws BadCredentialsException if token is invalid or expired
    */
@@ -52,7 +60,7 @@ public class RefreshTokenService implements TokenService<String> {
   public RefreshTokenEntity rotate(String refreshToken) {
     var now = OffsetDateTime.now(clock);
 
-    return repository.deleteAndReturnValidToken(refreshToken, now)
+    return repository.deleteAndReturnValidToken(hash(refreshToken), now)
         .orElseThrow(() -> new BadCredentialsException("Refresh token is invalid"));
   }
 
@@ -72,6 +80,15 @@ public class RefreshTokenService implements TokenService<String> {
   @Transactional
   public void deleteExpired() {
     repository.deleteAllExpired(OffsetDateTime.now(clock));
+  }
+
+  private static String hash(String token) {
+    try {
+      return HexFormat.of().formatHex(
+          MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8)));
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 not available", e);
+    }
   }
 
 }
