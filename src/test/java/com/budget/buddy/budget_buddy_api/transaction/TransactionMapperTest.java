@@ -28,7 +28,7 @@ class TransactionMapperTest {
       var date = LocalDate.now();
       var create = new TransactionCreate(
           categoryId,
-          1000,
+          1000L,
           TransactionCreate.TypeEnum.EXPENSE,
           "EUR",
           date
@@ -85,7 +85,7 @@ class TransactionMapperTest {
           .isNotNull()
           .returns(id, Transaction::getId)
           .returns(categoryId, Transaction::getCategoryId)
-          .returns(500, Transaction::getAmount)
+          .returns(500L, Transaction::getAmount)
           .returns("INCOME", m -> m.getType().getValue())
           .returns("USD", Transaction::getCurrency)
           .returns(date, Transaction::getDate)
@@ -117,12 +117,12 @@ class TransactionMapperTest {
       assertThat(models.get(0))
           .as("First model should match first entity")
           .returns(id1, Transaction::getId)
-          .returns(100, Transaction::getAmount);
+          .returns(100L, Transaction::getAmount);
 
       assertThat(models.get(1))
           .as("Second model should match second entity")
           .returns(id2, Transaction::getId)
-          .returns(200, Transaction::getAmount);
+          .returns(200L, Transaction::getAmount);
     }
   }
 
