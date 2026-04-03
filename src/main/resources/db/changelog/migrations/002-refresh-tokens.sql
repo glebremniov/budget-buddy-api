@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset g.remniov@gmail.com:003-refresh-tokens
+--changeset g.remniov@gmail.com:002-refresh-tokens
 CREATE TABLE refresh_tokens
 (
     id         UUID PRIMARY KEY,

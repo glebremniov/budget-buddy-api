@@ -238,7 +238,7 @@ class GlobalExceptionHandlerTest {
           .returns(HttpStatus.NOT_FOUND, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
           .returns("Resource not found", Problem::getTitle)
-          .returns("Resource /api/not-found not found", Problem::getDetail)
+          .returns("Resource not found", Problem::getDetail)
           .returns(HttpStatus.NOT_FOUND.value(), Problem::getStatus);
     }
   }
@@ -267,7 +267,7 @@ class GlobalExceptionHandlerTest {
           .returns(HttpStatus.FORBIDDEN, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
           .returns("Access denied", Problem::getTitle)
-          .returns(message, Problem::getDetail)
+          .returns("Access denied", Problem::getDetail)
           .returns(HttpStatus.FORBIDDEN.value(), Problem::getStatus);
     }
 
@@ -296,7 +296,7 @@ class GlobalExceptionHandlerTest {
             .returns(HttpStatus.UNAUTHORIZED, ResponseEntity::getStatusCode)
             .extracting(HttpEntity::getBody)
             .returns("Authentication failed", Problem::getTitle)
-            .returns(message, Problem::getDetail)
+            .returns("Authentication failed", Problem::getDetail)
             .returns(HttpStatus.UNAUTHORIZED.value(), Problem::getStatus);
       }
     }
@@ -408,7 +408,7 @@ class GlobalExceptionHandlerTest {
       var problem = response.getBody();
       assertThat(problem)
           .returns("Not implemented", Problem::getTitle)
-          .returns(message, Problem::getDetail)
+          .returns("Operation not supported", Problem::getDetail)
           .returns(501, Problem::getStatus);
     }
   }

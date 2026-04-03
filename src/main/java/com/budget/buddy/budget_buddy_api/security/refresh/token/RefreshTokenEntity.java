@@ -27,8 +27,8 @@ public class RefreshTokenEntity implements BaseEntity<UUID> {
   @Column("id")
   private UUID id;
 
-  @Column("token")
-  private String token;
+  @Column("token_hash")
+  private String tokenHash;
 
   @Column("user_id")
   private UUID userId;

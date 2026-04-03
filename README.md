@@ -36,10 +36,6 @@ cd budget-buddy-api
 
 The API will be available at `http://localhost:8080`.
 
-Dev seed data is applied automatically via Liquibase:
-- Username: `admin`
-- Password: `8a98232f-76f4-4819-b868-91682b52ad3b`
-
 ## Running with Docker Compose
 
 ```bash
@@ -62,7 +58,7 @@ docker compose logs -f app
 | `DB_NAME` | PostgreSQL database name |
 | `DB_USER` | PostgreSQL username |
 | `DB_PASSWORD` | PostgreSQL password |
-| `BUDGET_BUDDY_API_ACCESS_TOKEN_SECRET` | JWT signing secret |
+| `BUDGET_BUDDY_API_ACCESS_TOKEN_SECRET` | JWT signing secret (min 32 characters) |
 | `BUDGET_BUDDY_API_ACCESS_TOKEN_VALIDITY_SECONDS` | Access token validity in seconds |
 | `BUDGET_BUDDY_API_REFRESH_TOKEN_VALIDITY_SECONDS` | Refresh token validity in seconds |
 

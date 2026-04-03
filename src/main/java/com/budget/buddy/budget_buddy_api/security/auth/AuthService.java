@@ -35,7 +35,7 @@ public class AuthService {
   @Transactional
   public void register(RegisterRequest request) {
     if (userService.existsByUsername(request.getUsername())) {
-      throw new DataIntegrityViolationException("Username already taken: " + request.getUsername());
+      throw new DataIntegrityViolationException("Username already taken");
     }
 
     userService.create(request);

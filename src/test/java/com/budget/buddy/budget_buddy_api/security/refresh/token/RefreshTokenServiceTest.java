@@ -3,6 +3,7 @@ package com.budget.buddy.budget_buddy_api.security.refresh.token;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,34 +53,36 @@ class RefreshTokenServiceTest {
       // Given
       var userId = UUID.randomUUID();
       var userDto = new UserDto(userId, "testuser", true);
-      var generatedToken = "new-refresh-token";
+      var rawToken = "new-refresh-token";
       var now = OffsetDateTime.now(clock);
 
-      when(tokenProvider.get()).thenReturn(generatedToken);
+      when(tokenProvider.get()).thenReturn(rawToken);
       when(properties.validitySeconds()).thenReturn(VALIDITY_SECONDS);
-
-      var entity = new RefreshTokenEntity();
-      entity.setToken(generatedToken);
-      when(repository.save(any(RefreshTokenEntity.class))).thenReturn(entity);
+      when(repository.save(any(RefreshTokenEntity.class))).thenReturn(new RefreshTokenEntity());
 
       // When
       var result = refreshTokenService.createToken(userDto);
 
       // Then
       assertThat(result)
-          .as("Resulting token should match the generated token")
-          .isEqualTo(generatedToken);
+          .as("Raw token should be returned to caller, not the hash")
+          .isEqualTo(rawToken);
 
       var captor = ArgumentCaptor.forClass(RefreshTokenEntity.class);
       verify(repository).save(captor.capture());
 
       var savedEntity = captor.getValue();
       assertThat(savedEntity)
-          .as("Saved entity should have correct token, user ID, and expiration")
-          .returns(generatedToken, RefreshTokenEntity::getToken)
+          .as("Saved entity should have correct user ID and expiration")
           .returns(userId, RefreshTokenEntity::getUserId)
           .returns(now, RefreshTokenEntity::getCreatedAt)
           .returns(now.plusSeconds(VALIDITY_SECONDS), RefreshTokenEntity::getExpiresAt);
+
+      assertThat(savedEntity.getTokenHash())
+          .as("Stored token hash must differ from raw token")
+          .isNotEqualTo(rawToken)
+          .as("SHA-256 hex digest must be 64 characters")
+          .hasSize(64);
     }
   }
 
@@ -89,29 +92,35 @@ class RefreshTokenServiceTest {
     @Test
     void should_RotateToken_When_Valid() {
       // Given
-      var oldToken = "old-token";
+      var rawToken = "old-token";
       var tokenEntity = new RefreshTokenEntity();
-      tokenEntity.setToken(oldToken);
-
-      when(repository.findValidToken(oldToken, OffsetDateTime.now(clock)))
+      var now = OffsetDateTime.now(clock);
+      when(repository.deleteAndReturnValidToken(any(String.class), eq(now)))
           .thenReturn(Optional.of(tokenEntity));
 
       // When
-      var result = refreshTokenService.rotate(oldToken);
+      var result = refreshTokenService.rotate(rawToken);
 
       // Then
       assertThat(result)
           .as("Rotate result should be the valid token entity")
           .isSameAs(tokenEntity);
 
-      verify(repository).delete(tokenEntity);
+      var captor = ArgumentCaptor.forClass(String.class);
+      verify(repository).deleteAndReturnValidToken(captor.capture(), eq(now));
+      assertThat(captor.getValue())
+          .as("Repository must be called with the hash, not the raw token")
+          .isNotEqualTo(rawToken)
+          .as("SHA-256 hex digest must be 64 characters")
+          .hasSize(64);
     }
 
     @Test
     void should_ThrowException_When_TokenInvalid() {
       // Given
       var invalidToken = "invalid-token";
-      when(repository.findValidToken(invalidToken, OffsetDateTime.now(clock)))
+      var now = OffsetDateTime.now(clock);
+      when(repository.deleteAndReturnValidToken(any(String.class), eq(now)))
           .thenReturn(Optional.empty());
 
       // When & Then
@@ -119,6 +128,13 @@ class RefreshTokenServiceTest {
           .as("Should throw BadCredentialsException when an invalid refresh token is rotated")
           .isInstanceOf(BadCredentialsException.class)
           .hasMessage("Refresh token is invalid");
+
+      var captor = ArgumentCaptor.forClass(String.class);
+      verify(repository).deleteAndReturnValidToken(captor.capture(), eq(now));
+      assertThat(captor.getValue())
+          .as("Repository must be called with the hash, not the raw token")
+          .isNotEqualTo(invalidToken)
+          .hasSize(64);
     }
   }
 

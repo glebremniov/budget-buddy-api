@@ -2,6 +2,7 @@ package com.budget.buddy.budget_buddy_api.security.jwt;
 
 import static org.springframework.security.oauth2.jose.jws.JwsAlgorithms.HS256;
 
+import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,7 +19,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 public class JwtConfig {
 
   private static SecretKey buildSecretKey(String secret) {
-    return new SecretKeySpec(secret.getBytes(), HS256);
+    return new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), HS256);
   }
 
   @Bean

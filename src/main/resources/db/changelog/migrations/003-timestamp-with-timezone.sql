@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset g.remniov@gmail.com:004-timestamp-with-timezone
+--changeset g.remniov@gmail.com:003-timestamp-with-timezone
 ALTER TABLE users
     ALTER COLUMN created_at TYPE TIMESTAMP WITH TIME ZONE,
     ALTER COLUMN updated_at TYPE TIMESTAMP WITH TIME ZONE;

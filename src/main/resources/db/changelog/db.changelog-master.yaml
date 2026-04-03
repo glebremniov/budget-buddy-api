@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - include:
+      file: migrations/001-initial-schema.sql
+      relativeToChangelogFile: true
+  - include:
+      file: migrations/002-refresh-tokens.sql
+      relativeToChangelogFile: true
+  - include:
+      file: migrations/003-timestamp-with-timezone.sql
+      relativeToChangelogFile: true
+  - include:
+      file: migrations/004-add-owner-id.sql
+      relativeToChangelogFile: true
+  - include:
+      file: migrations/005-transaction-category-not-null.sql
+      relativeToChangelogFile: true
+  - include:
+      file: migrations/006-hash-refresh-tokens.sql
+      relativeToChangelogFile: true

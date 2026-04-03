@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset g.remniov@gmail.com:005-add-owner-id
+--changeset g.remniov@gmail.com:004-add-owner-id
 ALTER TABLE transactions
     ADD COLUMN owner_id UUID NOT NULL REFERENCES users (id);
 
