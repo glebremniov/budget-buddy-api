@@ -4,7 +4,7 @@ plugins {
   jacoco
   id("org.springframework.boot") version "4.0.5"
   id("io.spring.dependency-management") version "1.1.7"
-  id("org.openapi.generator") version "7.20.0"
+  id("org.openapi.generator") version "7.21.0"
   id("org.sonarqube") version "7.2.3.7755"
 }
 
