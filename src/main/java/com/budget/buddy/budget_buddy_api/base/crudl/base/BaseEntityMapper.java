@@ -6,6 +6,7 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 /**
  * Base interface for entity mappers using MapStruct.
@@ -70,4 +71,15 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "ownerId", ignore = true)
   void patchEntity(U patchRequest, @MappingTarget E existingEntity);
+
+  /**
+   * Maps a {@link JsonNullable} to its internal value.
+   *
+   * @param <T>      the type of the value
+   * @param nullable the JsonNullable container
+   * @return the value if present, or null otherwise
+   */
+  default <T> T fromNullable(JsonNullable<T> nullable) {
+    return nullable.orElse(null);
+  }
 }

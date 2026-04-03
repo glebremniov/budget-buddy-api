@@ -481,7 +481,6 @@ components:
       properties:
         name:
           type: string
-          nullable: true
           example: Dining
 
     Transaction:
@@ -554,26 +553,20 @@ components:
         categoryId:
           type: string
           format: uuid
-          nullable: true
         amount:
           type: integer
-          nullable: true
         type:
           type: string
           enum: [ EXPENSE, INCOME, TRANSFER ]
-          nullable: true
         currency:
           type: string
           minLength: 3
           maxLength: 3
-          nullable: true
         date:
           type: string
           format: date
-          nullable: true
         description:
-          type: string
-          nullable: true
+          type: [ string, "null" ]
 
     PaginationMeta:
       type: object

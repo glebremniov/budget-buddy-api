@@ -36,15 +36,22 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   private Transaction createTransaction(String token, UUID categoryId) throws Exception {
+    return createTransaction(token, categoryId, null);
+  }
+
+  private Transaction createTransaction(String token, UUID categoryId, String description) throws Exception {
+    var body = new TransactionCreate()
+        .categoryId(categoryId)
+        .amount(1000)
+        .type(TransactionCreate.TypeEnum.EXPENSE)
+        .currency("EUR")
+        .date(LocalDate.of(2026, 3, 1))
+        .description(description);
+
     var result = mvc.post().uri("/v1/transactions")
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new TransactionCreate()
-            .categoryId(categoryId)
-            .amount(1000)
-            .type(TransactionCreate.TypeEnum.EXPENSE)
-            .currency("EUR")
-            .date(LocalDate.of(2026, 3, 1))))
+        .content(json(body))
         .exchange();
 
     return parseBody(result, Transaction.class);
@@ -254,6 +261,26 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void should_ClearDescription_When_ExplicitNullInPatch() throws Exception {
+      // Given
+      var created = createTransaction(userToken, userCategoryId, "A description");
+
+      // When — raw JSON to explicitly send null (distinct from omitting the field)
+      var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content("{\"description\": null}")
+          .exchange();
+
+      // Then
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var updated = parseBody(result, Transaction.class);
+      assertThat(updated.getDescription())
+          .as("Description should be cleared when PATCH sends explicit null")
+          .isNull();
     }
   }
 

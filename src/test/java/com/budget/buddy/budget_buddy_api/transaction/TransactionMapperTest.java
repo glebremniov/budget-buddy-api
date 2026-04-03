@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 class TransactionMapperTest {
 
@@ -139,7 +140,7 @@ class TransactionMapperTest {
 
       var update = new TransactionUpdate();
       update.setAmount(500);
-      update.setDescription("New Desc");
+      update.setDescription(JsonNullable.of("New Desc"));
 
       // When
       transactionMapper.patchEntity(update, entity);
@@ -174,6 +175,25 @@ class TransactionMapperTest {
           .as("Entity should remain unchanged when the update request contains nulls")
           .returns(originalAmount, TransactionEntity::getAmount)
           .returns(originalDesc, TransactionEntity::getDescription);
+    }
+
+    @Test
+    void should_ClearDescription_When_ExplicitJsonNullableInPatch() {
+      // Given
+      var entity = new TransactionEntity(
+          UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE,
+          "EUR", LocalDate.now(), "Old Description", UUID.randomUUID());
+
+      var update = new TransactionUpdate();
+      update.setDescription(JsonNullable.undefined());
+
+      // When
+      transactionMapper.patchEntity(update, entity);
+
+      // Then
+      assertThat(entity.getDescription())
+          .as("Description should be cleared when explicitly set to null in PATCH")
+          .isNull();
     }
   }
 }
