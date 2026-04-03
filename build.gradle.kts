@@ -25,7 +25,7 @@ dependencies {
   val mapstructVersion = "1.6.3"
   val openApiVersion = "3.0.2"
   val lombokMapstructBindingVersion = "0.2.0"
-  val jacksonDatabindNullableVersion = "0.2.9"
+  val jacksonDatabindNullableVersion = "0.2.10"
 
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
