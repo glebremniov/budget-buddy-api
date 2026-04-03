@@ -1,14 +1,29 @@
-Create a branch, commit all staged/unstaged changes, push, and open a PR against `main`. Also bump the patch version in `gradle.properties`.
+Create a branch, commit all staged/unstaged changes, push, and open a PR against `main`. Bump the patch version only when changes are relevant to the built artifact (image).
 
 **Steps:**
 1. Run `git diff --stat` and `git status` to understand what changed
-2. Increment the `version` in `gradle.properties` by one patch level (e.g. `0.1.5` → `0.1.6`) — read the file first
+2. Determine whether a version bump is needed (see **Version bump rules** below). If yes, increment the `version` in `gradle.properties` by one patch level (e.g. `0.1.5` → `0.1.6`) — read the file first
 3. Propose a short, meaningful branch name based on the changes (prefix: `feat/`, `fix/`, `chore/`, `refactor/` as appropriate)
 4. `git checkout -b <branch-name>`
 5. Stage and commit with a concise message that explains *why*, not just *what*
 6. `git push -u origin <branch-name>`
 7. Create a PR against `main` using `gh pr create` with a clear title and a summary body (what changed + test plan)
 8. Return the PR URL
+
+**Version bump rules:**
+Bump the version when **any** changed file matches:
+- `src/` — application source code or resources
+- `build.gradle`, `build.gradle.kts`, `settings.gradle`, `settings.gradle.kts` — build logic
+- `gradle.properties` itself (if something other than `version` changed)
+- `Dockerfile`, `docker-compose*.yml` — container definition
+- `src/main/resources/db/changelog/` — database migrations
+
+Do **not** bump the version when changes are limited to:
+- `.claude/` — Claude Code tooling
+- `.github/` — CI/CD workflows and GitHub config
+- `*.md` — documentation
+- `.gitignore`, `.editorconfig`, linter/formatter configs
+- Any other non-build, non-source tooling file
 
 **Notes:**
 - If already on a feature branch (not `main` or `bugfix/*`), skip branch creation and just commit + push + open PR
