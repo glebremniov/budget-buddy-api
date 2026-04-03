@@ -7,7 +7,7 @@ import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_api.generated.model.LoginRequest;
 import com.budget.buddy.budget_buddy_api.generated.model.RefreshTokenRequest;
 import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
-import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenRepository;
+import com.budget.buddy.budget_buddy_api.security.refresh.token.TestRefreshTokenRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,7 +26,7 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
   static final String PASSWORD = "testpassword123";
 
   @Autowired
-  RefreshTokenRepository refreshTokenRepository;
+  TestRefreshTokenRepository refreshTokenRepository;
 
   // ── helpers ────────────────────────────────────────────────────────────────
 

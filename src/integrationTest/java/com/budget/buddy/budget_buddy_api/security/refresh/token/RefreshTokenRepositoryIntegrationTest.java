@@ -38,40 +38,6 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @DisplayName("should find valid token and ignore expired ones")
-  void shouldFindValidToken() {
-    // Given
-    var now = OffsetDateTime.now();
-    var validHash = sha256(UUID.randomUUID().toString());
-    var expiredHash = sha256(UUID.randomUUID().toString());
-
-    var validEntity = RefreshTokenEntity.builder()
-        .tokenHash(validHash)
-        .userId(userId)
-        .createdAt(now)
-        .expiresAt(now.plusDays(1))
-        .build();
-    refreshTokenRepository.save(validEntity);
-
-    var expiredEntity = RefreshTokenEntity.builder()
-        .tokenHash(expiredHash)
-        .userId(userId)
-        .createdAt(now.minusDays(2))
-        .expiresAt(now.minusDays(1))
-        .build();
-    refreshTokenRepository.save(expiredEntity);
-
-    // When
-    var foundValid = refreshTokenRepository.findValidToken(validHash, now);
-    var foundExpired = refreshTokenRepository.findValidToken(expiredHash, now);
-
-    // Then
-    assertThat(foundValid).isPresent();
-    assertThat(foundValid.get().getTokenHash()).isEqualTo(validHash);
-    assertThat(foundExpired).isEmpty();
-  }
-
-  @Test
   @DisplayName("should delete all tokens by user ID")
   void shouldDeleteAllByUserId() {
     // Given
@@ -102,9 +68,10 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
     refreshTokenRepository.deleteAllByUserId(userId);
 
     // Then
-    assertThat(refreshTokenRepository.findAll()).hasSize(1);
-    assertThat(refreshTokenRepository.findValidToken(t2Hash, OffsetDateTime.now())).isPresent();
-    assertThat(refreshTokenRepository.findValidToken(t1Hash, OffsetDateTime.now())).isEmpty();
+    assertThat(refreshTokenRepository.findAll())
+        .hasSize(1)
+        .first()
+        .returns(t2Hash, RefreshTokenEntity::getTokenHash);
   }
 
   @Test
@@ -134,9 +101,10 @@ class RefreshTokenRepositoryIntegrationTest extends BaseIntegrationTest {
     refreshTokenRepository.deleteAllExpired(now);
 
     // Then
-    assertThat(refreshTokenRepository.findAll()).hasSize(1);
-    assertThat(refreshTokenRepository.findValidToken(v1Hash, now)).isPresent();
-    assertThat(refreshTokenRepository.findValidToken(e1Hash, now)).isEmpty();
+    assertThat(refreshTokenRepository.findAll())
+        .hasSize(1)
+        .first()
+        .returns(v1Hash, RefreshTokenEntity::getTokenHash);
   }
 
   private static String sha256(String input) {
