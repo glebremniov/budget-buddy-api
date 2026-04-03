@@ -207,6 +207,7 @@ paths:
         - $ref: "#/components/parameters/offset"
         - name: categoryId
           in: query
+          description: Filter by category
           schema:
             type: string
             format: uuid
@@ -417,7 +418,7 @@ components:
       properties:
         username:
           type: string
-          example: user@example.com
+          example: john
         password:
           type: string
           example: strongpassword123
@@ -448,6 +449,7 @@ components:
           description: Opaque refresh token
         scope:
           type: string
+          description: Space-separated list of granted scopes, if applicable
 
     Category:
       type: object
@@ -495,6 +497,7 @@ components:
           format: uuid
         amount:
           type: integer
+          format: int64
           description: Amount in minor units
           example: 1299
         type:
@@ -531,6 +534,7 @@ components:
           format: uuid
         amount:
           type: integer
+          format: int64
           example: 1299
         type:
           type: string

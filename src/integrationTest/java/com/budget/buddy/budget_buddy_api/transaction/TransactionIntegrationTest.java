@@ -42,7 +42,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   private Transaction createTransaction(String token, UUID categoryId, String description) throws Exception {
     var body = new TransactionCreate()
         .categoryId(categoryId)
-        .amount(1000)
+        .amount(1000L)
         .type(TransactionCreate.TypeEnum.EXPENSE)
         .currency("EUR")
         .date(LocalDate.of(2026, 3, 1))
@@ -87,7 +87,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionCreate()
               .categoryId(userCategoryId)
-              .amount(500)
+              .amount(500L)
               .type(TransactionCreate.TypeEnum.INCOME)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
@@ -105,7 +105,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionCreate()
               .categoryId(otherUserCategoryId)
-              .amount(1000)
+              .amount(1000L)
               .type(TransactionCreate.TypeEnum.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
@@ -121,7 +121,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionCreate()
               .categoryId(UUID.randomUUID())
-              .amount(1000)
+              .amount(1000L)
               .type(TransactionCreate.TypeEnum.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
@@ -136,7 +136,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionCreate()
               .categoryId(userCategoryId)
-              .amount(1000)
+              .amount(1000L)
               .type(TransactionCreate.TypeEnum.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
@@ -367,7 +367,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionCreate()
               .categoryId(userCategoryId)
-              .amount(100).type(TransactionCreate.TypeEnum.EXPENSE)
+              .amount(100L).type(TransactionCreate.TypeEnum.EXPENSE)
               .currency("EUR").date(LocalDate.of(2026, 1, 1))))
           .exchange();
 
@@ -376,7 +376,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionCreate()
               .categoryId(userCategoryId)
-              .amount(200).type(TransactionCreate.TypeEnum.EXPENSE)
+              .amount(200L).type(TransactionCreate.TypeEnum.EXPENSE)
               .currency("EUR").date(LocalDate.of(2026, 6, 1))))
           .exchange();
 
