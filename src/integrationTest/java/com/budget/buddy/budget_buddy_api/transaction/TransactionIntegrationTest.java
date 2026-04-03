@@ -45,8 +45,8 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
         .amount(1000)
         .type(TransactionCreate.TypeEnum.EXPENSE)
         .currency("EUR")
-        .date(LocalDate.of(2026, 3, 1));
-    body.setDescription(description);
+        .date(LocalDate.of(2026, 3, 1))
+        .description(description);
 
     var result = mvc.post().uri("/v1/transactions")
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)

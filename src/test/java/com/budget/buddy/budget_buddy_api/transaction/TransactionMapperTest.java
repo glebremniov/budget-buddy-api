@@ -178,14 +178,14 @@ class TransactionMapperTest {
     }
 
     @Test
-    void should_ClearDescription_When_ExplicitNullSentInPatch() {
+    void should_ClearDescription_When_ExplicitJsonNullableInPatch() {
       // Given
       var entity = new TransactionEntity(
           UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE,
           "EUR", LocalDate.now(), "Old Description", UUID.randomUUID());
 
       var update = new TransactionUpdate();
-      update.setDescription(JsonNullable.undefined()); // explicit null — user intends to clear the field
+      update.setDescription(JsonNullable.undefined());
 
       // When
       transactionMapper.patchEntity(update, entity);
