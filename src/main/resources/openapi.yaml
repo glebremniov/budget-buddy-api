@@ -523,6 +523,8 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 255
           example: Restaurants
 
     CategoryUpdate:
@@ -532,6 +534,8 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 255
           example: Dining
 
     Transaction:
