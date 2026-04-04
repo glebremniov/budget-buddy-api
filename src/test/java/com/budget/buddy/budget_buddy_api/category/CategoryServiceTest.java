@@ -2,7 +2,6 @@ package com.budget.buddy.budget_buddy_api.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,11 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
@@ -32,29 +26,13 @@ class CategoryServiceTest {
   private CategoryRepository repository;
   @Mock
   private CategoryMapper mapper;
-  @Mock
-  private Converter<String, UUID> ownerIdConverter;
 
   private CategoryService categoryService;
   private final UUID currentUserId = UUID.randomUUID();
 
   @BeforeEach
   void setUp() {
-    categoryService = new CategoryService(repository, mapper, Collections.emptySet(), ownerIdConverter);
-    setupMockAuthentication();
-  }
-
-  private void setupMockAuthentication() {
-    var jwt = mock(Jwt.class);
-    when(jwt.getSubject()).thenReturn(currentUserId.toString());
-    when(ownerIdConverter.convert(currentUserId.toString())).thenReturn(currentUserId);
-
-    var authentication = mock(Authentication.class);
-    when(authentication.getPrincipal()).thenReturn(jwt);
-
-    var securityContext = mock(SecurityContext.class);
-    when(securityContext.getAuthentication()).thenReturn(authentication);
-    SecurityContextHolder.setContext(securityContext);
+    categoryService = new CategoryService(repository, mapper, Collections.emptySet(), () -> currentUserId);
   }
 
   @Nested

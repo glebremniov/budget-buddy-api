@@ -2,7 +2,6 @@ package com.budget.buddy.budget_buddy_api.base.crudl.ownable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +14,6 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,13 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("OwnableEntityService Unit Tests")
@@ -41,52 +34,13 @@ class OwnableEntityServiceTest {
   @Mock
   private BaseEntityMapper<DummyOwnableEntity, Object, Object, Object, Object> mapper;
 
-  @Mock
-  private Converter<String, String> idConverter;
-
   private DummyOwnableService service;
 
   private final String ownerId = UUID.randomUUID().toString();
 
   @BeforeEach
   void setUp() {
-    service = new DummyOwnableService(repository, mapper, Collections.emptyList(), idConverter);
-    setupSecurityContext(ownerId);
-  }
-
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
-
-  private void setupSecurityContext(String userId) {
-    var jwt = mock(Jwt.class);
-    when(jwt.getSubject()).thenReturn(userId);
-
-    var authentication = mock(Authentication.class);
-    when(authentication.getPrincipal()).thenReturn(jwt);
-
-    var securityContext = mock(SecurityContext.class);
-    when(securityContext.getAuthentication()).thenReturn(authentication);
-
-    SecurityContextHolder.setContext(securityContext);
-    when(idConverter.convert(userId)).thenReturn(userId);
-  }
-
-  @Nested
-  @DisplayName("getRequiredOwnerId")
-  class GetRequiredOwnerIdTests {
-
-    @Test
-    void should_ReturnCurrentUserId() {
-      // When
-      var result = service.getRequiredOwnerId();
-
-      // Then
-      assertThat(result)
-          .as("Result should be the current owner ID")
-          .isEqualTo(ownerId);
-    }
+    service = new DummyOwnableService(repository, mapper, Collections.emptyList(), () -> ownerId);
   }
 
   @Nested
@@ -306,9 +260,9 @@ class OwnableEntityServiceTest {
         OwnableEntityRepository<DummyOwnableEntity, String> repository,
         BaseEntityMapper<DummyOwnableEntity, Object, Object, Object, ?> mapper,
         Iterable<BaseEntityValidator<DummyOwnableEntity>> entityValidators,
-        Converter<String, String> idConverter
+        OwnerIdProvider<String> ownerIdProvider
     ) {
-      super(repository, mapper, entityValidators, idConverter);
+      super(repository, mapper, entityValidators, ownerIdProvider);
     }
   }
 }
