@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_api.category.CategoryService;
+import java.util.Currency;
 import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,11 @@ class TransactionValidatorTest {
   @InjectMocks
   TransactionValidator validator;
 
-  TransactionEntity entityWithCategory(UUID categoryId) {
+  TransactionEntity validEntity(UUID categoryId) {
     var entity = new TransactionEntity();
     entity.setCategoryId(categoryId);
+    entity.setAmount(1299);
+    entity.setCurrency(Currency.getInstance("EUR"));
     return entity;
   }
 
@@ -35,7 +38,7 @@ class TransactionValidatorTest {
     void should_PassValidation_When_CategoryExistsAndBelongsToCurrentUser() {
       // Given
       var categoryId = UUID.randomUUID();
-      var entity = entityWithCategory(categoryId);
+      var entity = validEntity(categoryId);
       when(categoryService.existsById(categoryId)).thenReturn(true);
 
       // When & Then
@@ -47,7 +50,7 @@ class TransactionValidatorTest {
     @Test
     void should_ThrowException_When_CategoryIdIsNull() {
       // Given
-      var entity = entityWithCategory(null);
+      var entity = validEntity(null);
 
       // When & Then
       assertThatThrownBy(() -> validator.validate(entity))
@@ -60,7 +63,7 @@ class TransactionValidatorTest {
     void should_ThrowException_When_CategoryDoesNotExist() {
       // Given
       var categoryId = UUID.randomUUID();
-      var entity = entityWithCategory(categoryId);
+      var entity = validEntity(categoryId);
       when(categoryService.existsById(categoryId)).thenReturn(false);
 
       // When & Then
@@ -68,6 +71,62 @@ class TransactionValidatorTest {
           .as("Should throw IllegalArgumentException when the specified category does not exist")
           .isInstanceOf(IllegalArgumentException.class)
           .hasMessage("Unknown category with id: " + categoryId);
+    }
+
+    @Test
+    void should_ThrowException_When_AmountIsNull() {
+      // Given
+      var categoryId = UUID.randomUUID();
+      var entity = validEntity(categoryId);
+      entity.setAmount(null);
+      when(categoryService.existsById(categoryId)).thenReturn(true);
+
+      // When & Then
+      assertThatThrownBy(() -> validator.validate(entity))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage("Amount must be a positive value in minor units");
+    }
+
+    @Test
+    void should_ThrowException_When_AmountIsZero() {
+      // Given
+      var categoryId = UUID.randomUUID();
+      var entity = validEntity(categoryId);
+      entity.setAmount(0);
+      when(categoryService.existsById(categoryId)).thenReturn(true);
+
+      // When & Then
+      assertThatThrownBy(() -> validator.validate(entity))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage("Amount must be a positive value in minor units");
+    }
+
+    @Test
+    void should_ThrowException_When_AmountIsNegative() {
+      // Given
+      var categoryId = UUID.randomUUID();
+      var entity = validEntity(categoryId);
+      entity.setAmount(-100);
+      when(categoryService.existsById(categoryId)).thenReturn(true);
+
+      // When & Then
+      assertThatThrownBy(() -> validator.validate(entity))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage("Amount must be a positive value in minor units");
+    }
+
+    @Test
+    void should_ThrowException_When_CurrencyIsNull() {
+      // Given
+      var categoryId = UUID.randomUUID();
+      var entity = validEntity(categoryId);
+      entity.setCurrency(null);
+      when(categoryService.existsById(categoryId)).thenReturn(true);
+
+      // When & Then
+      assertThatThrownBy(() -> validator.validate(entity))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessage("Currency must be set");
     }
   }
 }

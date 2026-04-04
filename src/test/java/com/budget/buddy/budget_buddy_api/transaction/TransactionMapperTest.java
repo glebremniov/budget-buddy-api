@@ -3,10 +3,11 @@ package com.budget.buddy.budget_buddy_api.transaction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
+import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Nested;
@@ -45,7 +46,7 @@ class TransactionMapperTest {
           .returns(categoryId, TransactionEntity::getCategoryId)
           .returns(1000, TransactionEntity::getAmount)
           .returns(TransactionType.EXPENSE, TransactionEntity::getType)
-          .returns("EUR", TransactionEntity::getCurrency)
+          .returns(Currency.getInstance("EUR"), TransactionEntity::getCurrency)
           .returns(date, TransactionEntity::getDate)
           .returns("Test transaction", TransactionEntity::getDescription);
     }
@@ -68,7 +69,7 @@ class TransactionMapperTest {
           categoryId,
           500,
           TransactionType.INCOME,
-          "USD",
+          Currency.getInstance("USD"),
           date,
           "Income description",
           ownerId
@@ -103,8 +104,8 @@ class TransactionMapperTest {
       // Given
       var id1 = UUID.randomUUID();
       var id2 = UUID.randomUUID();
-      var e1 = new TransactionEntity(id1, UUID.randomUUID(), 100, TransactionType.EXPENSE, "EUR", LocalDate.now(), "D1", UUID.randomUUID());
-      var e2 = new TransactionEntity(id2, UUID.randomUUID(), 200, TransactionType.INCOME, "USD", LocalDate.now(), "D2", UUID.randomUUID());
+      var e1 = new TransactionEntity(id1, UUID.randomUUID(), 100, TransactionType.EXPENSE, Currency.getInstance("EUR"), LocalDate.now(), "D1", UUID.randomUUID());
+      var e2 = new TransactionEntity(id2, UUID.randomUUID(), 200, TransactionType.INCOME, Currency.getInstance("USD"), LocalDate.now(), "D2", UUID.randomUUID());
 
       // When
       var models = transactionMapper.toModelList(List.of(e1, e2));
@@ -136,7 +137,7 @@ class TransactionMapperTest {
       var categoryId = UUID.randomUUID();
       var ownerId = UUID.randomUUID();
       var date = LocalDate.now();
-      var entity = new TransactionEntity(originalId, categoryId, 100, TransactionType.EXPENSE, "EUR", date, "Old Desc", ownerId);
+      var entity = new TransactionEntity(originalId, categoryId, 100, TransactionType.EXPENSE, Currency.getInstance("EUR"), date, "Old Desc", ownerId);
 
       var update = new TransactionUpdate();
       update.setAmount(500);
@@ -150,7 +151,7 @@ class TransactionMapperTest {
           .as("Updated entity should have correct updated and original values")
           .returns(500, TransactionEntity::getAmount)
           .returns("New Desc", TransactionEntity::getDescription)
-          .returns("EUR", TransactionEntity::getCurrency)
+          .returns(Currency.getInstance("EUR"), TransactionEntity::getCurrency)
           .returns(originalId, TransactionEntity::getId)
           .returns(categoryId, TransactionEntity::getCategoryId)
           .returns(date, TransactionEntity::getDate);
@@ -161,7 +162,7 @@ class TransactionMapperTest {
       // Given
       var originalAmount = 100;
       var originalDesc = "Keep Me";
-      var entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), originalAmount, TransactionType.EXPENSE, "EUR", LocalDate.now(), originalDesc, UUID.randomUUID());
+      var entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), originalAmount, TransactionType.EXPENSE, Currency.getInstance("EUR"), LocalDate.now(), originalDesc, UUID.randomUUID());
 
       var update = new TransactionUpdate();
       update.setAmount(null);
@@ -182,7 +183,7 @@ class TransactionMapperTest {
       // Given
       var entity = new TransactionEntity(
           UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE,
-          "EUR", LocalDate.now(), "Old Description", UUID.randomUUID());
+          Currency.getInstance("EUR"), LocalDate.now(), "Old Description", UUID.randomUUID());
 
       var update = new TransactionUpdate();
       update.setDescription(JsonNullable.undefined());
