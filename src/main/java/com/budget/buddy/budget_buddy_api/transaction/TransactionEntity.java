@@ -3,6 +3,7 @@ package com.budget.buddy.budget_buddy_api.transaction;
 import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntity;
 import java.time.LocalDate;
+import java.util.Currency;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,7 +37,7 @@ public class TransactionEntity extends AuditableEntity implements OwnableEntity<
   private TransactionType type;
 
   @Column("currency")
-  private String currency;
+  private Currency currency;
 
   @Column("date")
   private LocalDate date;

@@ -8,6 +8,7 @@ import com.budget.buddy.budget_buddy_api.category.CategoryRepository;
 import com.budget.buddy.budget_buddy_api.user.UserEntity;
 import com.budget.buddy.budget_buddy_api.user.UserRepository;
 import java.time.LocalDate;
+import java.util.Currency;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,7 +56,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
     // Given
     var t1 = new TransactionEntity();
     t1.setAmount(100);
-    t1.setCurrency("USD");
+    t1.setCurrency(Currency.getInstance("USD"));
     t1.setType(TransactionType.EXPENSE);
     t1.setDate(LocalDate.now().minusDays(1));
     t1.setOwnerId(ownerId);
@@ -64,7 +65,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
 
     var t2 = new TransactionEntity();
     t2.setAmount(200);
-    t2.setCurrency("USD");
+    t2.setCurrency(Currency.getInstance("USD"));
     t2.setType(TransactionType.EXPENSE);
     t2.setDate(LocalDate.now());
     t2.setOwnerId(ownerId);
@@ -88,7 +89,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
     // Given
     var t1 = new TransactionEntity();
     t1.setAmount(100);
-    t1.setCurrency("USD");
+    t1.setCurrency(Currency.getInstance("USD"));
     t1.setType(TransactionType.EXPENSE);
     t1.setDate(LocalDate.now());
     t1.setOwnerId(ownerId);
@@ -109,7 +110,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
     // Given
     var transaction = new TransactionEntity();
     transaction.setAmount(50);
-    transaction.setCurrency("EUR");
+    transaction.setCurrency(Currency.getInstance("EUR"));
     transaction.setType(TransactionType.EXPENSE);
     transaction.setDate(LocalDate.now());
     transaction.setOwnerId(ownerId);
