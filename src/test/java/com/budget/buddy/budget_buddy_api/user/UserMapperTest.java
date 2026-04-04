@@ -102,5 +102,13 @@ class UserMapperTest {
           .as("patchEntity operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
     }
+
+    @Test
+    void should_ThrowException_On_ReplaceEntity() {
+      // When & Then
+      assertThatThrownBy(() -> userMapper.replaceEntity(null, null))
+          .as("replaceEntity operation should be unsupported for users")
+          .isInstanceOf(UnsupportedOperationException.class);
+    }
   }
 }
