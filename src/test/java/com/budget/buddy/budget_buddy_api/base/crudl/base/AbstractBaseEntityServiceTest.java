@@ -139,6 +139,50 @@ class AbstractBaseEntityServiceTest {
   }
 
   @Nested
+  class ReplaceTests {
+
+    @Test
+    void should_ReplaceEntity() {
+      // Given
+      var id = "testId";
+      var existingEntity = new DummyEntity();
+      existingEntity.setId(id);
+      var replaceRequest = new Object();
+      var expected = new Object();
+      when(repository.findById(id)).thenReturn(Optional.of(existingEntity));
+      when(repository.save(existingEntity)).thenReturn(existingEntity);
+      when(mapper.toModel(existingEntity)).thenReturn(expected);
+
+      // When
+      var actual = service.replace(id, replaceRequest);
+
+      // Then
+      assertThat(actual).isEqualTo(expected);
+      assertThat(existingEntity)
+          .returns(existingEntity.getId(), BaseEntity::getId);
+      verify(repository).findById(id);
+      verify(mapper).replaceEntity(replaceRequest, existingEntity);
+      verify(repository).save(existingEntity);
+      verify(mapper).toModel(existingEntity);
+    }
+
+    @Test
+    void should_ThrowException_When_EntityNotFound() {
+      // Given
+      var id = "nonExistentId";
+      var replaceRequest = new Object();
+      when(repository.findById(id)).thenReturn(Optional.empty());
+
+      // When / Then
+      assertThatThrownBy(() -> service.replace(id, replaceRequest))
+          .isInstanceOf(EntityNotFoundException.class)
+          .hasMessageContaining("Entity not found with id: " + id);
+      verify(repository).findById(id);
+      verifyNoInteractions(mapper);
+    }
+  }
+
+  @Nested
   class DeleteTests {
 
     @Test

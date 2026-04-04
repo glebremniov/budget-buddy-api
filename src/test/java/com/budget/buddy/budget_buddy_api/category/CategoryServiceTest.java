@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
 import java.util.Collections;
 import java.util.Optional;
@@ -63,7 +63,7 @@ class CategoryServiceTest {
     @Test
     void should_CreateCategory_WithOwnerId() {
       // Given
-      var createRequest = new CategoryCreate("Groceries");
+      var createRequest = new CategoryWrite("Groceries");
       var entity = new CategoryEntity();
       var model = new Category();
 

@@ -73,6 +73,21 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
   void patchEntity(U patchRequest, @MappingTarget E existingEntity);
 
   /**
+   * Fully replaces an existing entity with values from a create request. All writable fields are overwritten,
+   * including nulls. Immutable fields (id, version, createdAt, updatedAt, ownerId) are preserved.
+   *
+   * @param replaceRequest the create request
+   * @param existingEntity the entity to replace
+   */
+  @BeanMapping(ignoreByDefault = false)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "version", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  @Mapping(target = "ownerId", ignore = true)
+  void replaceEntity(C replaceRequest, @MappingTarget E existingEntity);
+
+  /**
    * Maps a {@link JsonNullable} to its internal value.
    *
    * @param <T>      the type of the value

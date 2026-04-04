@@ -3,7 +3,7 @@ package com.budget.buddy.budget_buddy_api.category;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
 import com.budget.buddy.budget_buddy_api.generated.api.CategoriesApi;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginatedCategories;
 import java.net.URI;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CategoryController
-    extends BaseEntityController<UUID, Category, CategoryCreate, CategoryUpdate, PaginatedCategories>
+    extends BaseEntityController<UUID, Category, CategoryWrite, CategoryUpdate, PaginatedCategories>
     implements CategoriesApi {
 
   public CategoryController(CategoryService service, CategoryMapper mapper) {
@@ -31,6 +31,11 @@ public class CategoryController
   }
 
   @Override
+  public ResponseEntity<Category> replaceCategory(UUID categoryId, CategoryWrite categoryCreate) {
+    return super.replaceInternal(categoryId, categoryCreate);
+  }
+
+  @Override
   public ResponseEntity<Category> updateCategory(UUID categoryId, CategoryUpdate categoryUpdate) {
     return super.updateInternal(categoryId, categoryUpdate);
   }
@@ -41,7 +46,7 @@ public class CategoryController
   }
 
   @Override
-  public ResponseEntity<Category> createCategory(CategoryCreate categoryCreate) {
+  public ResponseEntity<Category> createCategory(CategoryWrite categoryCreate) {
     return super.createInternal(categoryCreate);
   }
 

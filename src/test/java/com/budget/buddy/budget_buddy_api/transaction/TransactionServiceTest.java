@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -66,7 +66,7 @@ class TransactionServiceTest {
     @Test
     void should_CreateTransaction_WithOwnerId() {
       // Given
-      var createRequest = new TransactionCreate();
+      var createRequest = new TransactionWrite();
       var entity = new TransactionEntity();
       var model = new Transaction();
 

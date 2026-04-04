@@ -43,6 +43,17 @@ public interface BaseEntityService<ID, R, C, U> {
   R update(ID id, U patchRequest) throws EntityNotFoundException;
 
   /**
+   * Fully replace an existing entity identified by its unique identifier. All writable fields are overwritten;
+   * omitting optional fields clears them.
+   *
+   * @param id The unique identifier of the entity to replace.
+   * @param replaceRequest The create request containing all fields for the replacement.
+   * @return The replaced resource/model.
+   * @throws EntityNotFoundException If no entity with the specified ID exists.
+   */
+  R replace(ID id, C replaceRequest) throws EntityNotFoundException;
+
+  /**
    * Delete an existing entity by its unique identifier.
    *
    * @param id The unique identifier of the entity to delete.

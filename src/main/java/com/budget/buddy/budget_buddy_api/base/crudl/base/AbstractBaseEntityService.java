@@ -69,6 +69,14 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
   }
 
   @Override
+  public R replace(ID id, C replaceRequest) {
+    log.debug("Replace entity by id: {}", id);
+    E replacedEntity = replaceInternal(id, replaceRequest);
+    log.debug("Replaced entity: {}", replacedEntity);
+    return mapper.toModel(replacedEntity);
+  }
+
+  @Override
   public void delete(ID id) {
     log.debug("Delete entity by id: {}", id);
     deleteInternal(id);
@@ -148,6 +156,20 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
   protected E updateInternal(ID id, U updateRequest) {
     E existingEntity = readInternal(id);
     mapper.patchEntity(updateRequest, existingEntity);
+    validate(existingEntity);
+    return repository.save(existingEntity);
+  }
+
+  /**
+   * Logic to fully replace an entity.
+   *
+   * @param id the unique identifier
+   * @param replaceRequest the replace request
+   * @return the replaced entity
+   */
+  protected E replaceInternal(ID id, C replaceRequest) {
+    E existingEntity = readInternal(id);
+    mapper.replaceEntity(replaceRequest, existingEntity);
     validate(existingEntity);
     return repository.save(existingEntity);
   }

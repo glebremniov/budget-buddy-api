@@ -3,7 +3,7 @@ package com.budget.buddy.budget_buddy_api.transaction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -22,14 +22,14 @@ class TransactionMapperTest {
   class ToEntity {
 
     @Test
-    void should_MapTransactionCreateToTransactionEntity() {
+    void should_MapTransactionWriteToTransactionEntity() {
       // Given
       var categoryId = UUID.randomUUID();
       var date = LocalDate.now();
-      var create = new TransactionCreate(
+      var create = new TransactionWrite(
           categoryId,
           1000L,
-          TransactionCreate.TypeEnum.EXPENSE,
+          TransactionWrite.TypeEnum.EXPENSE,
           "EUR",
           date
       );

@@ -42,4 +42,9 @@ public class UserMapper implements BaseEntityMapper<UserEntity, UserDto, Registe
   public void patchEntity(Object patchRequest, UserEntity existingEntity) {
     throw new UnsupportedOperationException();
   }
+
+  @Override
+  public void replaceEntity(RegisterRequest replaceRequest, UserEntity existingEntity) {
+    throw new UnsupportedOperationException();
+  }
 }

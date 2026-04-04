@@ -3,7 +3,7 @@ package com.budget.buddy.budget_buddy_api.category;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -20,9 +20,9 @@ class CategoryMapperTest {
   class ToEntity {
 
     @Test
-    void should_MapCategoryCreateToCategoryEntity() {
+    void should_MapCategoryWriteToCategoryEntity() {
       // Given
-      var create = new CategoryCreate("Groceries");
+      var create = new CategoryWrite("Groceries");
 
       // When
       var entity = categoryMapper.toEntity(create);

@@ -73,6 +73,14 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
   }
 
   @Override
+  protected E replaceInternal(ID id, C replaceRequest) {
+    E existingEntity = readInternal(id);
+    mapper.replaceEntity(replaceRequest, existingEntity);
+    validate(existingEntity);
+    return repository.save(existingEntity);
+  }
+
+  @Override
   protected E readInternal(ID id) {
     return repository.findByIdAndOwnerId(id, getRequiredOwnerId())
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));

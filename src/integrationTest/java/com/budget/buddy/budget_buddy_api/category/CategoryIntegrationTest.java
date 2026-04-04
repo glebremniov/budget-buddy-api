@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginatedCategories;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
     var result = mvc.post().uri("/v1/categories")
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new CategoryCreate().name(name)))
+        .content(json(new CategoryWrite().name(name)))
         .exchange();
 
     return parseBody(result, Category.class);
@@ -55,7 +55,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return401_When_NotAuthenticated() {
       var result = mvc.post().uri("/v1/categories")
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new CategoryCreate().name("Groceries")))
+          .content(json(new CategoryWrite().name("Groceries")))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
@@ -66,7 +66,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
       var result = mvc.post().uri("/v1/categories")
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new CategoryCreate().name("Groceries")))
+          .content(json(new CategoryWrite().name("Groceries")))
           .exchange();
 
       assertThat(result)
@@ -117,6 +117,54 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
       var created = createCategory(userToken, "Food");
 
       var result = mvc.get().uri("/v1/categories/{id}", created.getId())
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  @Nested
+  class Replace {
+
+    @Test
+    void should_ReplaceCategory_When_Owner() throws Exception {
+      var created = createCategory(userToken, "Food");
+      var newCategoryName = "Groceries";
+
+      var result = mvc.put().uri("/v1/categories/{id}", created.getId())
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(new CategoryWrite().name(newCategoryName)))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var replaced = parseBody(result, Category.class);
+
+      assertThat(replaced)
+          .returns(created.getId(), Category::getId)
+          .returns(newCategoryName, Category::getName);
+    }
+
+    @Test
+    void should_Return404_When_CategoryBelongsToOtherUser() throws Exception {
+      var created = createCategory(otherUserToken, "Other's category");
+
+      var result = mvc.put().uri("/v1/categories/{id}", created.getId())
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(new CategoryWrite().name("Hacked")))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void should_Return401_When_NotAuthenticated() throws Exception {
+      var created = createCategory(userToken, "Food");
+
+      var result = mvc.put().uri("/v1/categories/{id}", created.getId())
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(new CategoryWrite().name("Hacked")))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);

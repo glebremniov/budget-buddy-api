@@ -192,6 +192,45 @@ class OwnableEntityServiceTest {
   }
 
   @Nested
+  @DisplayName("replaceInternal")
+  class ReplaceInternalTests {
+
+    @Test
+    void should_ReplaceAndSave() {
+      // Given
+      var id = "123";
+      var replaceRequest = new Object();
+      var existingEntity = new DummyOwnableEntity();
+      when(repository.findByIdAndOwnerId(id, ownerId)).thenReturn(Optional.of(existingEntity));
+      when(repository.save(existingEntity)).thenReturn(existingEntity);
+
+      // When
+      var result = service.replaceInternal(id, replaceRequest);
+
+      // Then
+      assertThat(result)
+          .as("Result should be the replaced entity")
+          .isEqualTo(existingEntity);
+      verify(mapper).replaceEntity(replaceRequest, existingEntity);
+      verify(repository).save(existingEntity);
+    }
+
+    @Test
+    void should_ThrowException_When_NotFound() {
+      // Given
+      var id = "123";
+      var replaceRequest = new Object();
+      when(repository.findByIdAndOwnerId(id, ownerId)).thenReturn(Optional.empty());
+
+      // When & Then
+      assertThatThrownBy(() -> service.replaceInternal(id, replaceRequest))
+          .as("Should throw EntityNotFoundException when entity is not found or not owned by the current user")
+          .isInstanceOf(EntityNotFoundException.class)
+          .hasMessageContaining("Entity not found with id: " + id);
+    }
+  }
+
+  @Nested
   @DisplayName("existsByIdInternal")
   class ExistsByIdInternalTests {
 

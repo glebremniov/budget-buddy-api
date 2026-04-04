@@ -13,6 +13,7 @@ public class BaseEntityListener<ENTITY extends BaseEntity<ID>, ID>
 
   private final Supplier<ID> idGenerator;
 
+  @NonNull
   @Override
   public ENTITY onBeforeConvert(@NonNull ENTITY entity) {
     if (entity.isNew()) {

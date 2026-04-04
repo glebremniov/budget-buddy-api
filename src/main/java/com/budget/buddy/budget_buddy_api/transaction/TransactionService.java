@@ -3,7 +3,7 @@ package com.budget.buddy.budget_buddy_api.transaction;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityService;
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TransactionService extends
-    OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionCreate, TransactionUpdate> {
+    OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionWrite, TransactionUpdate> {
 
   public TransactionService(
       TransactionRepository repository,

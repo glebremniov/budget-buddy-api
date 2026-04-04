@@ -5,7 +5,7 @@ import com.budget.buddy.budget_buddy_api.generated.api.TransactionsApi;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
 import java.net.URI;
 import java.time.LocalDate;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class TransactionController
-    extends BaseEntityController<UUID, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions>
+    extends BaseEntityController<UUID, Transaction, TransactionWrite, TransactionUpdate, PaginatedTransactions>
     implements TransactionsApi {
 
   private static final Sort DEFAULT_SORT = Sort.by(Direction.DESC, "date");
@@ -63,7 +63,7 @@ public class TransactionController
   }
 
   @Override
-  public ResponseEntity<Transaction> createTransaction(TransactionCreate transactionCreate) {
+  public ResponseEntity<Transaction> createTransaction(TransactionWrite transactionCreate) {
     return super.createInternal(transactionCreate);
   }
 
@@ -75,6 +75,11 @@ public class TransactionController
   @Override
   public ResponseEntity<Transaction> getTransaction(UUID transactionId) {
     return super.readInternal(transactionId);
+  }
+
+  @Override
+  public ResponseEntity<Transaction> replaceTransaction(UUID transactionId, TransactionWrite transactionCreate) {
+    return super.replaceInternal(transactionId, transactionCreate);
   }
 
   @Override

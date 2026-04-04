@@ -3,7 +3,7 @@ package com.budget.buddy.budget_buddy_api.category;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityService;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
 import java.util.Set;
 import java.util.UUID;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * Service for category operations.
  */
 @Service
-public class CategoryService extends OwnableEntityService<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate> {
+public class CategoryService extends OwnableEntityService<CategoryEntity, UUID, Category, CategoryWrite, CategoryUpdate> {
 
   public CategoryService(
       CategoryRepository repository,

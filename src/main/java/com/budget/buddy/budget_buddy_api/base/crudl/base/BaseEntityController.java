@@ -64,6 +64,18 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
   }
 
   /**
+   * Internal method to fully replace an entity by ID.
+   *
+   * @param id the entity identifier
+   * @param replaceRequest the replace request (all fields required)
+   * @return {@link ResponseEntity} with the replaced entity
+   */
+  public ResponseEntity<R> replaceInternal(ID id, C replaceRequest) {
+    var replaced = service.replace(id, replaceRequest);
+    return ResponseEntity.ok(replaced);
+  }
+
+  /**
    * Internal method to delete an entity by ID.
    *
    * @param id the entity identifier
