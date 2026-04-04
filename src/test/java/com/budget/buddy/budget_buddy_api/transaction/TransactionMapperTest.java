@@ -2,9 +2,9 @@ package com.budget.buddy.budget_buddy_api.transaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Currency;

@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.base;
 
-import com.budget.buddy.budget_buddy_api.generated.model.Problem;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import java.util.NoSuchElementException;

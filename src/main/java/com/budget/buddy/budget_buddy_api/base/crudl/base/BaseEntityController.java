@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
-import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import java.net.URI;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;

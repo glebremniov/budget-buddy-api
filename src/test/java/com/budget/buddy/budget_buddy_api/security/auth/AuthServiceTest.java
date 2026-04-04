@@ -7,8 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
-import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
+import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
+import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import com.budget.buddy.budget_buddy_api.security.auth.token.AuthTokenService;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenEntity;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenService;

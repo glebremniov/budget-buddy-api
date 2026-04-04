@@ -1,12 +1,12 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
-import com.budget.buddy.budget_buddy_api.generated.api.TransactionsApi;
-import com.budget.buddy.budget_buddy_api.generated.model.PaginatedTransactions;
-import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
-import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.api.TransactionsApi;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.UUID;

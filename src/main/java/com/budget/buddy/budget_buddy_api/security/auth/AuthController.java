@@ -1,10 +1,10 @@
 package com.budget.buddy.budget_buddy_api.security.auth;
 
-import com.budget.buddy.budget_buddy_api.generated.api.AuthApi;
-import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
-import com.budget.buddy.budget_buddy_api.generated.model.LoginRequest;
-import com.budget.buddy.budget_buddy_api.generated.model.RefreshTokenRequest;
-import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
+import com.budget.buddy.budget_buddy_contracts.generated.api.AuthApi;
+import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
+import com.budget.buddy.budget_buddy_contracts.generated.model.LoginRequest;
+import com.budget.buddy.budget_buddy_contracts.generated.model.RefreshTokenRequest;
+import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

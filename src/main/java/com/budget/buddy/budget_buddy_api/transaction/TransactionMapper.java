@@ -1,10 +1,10 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityMapper;
-import com.budget.buddy.budget_buddy_api.generated.model.PaginatedTransactions;
-import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
 import java.util.Currency;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;

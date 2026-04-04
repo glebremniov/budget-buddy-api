@@ -2,9 +2,9 @@ package com.budget.buddy.budget_buddy_api.category;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;

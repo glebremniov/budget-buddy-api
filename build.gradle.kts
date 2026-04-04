@@ -4,7 +4,6 @@ plugins {
   jacoco
   id("org.springframework.boot") version "4.0.5"
   id("io.spring.dependency-management") version "1.1.7"
-  id("org.openapi.generator") version "7.21.0"
   id("org.sonarqube") version "7.2.3.7755"
 }
 
@@ -19,21 +18,29 @@ java {
 
 repositories {
   mavenCentral()
+  maven {
+    name = "GitHubPackages"
+    url = uri("https://maven.pkg.github.com/glebremniov/budget-buddy-contracts")
+    credentials {
+      username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+      password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+    }
+  }
 }
 
 dependencies {
   val mapstructVersion = "1.6.3"
-  val openApiVersion = "3.0.2"
   val lombokMapstructBindingVersion = "0.2.0"
   val jacksonDatabindNullableVersion = "0.2.10"
+  val budgetBuddyContractsVersion = "1.0.0"
 
+  implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
-  implementation("org.springdoc:springdoc-openapi-starter-common:${openApiVersion}")
   implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
   implementation("org.mapstruct:mapstruct:${mapstructVersion}")
 
@@ -104,43 +111,6 @@ configurations {
   named("integrationTestAnnotationProcessor") {
     extendsFrom(configurations.testAnnotationProcessor.get())
   }
-}
-
-tasks.openApiGenerate {
-  generatorName.set("spring")
-  inputSpec.set("${rootDir}/src/main/resources/openapi.yaml")
-  outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
-  apiPackage.set("com.budget.buddy.budget_buddy_api.generated.api")
-  modelPackage.set("com.budget.buddy.budget_buddy_api.generated.model")
-  configOptions.set(
-    mapOf(
-      "useSpringBoot4" to "true",
-//      "useJSpecify" to "true", // https://github.com/OpenAPITools/openapi-generator/pull/23256
-      "openApiNullable" to "true",
-      "generateSupportingFiles" to "false",
-      "useTags" to "true",
-      "interfaceOnly" to "true",
-      "skipOperationExample" to "true",
-      "sourceFolder" to "src/main/java",
-      "useJakartaEe" to "true"
-    )
-  )
-}
-
-sourceSets {
-  main {
-    java {
-      srcDir(layout.buildDirectory.dir("generated/src/main/java"))
-    }
-  }
-}
-
-tasks.compileJava {
-  dependsOn(tasks.openApiGenerate)
-}
-
-tasks.named("compileIntegrationTestJava") {
-  dependsOn(tasks.openApiGenerate)
 }
 
 tasks.named<Test>("test") {

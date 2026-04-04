@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
+import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;

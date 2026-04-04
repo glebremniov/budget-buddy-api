@@ -1,7 +1,7 @@
 package com.budget.buddy.budget_buddy_api.security.auth;
 
-import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
-import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
+import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
+import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import com.budget.buddy.budget_buddy_api.security.auth.token.AuthTokenService;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenService;
 import com.budget.buddy.budget_buddy_api.user.UserService;

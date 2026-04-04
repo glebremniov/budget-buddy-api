@@ -2,9 +2,9 @@ package com.budget.buddy.budget_buddy_api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
-import com.budget.buddy.budget_buddy_api.generated.model.LoginRequest;
-import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
+import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
+import com.budget.buddy.budget_buddy_contracts.generated.model.LoginRequest;
+import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;

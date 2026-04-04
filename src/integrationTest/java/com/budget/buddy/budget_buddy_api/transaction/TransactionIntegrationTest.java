@@ -3,12 +3,12 @@ package com.budget.buddy.budget_buddy_api.transaction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
-import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
-import com.budget.buddy.budget_buddy_api.generated.model.PaginatedTransactions;
-import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;

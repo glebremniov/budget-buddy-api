@@ -3,7 +3,7 @@ package com.budget.buddy.budget_buddy_api.user;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.AbstractBaseEntityService;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
+import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

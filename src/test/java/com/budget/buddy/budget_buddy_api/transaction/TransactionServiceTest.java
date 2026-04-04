@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;

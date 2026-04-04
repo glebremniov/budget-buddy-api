@@ -6,9 +6,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;

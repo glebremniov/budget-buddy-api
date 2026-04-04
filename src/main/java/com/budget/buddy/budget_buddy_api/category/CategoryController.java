@@ -1,11 +1,11 @@
 package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
-import com.budget.buddy.budget_buddy_api.generated.api.CategoriesApi;
-import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
-import com.budget.buddy.budget_buddy_api.generated.model.PaginatedCategories;
+import com.budget.buddy.budget_buddy_contracts.generated.api.CategoriesApi;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedCategories;
 import java.net.URI;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;

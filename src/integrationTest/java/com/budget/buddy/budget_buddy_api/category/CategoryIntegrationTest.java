@@ -3,10 +3,10 @@ package com.budget.buddy.budget_buddy_api.category;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
-import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
-import com.budget.buddy.budget_buddy_api.generated.model.PaginatedCategories;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedCategories;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
