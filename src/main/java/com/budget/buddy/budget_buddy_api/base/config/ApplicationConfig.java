@@ -1,11 +1,12 @@
 package com.budget.buddy.budget_buddy_api.base.config;
 
+import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
+import com.budget.buddy.budget_buddy_api.security.auth.AuthUtils;
 import java.time.Clock;
 import java.util.UUID;
 import java.util.function.Supplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
 
 @Configuration
 public class ApplicationConfig {
@@ -20,9 +21,15 @@ public class ApplicationConfig {
     return UUID::randomUUID;
   }
 
+  /**
+   * Provides the ID of the currently authenticated user by reading the JWT subject from the
+   * active security context.
+   *
+   * @return an {@link OwnerIdProvider} backed by the current request's security context
+   */
   @Bean
-  Converter<String, UUID> ownerIdConverter() {
-    return UUID::fromString;
+  OwnerIdProvider<UUID> ownerIdProvider() {
+    return () -> AuthUtils.requireCurrentUserId(UUID::fromString);
   }
 
 }

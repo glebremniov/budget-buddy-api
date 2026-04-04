@@ -2,7 +2,6 @@ package com.budget.buddy.budget_buddy_api.transaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,13 +19,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -35,29 +29,13 @@ class TransactionServiceTest {
   private TransactionRepository repository;
   @Mock
   private TransactionMapper mapper;
-  @Mock
-  private Converter<String, UUID> ownerIdConverter;
 
   private TransactionService transactionService;
   private final UUID currentUserId = UUID.randomUUID();
 
   @BeforeEach
   void setUp() {
-    transactionService = new TransactionService(repository, mapper, Collections.emptySet(), ownerIdConverter);
-    setupMockAuthentication();
-  }
-
-  private void setupMockAuthentication() {
-    var jwt = mock(Jwt.class);
-    when(jwt.getSubject()).thenReturn(currentUserId.toString());
-    when(ownerIdConverter.convert(currentUserId.toString())).thenReturn(currentUserId);
-
-    var authentication = mock(Authentication.class);
-    when(authentication.getPrincipal()).thenReturn(jwt);
-
-    var securityContext = mock(SecurityContext.class);
-    when(securityContext.getAuthentication()).thenReturn(authentication);
-    SecurityContextHolder.setContext(securityContext);
+    transactionService = new TransactionService(repository, mapper, Collections.emptySet(), () -> currentUserId);
   }
 
   @Nested
