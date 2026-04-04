@@ -16,27 +16,19 @@ import org.springframework.data.repository.query.Param;
  */
 public interface TransactionRepository extends OwnableEntityRepository<TransactionEntity, UUID> {
 
-  String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC_QUERY = """
+  String FIND_ALL_BY_FILTERS_WHERE_CLAUSE = """
       SELECT * FROM transactions
       WHERE owner_id = :ownerId::uuid
       AND (:startDate::date IS NULL OR date >= :startDate::date)
       AND (:endDate::date IS NULL OR date <= :endDate::date)
       AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
-      ORDER BY date DESC
-      LIMIT :limit
-      OFFSET :offset
       """;
 
-  String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_ASC_QUERY = """
-      SELECT * FROM transactions
-      WHERE owner_id = :ownerId::uuid
-      AND (:startDate::date IS NULL OR date >= :startDate::date)
-      AND (:endDate::date IS NULL OR date <= :endDate::date)
-      AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
-      ORDER BY date ASC
-      LIMIT :limit
-      OFFSET :offset
-      """;
+  String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC_QUERY =
+      FIND_ALL_BY_FILTERS_WHERE_CLAUSE + "ORDER BY date DESC LIMIT :limit OFFSET :offset";
+
+  String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_ASC_QUERY =
+      FIND_ALL_BY_FILTERS_WHERE_CLAUSE + "ORDER BY date ASC LIMIT :limit OFFSET :offset";
 
   String COUNT_BY_FILTERS_QUERY = """
       SELECT COUNT(*) FROM transactions

@@ -554,7 +554,6 @@ components:
           enum:
             - EXPENSE
             - INCOME
-            - TRANSFER
         currency:
           type: string
           minLength: 3
@@ -587,7 +586,7 @@ components:
           example: 1299
         type:
           type: string
-          enum: [ EXPENSE, INCOME, TRANSFER ]
+          enum: [ EXPENSE, INCOME ]
         currency:
           type: string
           minLength: 3
@@ -610,7 +609,7 @@ components:
           type: integer
         type:
           type: string
-          enum: [ EXPENSE, INCOME, TRANSFER ]
+          enum: [ EXPENSE, INCOME ]
         currency:
           type: string
           minLength: 3
