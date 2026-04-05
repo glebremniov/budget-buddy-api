@@ -12,9 +12,7 @@ on:
       - 'gradlew'
       - 'gradlew.bat'
       - '.github/workflows/**'
-      - '**/*.properties'
-      - '**/*.yml'
-      - '**/*.yaml'
+      - 'gradle.properties'
   pull_request:
     types: [ opened, synchronize, reopened ]
     paths:
@@ -25,9 +23,7 @@ on:
       - 'gradlew'
       - 'gradlew.bat'
       - '.github/workflows/**'
-      - '**/*.properties'
-      - '**/*.yml'
-      - '**/*.yaml'
+      - 'gradle.properties'
 
 jobs:
   build:

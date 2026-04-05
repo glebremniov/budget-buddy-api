@@ -12,9 +12,7 @@ on:
       - 'gradlew'
       - 'gradlew.bat'
       - '.github/workflows/**'
-      - '**/*.properties'
-      - '**/*.yml'
-      - '**/*.yaml'
+      - 'gradle.properties'
 
 jobs:
   build-and-test:
