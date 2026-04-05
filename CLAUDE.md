@@ -4,14 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stack
 
-Java 25, Spring Boot 4.0.4, Spring Data JDBC, PostgreSQL, Liquibase, MapStruct, Lombok, OpenAPI Generator.
+Java 25, Spring Boot 4.0.5, Spring Data JDBC, PostgreSQL, Liquibase, MapStruct, Lombok.
 
 ## Commands
 
 ```bash
-# Generate code from OpenAPI spec (required after spec changes, before building)
-./gradlew openApiGenerate
-
 # Run locally (auto-starts PostgreSQL via Docker Compose)
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 
@@ -27,7 +24,7 @@ Java 25, Spring Boot 4.0.4, Spring Data JDBC, PostgreSQL, Liquibase, MapStruct, 
 
 ## Architecture
 
-**API-First**: `src/main/resources/openapi.yaml` is the source of truth. Update the spec before implementing endpoints, then run `openApiGenerate` to regenerate models and interfaces.
+**API-First**: The OpenAPI spec lives in the external [budget-buddy-contracts](https://github.com/glebremniov/budget-buddy-contracts) repository. Models and interfaces are consumed as the `com.budgetbuddy:budget-buddy-contracts` dependency (version in `build.gradle.kts`). To change the API contract, update the contracts repo and bump `budgetBuddyContractsVersion` in `build.gradle.kts`.
 
 **Generic CRUDL framework** lives in `base/crudl/` and is the backbone of all domain features:
 
@@ -61,11 +58,10 @@ Increment `version` in `gradle.properties` for every change to code or configura
 
 ## Adding a New Feature
 
-1. Update `openapi.yaml`
-2. Run `./gradlew openApiGenerate`
-3. Add a Liquibase migration if schema changes are needed
-4. Implement: Entity → Repository → Mapper → Service → Controller
-5. Add integration tests in `src/integrationTest/`
+1. If the API contract changes, update the `budget-buddy-contracts` repo and bump `budgetBuddyContractsVersion` in `build.gradle.kts`
+2. Add a Liquibase migration if schema changes are needed
+3. Implement: Entity → Repository → Mapper → Service → Controller
+4. Add integration tests in `src/integrationTest/`
 
 ## Testing
 

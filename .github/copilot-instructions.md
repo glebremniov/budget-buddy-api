@@ -5,16 +5,13 @@ This guide helps Copilot sessions work effectively in this Java/Spring Boot REST
 ## Quick Reference: Commands
 
 ```bash
-# Code generation
-./gradlew openApiGenerate          # Generate DTOs and interfaces from OpenAPI spec (run after spec changes)
-
-# Running
+# Running locally (auto-starts PostgreSQL)
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 
 # Testing
 ./gradlew test                     # Unit tests only
 ./gradlew integrationTest          # Integration tests (Testcontainers + PostgreSQL)
-./gradlew check                    # All tests + quality checks
+./gradlew check                    # All tests + quality checks + SonarQube analysis
 
 # Running specific tests
 ./gradlew test --tests "com.budget.buddy.budget_buddy_api.CategoryServiceTest"
@@ -27,16 +24,74 @@ This guide helps Copilot sessions work effectively in this Java/Spring Boot REST
 # Always increment version in gradle.properties before merging to main (use semantic versioning)
 ```
 
+## Environment Setup
+
+### Prerequisites
+
+- **Java 25** — required by `toolchain` in `build.gradle.kts`
+- **Docker & Docker Compose** — for PostgreSQL and integration tests
+- **GitHub credentials** — required to fetch `budget-buddy-contracts` from GitHub Packages
+
+### GitHub Packages Authentication
+
+The project depends on `com.budgetbuddy:budget-buddy-contracts` from GitHub Packages. Authenticate using one of:
+
+**Option 1: Environment variables (preferred for CI/CD)**
+```bash
+export GITHUB_ACTOR=your-username
+export GITHUB_TOKEN=your-personal-access-token
+./gradlew build
+```
+
+**Option 2: gradle.properties (for local development)**
+```
+# ~/.gradle/gradle.properties or ./gradle.properties
+gpr.user=your-username
+gpr.key=your-personal-access-token
+```
+
+> **Token requirements:** Personal access token must have `read:packages` scope. See [GitHub docs](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#authenticating-with-a-personal-access-token).
+
+### Local Development with Docker Compose
+
+For development without the auto-starting Spring Docker Compose (e.g., to test with custom PostgreSQL settings), use the local compose file:
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Start PostgreSQL + pgAdmin (optional)
+docker compose -f docker-compose.local.yaml up -d
+
+# Run the app with dev profile (connects to Docker PostgreSQL)
+./gradlew bootRun --args='--spring.profiles.active=dev'
+
+# Stop services
+docker compose -f docker-compose.local.yaml down
+```
+
+**Environment variables in `.env`:**
+- `DB_NAME` — PostgreSQL database name
+- `DB_USER` — PostgreSQL username
+- `DB_PASSWORD` — PostgreSQL password
+- `DB_IMAGE_TAG` — PostgreSQL image version (e.g., `18.3-alpine`)
+- `DOCKER_PLATFORM` — target platform (e.g., `linux/arm64` for Mac M1/M2)
+
+
 ## Architecture Overview
 
 ### API-First Design
 
-**`src/main/resources/openapi.yaml`** is the authoritative API specification (managed by [budget-buddy-contracts](https://github.com/glebremniov/budget-buddy-contracts) package). Any endpoint or model change must:
-1. Update the OpenAPI spec
-2. Run `./gradlew openApiGenerate` to regenerate DTOs, request/response models, and controller interfaces
-3. Then implement the business logic
+**External OpenAPI Contracts**: The API specification is managed by the external [`budget-buddy-contracts`](https://github.com/glebremniov/budget-buddy-contracts) repository. This project imports the generated models and interfaces via the `com.budgetbuddy:budget-buddy-contracts` dependency (version specified in `build.gradle.kts`, currently `1.0.1`).
 
-Generated code lives in `build/generated/sources/openapi/` (do not edit directly).
+When the API contract changes:
+1. Update the `budget-buddy-contracts` repository with the new OpenAPI spec
+2. Bump `budgetBuddyContractsVersion` in `build.gradle.kts`
+3. Run `./gradlew build` to fetch the new contracts
+4. Implement the business logic to satisfy the new contract
+
+This approach decouples API contracts from implementation, allowing multiple services to consume the same contracts.
+
 
 ### Generic CRUDL Framework
 
@@ -145,23 +200,65 @@ transaction/           # Transaction CRUDL (extends OwnableEntityService)
 - `@Getter`, `@Setter`, `@Data`, `@Builder` for reducing boilerplate
 - MapStruct processors configured to work with Lombok
 
-## Development Workflow
+### Security Configuration
+
+**JWT Implementation:**
+- Access tokens: Short-lived JWTs containing `ownerId` claim for multi-tenant filtering
+- Refresh tokens: Opaque tokens stored in PostgreSQL (enables revocation)
+- Token generation/parsing in `security/jwt/` package
+- Refresh token management in `security/refresh/` package
+
+**Endpoint Security:**
+- **Public endpoints:** `POST /v1/auth/register`, `POST /v1/auth/login`, `POST /v1/auth/refresh`, `GET /actuator/health`
+- **Protected endpoints:** All others require `Authorization: Bearer <access_token>` header
+- Multi-tenant isolation: `OwnableEntityService` automatically filters all queries by `ownerId` extracted from JWT
+
+**Token Configuration (environment variables):**
+- `BUDGET_BUDDY_API_ACCESS_TOKEN_SECRET` — JWT signing key (min 32 chars for HS256)
+- `BUDGET_BUDDY_API_ACCESS_TOKEN_VALIDITY_SECONDS` — Access token expiry (suggested: 900 seconds / 15 minutes)
+- `BUDGET_BUDDY_API_REFRESH_TOKEN_VALIDITY_SECONDS` — Refresh token expiry (suggested: 1209600 seconds / 14 days)
+
+### Database Migrations
+
+**Schema management:** Liquibase at `src/main/resources/db/changelog/`
+
+**File structure:**
+- `db.changelog-master.yaml` — Master changelog referencing all migrations
+- `migrations/` — Numbered SQL migration files (e.g., `001-initial-schema.sql`, `002-refresh-tokens.sql`)
+
+**Adding a migration:**
+1. Create new SQL file in `migrations/` with next number (e.g., `007-add-column.sql`)
+2. Add changeset entry in `db.changelog-master.yaml`:
+   ```yaml
+   - include:
+       file: migrations/007-add-column.sql
+   ```
+3. Migration auto-runs on next application startup
+4. Migrations are tracked in `databasechangelog` table (do not modify manually)
+
+**Migration best practices:**
+- Keep migrations idempotent (safe to run multiple times)
+- Use `IF NOT EXISTS` and `IF EXISTS` clauses where applicable
+- Test migrations locally before committing
+- Never edit existing migration files; create new ones instead
+
+
 
 ### Adding a New Feature
 
-1. **Update OpenAPI spec** in `budget-buddy-contracts` repository
-2. **Run code generation:** `./gradlew openApiGenerate`
-3. **Add Liquibase migration** if schema changes needed
-4. **Implement in order:** Entity → Repository → Mapper → Service → Controller
-5. **Add integration tests** in `src/integrationTest/java/`
-6. **Increment version** in `gradle.properties` before merging
-7. **Run full test suite:** `./gradlew check`
+1. **If API contract changes:** Update the `budget-buddy-contracts` repository, bump the version in `build.gradle.kts`, then run `./gradlew build` to fetch new contracts
+2. **Add Liquibase migration** if schema changes needed (numbered SQL files in `src/main/resources/db/changelog/migrations/`)
+3. **Implement in order:** Entity → Repository → Mapper → Service → Controller
+4. **Add integration tests** in `src/integrationTest/java/`
+5. **Increment version** in `gradle.properties` before merging
+6. **Run full test suite:** `./gradlew check`
 
 ### Accessing External Contracts
 
 - The project depends on `com.budgetbuddy:budget-buddy-contracts` from GitHub Packages
 - Requires GitHub credentials: set `GITHUB_ACTOR` and `GITHUB_TOKEN` environment variables (or `gpr.user`/`gpr.key` in `gradle.properties`)
-- Generated models and interfaces are available after `openApiGenerate` runs
+- Models and interfaces become available after dependencies are resolved in the build
+
 
 ## Versioning
 
@@ -174,3 +271,73 @@ transaction/           # Transaction CRUDL (extends OwnableEntityService)
 - **dev profile:** Includes Spring Boot Docker Compose auto-starter; PostgreSQL container launches on startup
 - **prod profile:** Used in Docker deployments; all environment-specific configs loaded from env vars
 - Spring profiles active: set via `--spring.profiles.active=dev` or `SPRING_PROFILES_ACTIVE` env var
+
+## Continuous Integration & Deployment
+
+### GitHub Actions Workflows
+
+All workflows are in `.github/workflows/`:
+
+**`ci.yaml`** — Runs on every push to `main` and pull request:
+- Sets up JDK 25 and Gradle build cache
+- Runs `./gradlew build sonar` (unit tests, integration tests via Testcontainers, SonarQube analysis)
+- Caches SonarQube packages and Gradle dependencies
+- Uploads JAR artifact to GitHub (1-day retention)
+- **Triggers on:** Code changes (`src/`, `build.gradle*`, `gradle/`, `docker-compose*.yaml`)
+- **Requires:** `SONAR_TOKEN` secret, `GITHUB_TOKEN` (auto-provided)
+
+**`release.yaml`** — Triggered manually from Actions tab:
+- Builds and publishes Docker image to GitHub Container Registry (GHCR)
+- Creates GitHub release with changelog
+- Requires `GITHUB_TOKEN` (auto-provided)
+
+**`dependency-submission.yaml`** — Automatically generates dependency graph for GitHub's supply chain security features
+
+### SonarQube Integration
+
+- Configuration in `build.gradle.kts` (sonar task and properties block)
+- Automatic Jacoco code coverage XML report generation
+- Excludes `**/generated/**` from coverage calculations
+- Requires `SONAR_TOKEN` secret in repository settings
+- Project key: `glebremniov_budget-buddy-api` (organization: `glebremniov`)
+- [View dashboard](https://sonarcloud.io/summary/new_code?id=glebremniov_budget-buddy-api)
+
+### Docker Deployment
+
+**Building Docker image locally:**
+```bash
+./gradlew bootBuildImage --imageName=ghcr.io/your-username/budget-buddy-api:latest
+```
+
+**Deploying with Docker Compose:**
+```bash
+# Copy and configure environment
+cp .env.example .env
+# Edit .env: set BUDGET_BUDDY_API_IMAGE, JWT secrets, database credentials, etc.
+
+# Start all services (API + PostgreSQL)
+docker compose up -d
+
+# View logs
+docker compose logs -f app
+
+# Health check
+curl http://localhost:8080/actuator/health
+
+# Stop services
+docker compose down
+```
+
+**Environment variables for production deployment** (set in `.env`):
+| Variable | Example | Notes |
+|---|---|---|
+| `BUDGET_BUDDY_API_IMAGE` | `ghcr.io/user/budget-buddy-api:0.1.13` | Docker image URI |
+| `SPRING_PROFILES_ACTIVE` | `prod` | Use `prod` for production |
+| `BUDGET_BUDDY_API_ACCESS_TOKEN_SECRET` | 32+ random characters | JWT signing secret; min 32 chars |
+| `BUDGET_BUDDY_API_ACCESS_TOKEN_VALIDITY_SECONDS` | `900` | Token expiry in seconds (15 min) |
+| `BUDGET_BUDDY_API_REFRESH_TOKEN_VALIDITY_SECONDS` | `1209600` | Refresh token expiry (14 days) |
+| `DB_NAME` | `budget_buddy_db` | PostgreSQL database name |
+| `DB_USER` | `budget_buddy_user` | PostgreSQL username |
+| `DB_PASSWORD` | strong-random-password | PostgreSQL password |
+| `DB_IMAGE_TAG` | `18.3-alpine` | PostgreSQL image version |
+| `DOCKER_PLATFORM` | `linux/arm64` | Target platform (`linux/arm64` for Mac M1/M2, `linux/amd64` for Intel) |
