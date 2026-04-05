@@ -4,6 +4,19 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'build.gradle*'
+      - 'settings.gradle*'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/**'
+      - 'Dockerfile'
+      - 'docker-compose*.yml'
+      - '**/*.properties'
+      - '**/*.yml'
+      - '**/*.yaml'
 
 jobs:
   build-and-test:

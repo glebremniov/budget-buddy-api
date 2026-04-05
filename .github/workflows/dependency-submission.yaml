@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'build.gradle*'
+      - 'settings.gradle*'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/dependency-submission.yaml'
 
 jobs:
   dependency-submission:
