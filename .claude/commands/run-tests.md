@@ -4,7 +4,7 @@ Run the appropriate test suite and surface failures clearly. Accepts an optional
 - `/run-tests` — run unit tests only (`./gradlew test`)
 - `/run-tests integration` — run integration tests only (`./gradlew integrationTest`)
 - `/run-tests all` — run full check (`./gradlew check`)
-- `/run-tests <ClassName>` — run a single test class (auto-detects unit vs integration by `IT` suffix)
+- `/run-tests <ClassName>` — run a single test class (auto-detects unit vs integration by `IntegrationTest` suffix)
 
 **Steps:**
 
@@ -12,7 +12,7 @@ Run the appropriate test suite and surface failures clearly. Accepts an optional
    - No argument → unit tests: `./gradlew test`
    - `integration` → `./gradlew integrationTest`
    - `all` → `./gradlew check`
-   - Class name ending in `IT` → `./gradlew integrationTest --tests "com.budget.buddy.budget_buddy_api.<ClassName>"`
+   - Class name ending in `IntegrationTest` → `./gradlew integrationTest --tests "com.budget.buddy.budget_buddy_api.<ClassName>"`
    - Any other class name → `./gradlew test --tests "com.budget.buddy.budget_buddy_api.<ClassName>"`
 
 2. Run the command and capture output.
