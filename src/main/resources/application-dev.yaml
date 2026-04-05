@@ -13,6 +13,9 @@ management:
         include: "*"
 
 security:
+  cors:
+    allowed-origin-patterns:
+      - "http://localhost:[*]"
   access-token:
     validity-seconds: 86400 # 1 day
   refresh-token:

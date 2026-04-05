@@ -18,6 +18,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Security configuration for the application. Configures HTTP security, authentication manager, password encoder, and user details manager.
@@ -33,8 +34,9 @@ public class SecurityConfig {
    * @return the {@link SecurityFilterChain}
    */
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http) {
+  SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) {
     http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/actuator/health").permitAll()
             .requestMatchers("/v1/auth/login").permitAll()
