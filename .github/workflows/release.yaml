@@ -12,8 +12,6 @@ on:
       - 'gradlew'
       - 'gradlew.bat'
       - '.github/workflows/**'
-      - 'Dockerfile'
-      - 'docker-compose*.yml'
       - '**/*.properties'
       - '**/*.yml'
       - '**/*.yaml'
