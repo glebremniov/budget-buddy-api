@@ -4,8 +4,28 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'build.gradle*'
+      - 'settings.gradle*'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/**'
+      - 'gradle.properties'
+      - 'docker-compose*.yaml'
   pull_request:
     types: [ opened, synchronize, reopened ]
+    paths:
+      - 'src/**'
+      - 'build.gradle*'
+      - 'settings.gradle*'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/**'
+      - 'gradle.properties'
+      - 'docker-compose*.yaml'
 
 jobs:
   build:
