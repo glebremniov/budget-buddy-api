@@ -82,7 +82,7 @@ docker compose -f docker-compose.local.yaml down
 
 ### API-First Design
 
-**External OpenAPI Contracts**: The API specification is managed by the external [`budget-buddy-contracts`](https://github.com/glebremniov/budget-buddy-contracts) repository. This project imports the generated models and interfaces via the `com.budgetbuddy:budget-buddy-contracts` dependency (version specified in `build.gradle.kts`, currently `1.0.1`).
+**External OpenAPI Contracts**: The API specification is managed by the external [`budget-buddy-contracts`](https://github.com/budget-buddy-org/budget-buddy-contracts) repository. This project imports the generated models and interfaces via the `com.budgetbuddy:budget-buddy-contracts` dependency (version specified in `build.gradle.kts`, currently `1.0.1`).
 
 When the API contract changes:
 1. Update the `budget-buddy-contracts` repository with the new OpenAPI spec
@@ -302,7 +302,7 @@ All workflows are in `.github/workflows/`:
 - Automatic Jacoco code coverage XML report generation
 - Excludes `**/generated/**` from coverage calculations
 - Requires `SONAR_TOKEN` secret in repository settings
-- Project key: `glebremniov_budget-buddy-api` (organization: `glebremniov`)
+- Project key: `glebremniov_budget-buddy-api` (organization: `budget-buddy-org`)
 - [View dashboard](https://sonarcloud.io/summary/new_code?id=glebremniov_budget-buddy-api)
 
 ### Docker Deployment

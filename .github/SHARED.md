@@ -22,7 +22,7 @@ This file contains common guidance shared across all AI agent instruction files 
 
 ### API-First Design
 
-The OpenAPI spec lives in the external [budget-buddy-contracts](https://github.com/glebremniov/budget-buddy-contracts) repository. Models and interfaces are consumed as the `com.budgetbuddy:budget-buddy-contracts` dependency (version in `build.gradle.kts`). To change the API contract:
+The OpenAPI spec lives in the external [budget-buddy-contracts](https://github.com/budget-buddy-org/budget-buddy-contracts) repository. Models and interfaces are consumed as the `com.budgetbuddy:budget-buddy-contracts` dependency (version in `build.gradle.kts`). To change the API contract:
 1. Update the `budget-buddy-contracts` repository
 2. Bump `budgetBuddyContractsVersion` in `build.gradle.kts`
 3. Run `./gradlew build` to fetch new contracts

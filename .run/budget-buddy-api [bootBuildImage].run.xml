@@ -15,7 +15,7 @@
       <option name="taskNames">
         <list>
           <option value="bootBuildImage"/>
-          <option value="--imageName=glebremniov/budget-buddy-api"/>
+          <option value="--imageName=budget-buddy-org/budget-buddy-api"/>
         </list>
       </option>
       <option name="vmOptions" value=""/>

@@ -8,8 +8,8 @@ Review a pull request and post a structured GitHub review. Accepts a PR number o
 
 2. Fetch PR metadata and diff:
    ```
-   gh pr view <number> --repo glebremniov/budget-buddy-api
-   gh pr diff <number> --repo glebremniov/budget-buddy-api
+   gh pr view <number> --repo budget-buddy-org/budget-buddy-api
+   gh pr diff <number> --repo budget-buddy-org/budget-buddy-api
    ```
 
 3. Read the relevant changed source files from the local working tree to get full context (don't rely solely on the diff)
@@ -54,7 +54,7 @@ Review a pull request and post a structured GitHub review. Accepts a PR number o
 
 6. Post the review using `gh pr review`:
    ```
-   gh pr review <number> --repo glebremniov/budget-buddy-api \
+   gh pr review <number> --repo budget-buddy-org/budget-buddy-api \
      --comment --body "<review body>"
    ```
    Use `--approve` instead of `--comment` only if there are zero Must-fix or Should-fix issues.
