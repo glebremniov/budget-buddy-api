@@ -2,7 +2,6 @@
   "name": "budget-buddy-api",
   "version": "0.0.0-semantic-release",
   "private": true,
-  "packageManager": "pnpm@10.0.0",
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
