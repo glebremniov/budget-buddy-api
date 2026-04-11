@@ -166,3 +166,6 @@ Temporary Items
 
 !.env.example
 .env
+
+# Node / semantic-release tooling
+node_modules/
