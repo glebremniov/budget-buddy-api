@@ -3,11 +3,11 @@ package com.budget.buddy.budget_buddy_api.security.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
+import com.budget.buddy.budget_buddy_api.security.refresh.token.TestRefreshTokenRepository;
 import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_contracts.generated.model.LoginRequest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.RefreshTokenRequest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
-import com.budget.buddy.budget_buddy_api.security.refresh.token.TestRefreshTokenRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -53,6 +53,19 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
         exchange.getResponse().getContentAsString(), AuthToken.class);
   }
 
+  @Override
+  protected AuthToken login(String username, String password) throws Exception {
+    var exchange = mvc.post().uri("/v1/auth/login")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(json(new LoginRequest().username(username).password(password)))
+        .exchange();
+
+    assertThat(exchange).hasStatus(HttpStatus.OK);
+
+    return objectMapper.readValue(
+        exchange.getResponse().getContentAsString(), AuthToken.class);
+  }
+
   // ── tests ──────────────────────────────────────────────────────────────────
 
   @Nested
@@ -71,8 +84,8 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
 
       // Then
       assertThat(exchange)
-          .as("Registration should return 201 Created")
-          .hasStatus(HttpStatus.CREATED);
+          .as("Registration should return 204 No Content")
+          .hasStatus(HttpStatus.NO_CONTENT);
     }
 
     @Test

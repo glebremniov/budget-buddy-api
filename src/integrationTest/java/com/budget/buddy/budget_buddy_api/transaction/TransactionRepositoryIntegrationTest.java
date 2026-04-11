@@ -55,7 +55,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
   void shouldFilterTransactions(Direction direction) {
     // Given
     var t1 = new TransactionEntity();
-    t1.setAmount(100);
+    t1.setAmount(100L);
     t1.setCurrency(Currency.getInstance("USD"));
     t1.setType(TransactionType.EXPENSE);
     t1.setDate(LocalDate.now().minusDays(1));
@@ -64,7 +64,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
     transactionRepository.save(t1);
 
     var t2 = new TransactionEntity();
-    t2.setAmount(200);
+    t2.setAmount(200L);
     t2.setCurrency(Currency.getInstance("USD"));
     t2.setType(TransactionType.EXPENSE);
     t2.setDate(LocalDate.now());
@@ -88,7 +88,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
   void shouldCountByFilter() {
     // Given
     var t1 = new TransactionEntity();
-    t1.setAmount(100);
+    t1.setAmount(100L);
     t1.setCurrency(Currency.getInstance("USD"));
     t1.setType(TransactionType.EXPENSE);
     t1.setDate(LocalDate.now());
@@ -109,7 +109,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
   void shouldSaveAndFindByIdAndOwnerId() {
     // Given
     var transaction = new TransactionEntity();
-    transaction.setAmount(50);
+    transaction.setAmount(50L);
     transaction.setCurrency(Currency.getInstance("EUR"));
     transaction.setType(TransactionType.EXPENSE);
     transaction.setDate(LocalDate.now());
@@ -122,6 +122,6 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
 
     // Then
     assertThat(found).isPresent();
-    assertThat(found.get().getAmount()).isEqualTo(50);
+    assertThat(found.get().getAmount()).isEqualTo(50L);
   }
 }

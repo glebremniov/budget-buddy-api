@@ -5,8 +5,8 @@ import com.budget.buddy.budget_buddy_contracts.generated.api.TransactionsApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -42,13 +42,9 @@ public class TransactionController
       UUID categoryId,
       LocalDate start,
       LocalDate end,
-      String order
+      String sort
   ) {
-    var sort = Direction.fromOptionalString(order)
-        .map(direction -> Sort.by(direction, "date"))
-        .orElse(DEFAULT_SORT);
-
-    var pageable = PageRequest.of(offset, limit, sort);
+    var pageable = PageRequest.of(offset, limit, buildSort(sort));
     var filter = TransactionFilter.of(categoryId, start, end);
     var items = service.list(filter, pageable);
     var total = service.count(filter);
@@ -92,4 +88,9 @@ public class TransactionController
     return URI.create("/v1/transactions/" + created.getId());
   }
 
+  private static Sort buildSort(String sortStr) {
+    return Direction.fromOptionalString(sortStr)
+        .map(direction -> Sort.by(direction, "date"))
+        .orElse(DEFAULT_SORT);
+  }
 }

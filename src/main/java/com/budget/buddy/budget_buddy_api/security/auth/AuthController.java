@@ -7,7 +7,6 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.RefreshTokenReque
 import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,7 +34,7 @@ public class AuthController implements AuthApi {
   @Override
   public ResponseEntity<Void> registerUser(RegisterRequest registerRequest) {
     authService.register(registerRequest);
-    return ResponseEntity.status(HttpStatus.CREATED).build();
+    return ResponseEntity.noContent().build();
   }
 
   @Override

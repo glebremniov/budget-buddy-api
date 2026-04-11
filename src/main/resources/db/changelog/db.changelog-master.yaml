@@ -17,3 +17,6 @@ databaseChangeLog:
   - include:
       file: migrations/006-hash-refresh-tokens.sql
       relativeToChangelogFile: true
+  - include:
+      file: migrations/007-transaction-amount-bigint.sql
+      relativeToChangelogFile: true

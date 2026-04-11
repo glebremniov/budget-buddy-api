@@ -7,7 +7,6 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.LoginRequest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
@@ -41,7 +40,7 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
         .content(json(new RegisterRequest().username(username).password(password)))
         .exchange();
 
-    assertThat(exchange).hasStatus(HttpStatus.CREATED);
+    assertThat(exchange).hasStatus2xxSuccessful();
   }
 
   protected AuthToken login(String username, String password) throws Exception {
@@ -50,7 +49,7 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
         .content(json(new LoginRequest().username(username).password(password)))
         .exchange();
 
-    assertThat(exchange).hasStatus(HttpStatus.OK);
+    assertThat(exchange).hasStatus2xxSuccessful();
 
     return objectMapper.readValue(
         exchange.getResponse().getContentAsString(), AuthToken.class);
