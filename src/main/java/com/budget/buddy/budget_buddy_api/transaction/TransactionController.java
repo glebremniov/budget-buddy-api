@@ -44,7 +44,8 @@ public class TransactionController
       LocalDate end,
       String sort
   ) {
-    var pageable = PageRequest.of(offset, limit, buildSort(sort));
+    int pageNumber = offset / limit;
+    var pageable = PageRequest.of(pageNumber, limit, buildSort(sort));
     var filter = TransactionFilter.of(categoryId, start, end);
     var items = service.list(filter, pageable);
     var total = service.count(filter);

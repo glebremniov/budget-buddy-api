@@ -90,11 +90,12 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
    * Internal method to list entities with limit and offset.
    *
    * @param limit the maximum number of items to return
-   * @param offset the page number (0-indexed)
+   * @param offset the skip count
    * @return {@link ResponseEntity} with the paginated response
    */
   public ResponseEntity<L> listInternal(Integer limit, Integer offset) {
-    return listInternal(PageRequest.of(offset, limit));
+    int pageNumber = offset / limit;
+    return listInternal(PageRequest.of(pageNumber, limit));
   }
 
   /**
@@ -108,7 +109,7 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
 
     var meta = new PaginationMeta();
     meta.setLimit(items.getSize());
-    meta.setOffset(items.getNumber());
+    meta.setOffset((int) items.getPageable().getOffset());
     meta.setTotal(items.getTotalElements());
 
     var response = mapper.toPageResponse(items.getContent(), meta);
