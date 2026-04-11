@@ -41,8 +41,8 @@ public class CategoryController
   }
 
   @Override
-  public ResponseEntity<PaginatedCategories> listCategories(Integer limit, Integer offset) {
-    return super.listInternal(limit, offset);
+  public ResponseEntity<PaginatedCategories> listCategories(Integer page, Integer size) {
+    return super.listInternal(page, size);
   }
 
   @Override

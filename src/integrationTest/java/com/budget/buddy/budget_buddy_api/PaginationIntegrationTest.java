@@ -54,82 +54,81 @@ class PaginationIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   @Test
-  void should_ReturnCorrectPage_When_OffsetIsSkipCount_ForTransactions() throws Exception {
+  void should_ReturnSecondPage_When_PageIs1AndSizeIs2_ForTransactions() throws Exception {
     // Given: 5 transactions, sorted by date DESC: T5, T4, T3, T2, T1
-    // We want to skip 2 (T5, T4) and take 2 (T3, T2)
-    int limit = 2;
-    int offset = 2;
+    // page=1, size=2 skips the first 2 (T5, T4) and returns the next 2 (T3, T2)
+    int page = 1;
+    int size = 2;
 
     // When
-    var result = mvc.get().uri("/v1/transactions?limit={limit}&offset={offset}", limit, offset)
+    var result = mvc.get().uri("/v1/transactions?page={page}&size={size}", page, size)
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
         .exchange();
 
     // Then
     assertThat(result).hasStatusOk();
-    var page = parseBody(result, PaginatedTransactions.class);
-    
-    assertThat(page.getItems()).hasSize(2);
-    assertThat(page.getItems().get(0).getAmount()).isEqualTo(300L);
-    assertThat(page.getItems().get(1).getAmount()).isEqualTo(200L);
-    
-    assertThat(page.getMeta().getOffset()).isEqualTo(2);
-    assertThat(page.getMeta().getLimit()).isEqualTo(2);
-    assertThat(page.getMeta().getTotal()).isEqualTo(5L);
+    var response = parseBody(result, PaginatedTransactions.class);
+
+    assertThat(response.getItems()).hasSize(2);
+    assertThat(response.getItems().get(0).getAmount()).isEqualTo(300L); // T3
+    assertThat(response.getItems().get(1).getAmount()).isEqualTo(200L); // T2
+
+    assertThat(response.getMeta().getPage()).isEqualTo(1);
+    assertThat(response.getMeta().getSize()).isEqualTo(2);
+    assertThat(response.getMeta().getTotal()).isEqualTo(5L);
   }
 
   @Test
-  void should_ReturnCorrectPage_When_OffsetIsNotPageAligned() throws Exception {
+  void should_ReturnPartialLastPage_When_TotalIsNotDivisibleBySize_ForTransactions() throws Exception {
     // Given: 5 transactions, sorted by date DESC: T5, T4, T3, T2, T1
-    // We want to skip 1 (T5) and take 2 (T4, T3)
-    int limit = 2;
-    int offset = 1;
+    // page=2, size=2 skips the first 4 (T5, T4, T3, T2) and returns the remainder (T1)
+    int page = 2;
+    int size = 2;
 
     // When
-    var result = mvc.get().uri("/v1/transactions?limit={limit}&offset={offset}", limit, offset)
+    var result = mvc.get().uri("/v1/transactions?page={page}&size={size}", page, size)
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
         .exchange();
 
     // Then
     assertThat(result).hasStatusOk();
-    var page = parseBody(result, PaginatedTransactions.class);
+    var response = parseBody(result, PaginatedTransactions.class);
 
-    assertThat(page.getItems()).hasSize(2);
-    assertThat(page.getItems().get(0).getAmount()).isEqualTo(400L); // T4
-    assertThat(page.getItems().get(1).getAmount()).isEqualTo(300L); // T3
+    assertThat(response.getItems()).hasSize(1);
+    assertThat(response.getItems().get(0).getAmount()).isEqualTo(100L); // T1
 
-    assertThat(page.getMeta().getOffset()).isEqualTo(1);
-    assertThat(page.getMeta().getLimit()).isEqualTo(2);
-    assertThat(page.getMeta().getTotal()).isEqualTo(5L);
+    assertThat(response.getMeta().getPage()).isEqualTo(2);
+    assertThat(response.getMeta().getSize()).isEqualTo(2);
+    assertThat(response.getMeta().getTotal()).isEqualTo(5L);
   }
 
   @Test
-  void should_ReturnCorrectPage_When_OffsetIsSkipCount_ForCategories() throws Exception {
+  void should_ReturnSecondPage_When_PageIs1AndSizeIs2_ForCategories() throws Exception {
     // Create additional 4 categories (total 5)
     createCategory("Category 2");
     createCategory("Category 3");
     createCategory("Category 4");
     createCategory("Category 5");
 
-    int limit = 2;
-    int offset = 2;
+    int page = 1;
+    int size = 2;
 
     // When
-    var result = mvc.get().uri("/v1/categories?limit={limit}&offset={offset}", limit, offset)
+    var result = mvc.get().uri("/v1/categories?page={page}&size={size}", page, size)
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
         .exchange();
 
     // Then
     assertThat(result).hasStatusOk();
-    var page = parseBody(result, PaginatedCategories.class);
+    var response = parseBody(result, PaginatedCategories.class);
 
-    assertThat(page.getItems()).hasSize(2);
+    assertThat(response.getItems()).hasSize(2);
     // Assuming default sort is by creation order (id)
-    assertThat(page.getItems().get(0).getName()).isEqualTo("Category 3");
-    assertThat(page.getItems().get(1).getName()).isEqualTo("Category 4");
+    assertThat(response.getItems().get(0).getName()).isEqualTo("Category 3");
+    assertThat(response.getItems().get(1).getName()).isEqualTo("Category 4");
 
-    assertThat(page.getMeta().getOffset()).isEqualTo(2);
-    assertThat(page.getMeta().getLimit()).isEqualTo(2);
-    assertThat(page.getMeta().getTotal()).isEqualTo(5L);
+    assertThat(response.getMeta().getPage()).isEqualTo(1);
+    assertThat(response.getMeta().getSize()).isEqualTo(2);
+    assertThat(response.getMeta().getTotal()).isEqualTo(5L);
   }
 }

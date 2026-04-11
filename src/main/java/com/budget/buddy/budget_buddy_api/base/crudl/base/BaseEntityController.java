@@ -2,6 +2,7 @@ package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import java.net.URI;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
@@ -87,14 +88,14 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
   }
 
   /**
-   * Internal method to list entities with limit and offset.
+   * Internal method to list entities with page and size.
    *
-   * @param limit the maximum number of items to return
-   * @param offset the skip count
+   * @param page zero-based page number
+   * @param size the number of items per page
    * @return {@link ResponseEntity} with the paginated response
    */
-  public ResponseEntity<L> listInternal(Integer limit, Integer offset) {
-    return listInternal(new OffsetPageRequest(offset, limit));
+  public ResponseEntity<L> listInternal(Integer page, Integer size) {
+    return listInternal(PageRequest.of(page, size));
   }
 
   /**
@@ -107,8 +108,8 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
     var items = service.list(pageable);
 
     var meta = new PaginationMeta();
-    meta.setLimit(items.getSize());
-    meta.setOffset((int) items.getPageable().getOffset());
+    meta.setPage(items.getNumber());
+    meta.setSize(items.getSize());
     meta.setTotal(items.getTotalElements());
 
     var response = mapper.toPageResponse(items.getContent(), meta);
