@@ -108,11 +108,7 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    * @return true if the value is present (even if it's null), false otherwise
    */
   @Condition
-  default boolean isPresent(Object value) {
-    if (value instanceof JsonNullable<?> nullable) {
-      return nullable.isPresent();
-    }
-
-    return value != null;
+  default boolean isPresent(JsonNullable<?> value) {
+    return value != null && value.isPresent();
   }
 }

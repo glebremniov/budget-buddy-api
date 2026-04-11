@@ -159,8 +159,7 @@ class TransactionMapperTest {
     }
 
     @Test
-    void
-    should_NotUpdate_When_Undefined() {
+    void should_NotUpdate_When_Undefined() {
       // Given
       var originalDesc = "Keep Me";
       var entity = new TransactionEntity(
