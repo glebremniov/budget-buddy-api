@@ -1,16 +1,17 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
-import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.UUID;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CategoryMapperTest {
 
@@ -131,6 +132,40 @@ class CategoryMapperTest {
       assertThat(entity.getName())
           .as("Entity name should remain unchanged when the update request contains null")
           .isEqualTo(originalName);
+    }
+  }
+
+  @Nested
+  class ReplaceEntity {
+
+    @Test
+    void should_OverwriteExistingEntity_But_PreserveMetadata() {
+      // Given
+      var originalId = UUID.randomUUID();
+      var originalOwnerId = UUID.randomUUID();
+      var originalCreatedAt = OffsetDateTime.now().minusDays(1);
+      var originalUpdatedAt = OffsetDateTime.now().minusHours(1);
+      var originalVersion = 10;
+
+      var entity = new CategoryEntity(originalId, "Old Name", originalOwnerId);
+      entity.setCreatedAt(originalCreatedAt);
+      entity.setUpdatedAt(originalUpdatedAt);
+      entity.setVersion(originalVersion);
+
+      var replace = new CategoryWrite("New Name");
+
+      // When
+      categoryMapper.replaceEntity(replace, entity);
+
+      // Then
+      assertThat(entity)
+          .as("Entity name should be replaced, but metadata must be preserved")
+          .returns("New Name", CategoryEntity::getName)
+          .returns(originalId, CategoryEntity::getId)
+          .returns(originalOwnerId, CategoryEntity::getOwnerId)
+          .returns(originalVersion, CategoryEntity::getVersion)
+          .returns(originalCreatedAt, CategoryEntity::getCreatedAt)
+          .returns(originalUpdatedAt, CategoryEntity::getUpdatedAt);
     }
   }
 }

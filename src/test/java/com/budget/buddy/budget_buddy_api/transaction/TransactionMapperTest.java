@@ -1,19 +1,20 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+import org.openapitools.jackson.nullable.JsonNullable;
+
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import org.openapitools.jackson.nullable.JsonNullable;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class TransactionMapperTest {
 
@@ -158,7 +159,8 @@ class TransactionMapperTest {
     }
 
     @Test
-    void should_NotUpdate_When_Undefined() {
+    void
+    should_NotUpdate_When_Undefined() {
       // Given
       var originalDesc = "Keep Me";
       var entity = new TransactionEntity(
@@ -208,6 +210,64 @@ class TransactionMapperTest {
       assertThat(entity.getDescription())
           .as("Description should be cleared when explicitly set to null in PATCH")
           .isNull();
+    }
+  }
+
+  @Nested
+  class ReplaceEntity {
+
+    @Test
+    void should_OverwriteWithNull_When_ProvidedInReplaceRequest_But_PreserveMetadata() {
+      // Given
+      var originalId = UUID.randomUUID();
+      var originalOwnerId = UUID.randomUUID();
+      var originalCreatedAt = OffsetDateTime.now().minusDays(1);
+      var originalUpdatedAt = OffsetDateTime.now().minusHours(1);
+      var originalVersion = 5;
+
+      var entity = new TransactionEntity(
+          originalId,
+          UUID.randomUUID(),
+          100L,
+          TransactionType.EXPENSE,
+          Currency.getInstance("EUR"),
+          LocalDate.now(),
+          "Old Desc",
+          originalOwnerId
+      );
+      entity.setCreatedAt(originalCreatedAt);
+      entity.setUpdatedAt(originalUpdatedAt);
+      entity.setVersion(originalVersion);
+
+      var replace = new TransactionWrite(
+          UUID.randomUUID(), // New category
+          200L,
+          TransactionWrite.TypeEnum.INCOME,
+          "USD",
+          LocalDate.now()
+      );
+      replace.setDescription(null); // Explicitly null
+
+      // When
+      transactionMapper.replaceEntity(replace, entity);
+
+      // Then
+      assertThat(entity)
+          .as("CategoryId and amount should be updated")
+          .returns(replace.getCategoryId(), TransactionEntity::getCategoryId)
+          .returns(200L, TransactionEntity::getAmount)
+          .extracting(TransactionEntity::getDescription)
+          .as("Description should be overwritten with null in replace (PUT) operation")
+          .isNull();
+
+      // Verify metadata is preserved
+      assertThat(entity)
+          .as("Metadata and identity fields should not be changed by replaceEntity")
+          .returns(originalId, TransactionEntity::getId)
+          .returns(originalOwnerId, TransactionEntity::getOwnerId)
+          .returns(originalVersion, TransactionEntity::getVersion)
+          .returns(originalCreatedAt, TransactionEntity::getCreatedAt)
+          .returns(originalUpdatedAt, TransactionEntity::getUpdatedAt);
     }
   }
 }
