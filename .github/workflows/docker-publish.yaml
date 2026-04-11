@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
     strategy:
       fail-fast: false
       matrix:
@@ -18,12 +19,12 @@ jobs:
       IMAGE_NAME: ghcr.io/${{ github.repository }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ github.event.release.tag_name }}
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '25'
           distribution: 'temurin'
@@ -34,47 +35,89 @@ jobs:
           cache-provider: basic
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
 
       - name: Log in to GHCR
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract build metadata
+        id: meta
         run: |
           ARCH=$(echo "${{ matrix.platform }}" | cut -d'/' -f2)
           VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
+          echo "arch=${ARCH}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
           ./gradlew bootBuildImage -x test \
             --imagePlatform=${{ matrix.platform }} \
-            --imageName=${{ env.IMAGE_NAME }}:${VERSION}-${ARCH}
-          docker push ${{ env.IMAGE_NAME }}:${VERSION}-${ARCH}
+            --imageName=${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.arch }}
+
+      # Scan amd64 image before pushing — blocking gate on unfixed CRITICAL CVEs.
+      # HIGH findings are uploaded to the Security tab for visibility but do not
+      # block the release (same policy as the web-app).
+      - name: Scan image with Trivy (SARIF)
+        if: matrix.platform == 'linux/amd64'
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}-amd64
+          format: sarif
+          output: trivy-amd64.sarif
+          exit-code: '0'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Upload amd64 scan results to GitHub Security tab
+        if: always() && matrix.platform == 'linux/amd64'
+        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+        with:
+          sarif_file: trivy-amd64.sarif
+          category: trivy-amd64
+
+      - name: Block on CRITICAL vulnerabilities (amd64)
+        if: matrix.platform == 'linux/amd64'
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}-amd64
+          format: table
+          exit-code: '1'
+          severity: CRITICAL
+          ignore-unfixed: true
+
+      - name: Push Docker image
+        run: docker push ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.arch }}
 
   docker-manifest:
     runs-on: ubuntu-latest
     needs: docker-build
     permissions:
       packages: write
+      id-token: write
+      security-events: write
     env:
       IMAGE_NAME: ghcr.io/${{ github.repository }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ github.event.release.tag_name }}
 
       - name: Log in to GHCR
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create and push manifest
+      - name: Create and push multi-arch manifest
+        id: manifest
         run: |
           VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
           docker buildx imagetools create \
@@ -82,3 +125,38 @@ jobs:
             --tag ${{ env.IMAGE_NAME }}:latest \
             ${{ env.IMAGE_NAME }}:${VERSION}-arm64 \
             ${{ env.IMAGE_NAME }}:${VERSION}-amd64
+          DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${VERSION} --format '{{.Manifest.Digest}}')
+          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+      # Sign the published manifest digest with Cosign using GitHub OIDC —
+      # no long-lived signing key stored or rotated.
+      - name: Sign image with Cosign (keyless)
+        run: |
+          cosign sign --yes \
+            ${{ env.IMAGE_NAME }}@${{ steps.manifest.outputs.digest }}
+
+      # Scan the arm64 image by digest to catch arch-specific vulnerabilities.
+      # Non-blocking — findings are surfaced in the Security tab only.
+      - name: Scan arm64 image with Trivy
+        id: trivy-arm64
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ steps.manifest.outputs.version }}-arm64
+          format: sarif
+          output: trivy-arm64.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+        env:
+          TRIVY_PLATFORM: linux/arm64
+
+      - name: Upload arm64 scan results to GitHub Security tab
+        if: always() && steps.trivy-arm64.outcome != 'skipped'
+        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+        with:
+          sarif_file: trivy-arm64.sarif
+          category: trivy-arm64

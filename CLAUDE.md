@@ -77,3 +77,20 @@ Spring Data JDBC (not JPA). Migrations live in `src/main/resources/db/changelog/
 ### Adding a domain feature
 
 Create: Entity (extends `OwnableEntity`), Repository (extends `OwnableEntityRepository`), Service (extends `OwnableEntityService`), Controller (extends `BaseEntityController`, implements generated API interface), Mapper (implements `BaseEntityMapper`). Add a Liquibase migration for the new table.
+
+## Commits and Releases
+
+Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/). A `commit-msg` husky hook enforces this locally via commitlint.
+
+Required format: `type(scope): subject` — scope is optional.
+
+| Type | When to use | Release bump |
+|---|---|---|
+| `feat` | new user-facing feature | minor |
+| `fix` | bug fix | patch |
+| `perf` | performance improvement | patch |
+| `revert` | reverts a previous commit | patch |
+| `feat!` / `BREAKING CHANGE:` footer | breaking API change | major |
+| `chore`, `docs`, `test`, `refactor`, `style`, `build`, `ci`, `ops` | everything else | none |
+
+**Releases are fully automated.** Merging to `main` triggers semantic-release in CI, which analyzes commits, bumps the version in `gradle.properties`, writes `CHANGELOG.md`, and publishes a GitHub Release. That release event then triggers the Docker image build and push to GHCR with semver tags and Cosign signing.
