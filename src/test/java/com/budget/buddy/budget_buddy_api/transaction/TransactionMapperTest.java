@@ -44,7 +44,7 @@ class TransactionMapperTest {
           .as("Mapped transaction entity should have correct values")
           .isNotNull()
           .returns(categoryId, TransactionEntity::getCategoryId)
-          .returns(1000, TransactionEntity::getAmount)
+          .returns(1000L, TransactionEntity::getAmount)
           .returns(TransactionType.EXPENSE, TransactionEntity::getType)
           .returns(Currency.getInstance("EUR"), TransactionEntity::getCurrency)
           .returns(date, TransactionEntity::getDate)
@@ -67,7 +67,7 @@ class TransactionMapperTest {
       var entity = new TransactionEntity(
           id,
           categoryId,
-          500,
+          500L,
           TransactionType.INCOME,
           Currency.getInstance("USD"),
           date,
@@ -104,8 +104,8 @@ class TransactionMapperTest {
       // Given
       var id1 = UUID.randomUUID();
       var id2 = UUID.randomUUID();
-      var e1 = new TransactionEntity(id1, UUID.randomUUID(), 100, TransactionType.EXPENSE, Currency.getInstance("EUR"), LocalDate.now(), "D1", UUID.randomUUID());
-      var e2 = new TransactionEntity(id2, UUID.randomUUID(), 200, TransactionType.INCOME, Currency.getInstance("USD"), LocalDate.now(), "D2", UUID.randomUUID());
+      var e1 = new TransactionEntity(id1, UUID.randomUUID(), 100L, TransactionType.EXPENSE, Currency.getInstance("EUR"), LocalDate.now(), "D1", UUID.randomUUID());
+      var e2 = new TransactionEntity(id2, UUID.randomUUID(), 200L, TransactionType.INCOME, Currency.getInstance("USD"), LocalDate.now(), "D2", UUID.randomUUID());
 
       // When
       var models = transactionMapper.toModelList(List.of(e1, e2));
@@ -137,10 +137,10 @@ class TransactionMapperTest {
       var categoryId = UUID.randomUUID();
       var ownerId = UUID.randomUUID();
       var date = LocalDate.now();
-      var entity = new TransactionEntity(originalId, categoryId, 100, TransactionType.EXPENSE, Currency.getInstance("EUR"), date, "Old Desc", ownerId);
+      var entity = new TransactionEntity(originalId, categoryId, 100L, TransactionType.EXPENSE, Currency.getInstance("EUR"), date, "Old Desc", ownerId);
 
       var update = new TransactionUpdate();
-      update.setAmount(500);
+      update.setAmount(500L);
       update.setDescription(JsonNullable.of("New Desc"));
 
       // When
@@ -149,7 +149,7 @@ class TransactionMapperTest {
       // Then
       assertThat(entity)
           .as("Updated entity should have correct updated and original values")
-          .returns(500, TransactionEntity::getAmount)
+          .returns(500L, TransactionEntity::getAmount)
           .returns("New Desc", TransactionEntity::getDescription)
           .returns(Currency.getInstance("EUR"), TransactionEntity::getCurrency)
           .returns(originalId, TransactionEntity::getId)
@@ -160,7 +160,7 @@ class TransactionMapperTest {
     @Test
     void should_NotUpdateIfNull() {
       // Given
-      var originalAmount = 100;
+      var originalAmount = 100L;
       var originalDesc = "Keep Me";
       var entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), originalAmount, TransactionType.EXPENSE, Currency.getInstance("EUR"), LocalDate.now(), originalDesc, UUID.randomUUID());
 
@@ -182,7 +182,7 @@ class TransactionMapperTest {
     void should_ClearDescription_When_ExplicitJsonNullableInPatch() {
       // Given
       var entity = new TransactionEntity(
-          UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE,
+          UUID.randomUUID(), UUID.randomUUID(), 100L, TransactionType.EXPENSE,
           Currency.getInstance("EUR"), LocalDate.now(), "Old Description", UUID.randomUUID());
 
       var update = new TransactionUpdate();

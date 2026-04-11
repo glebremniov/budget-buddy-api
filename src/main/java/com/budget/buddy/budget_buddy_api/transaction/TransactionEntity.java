@@ -31,7 +31,7 @@ public class TransactionEntity extends AuditableEntity implements OwnableEntity<
   private UUID categoryId;
 
   @Column("amount")
-  private Integer amount;
+  private Long amount;
 
   @Column("type")
   private TransactionType type;

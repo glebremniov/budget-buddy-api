@@ -283,6 +283,8 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   @Nested
   class Update {
 
+    public static final Long AMOUNT = 2000L;
+
     @Test
     void should_UpdateTransaction_When_Owner() throws Exception {
       var created = createTransaction(userToken, userCategoryId);
@@ -290,12 +292,13 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionUpdate().amount(2000)))
+          .content(json(new TransactionUpdate().amount(AMOUNT)))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var updated = parseBody(result, Transaction.class);
-      assertThat(updated.getAmount()).isEqualTo(2000);
+      assertThat(updated)
+          .returns(AMOUNT, Transaction::getAmount);
     }
 
     @Test
@@ -331,7 +334,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionUpdate().amount(9999)))
+          .content(json(new TransactionUpdate().amount(AMOUNT)))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
@@ -343,7 +346,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionUpdate().amount(9999)))
+          .content(json(new TransactionUpdate().amount(AMOUNT)))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);

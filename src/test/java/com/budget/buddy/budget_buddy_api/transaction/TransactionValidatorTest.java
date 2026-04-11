@@ -26,7 +26,7 @@ class TransactionValidatorTest {
   TransactionEntity validEntity(UUID categoryId) {
     var entity = new TransactionEntity();
     entity.setCategoryId(categoryId);
-    entity.setAmount(1299);
+    entity.setAmount(1299L);
     entity.setCurrency(Currency.getInstance("EUR"));
     return entity;
   }
