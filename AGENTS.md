@@ -52,6 +52,9 @@ Or add `gpr.user` / `gpr.key` to `~/.gradle/gradle.properties`.
 - **Validation Handling**:
   - Prefer using `ex.getBindingResult().getFieldErrors()` for `MethodArgumentNotValidException`.
   - Prefer using `ex.getConstraintViolations()` for `ConstraintViolationException`.
+- **Transactional Methods**:
+  - **Read-Only Operations**: All service-level read operations (e.g., `read`, `list`, `count`) MUST be marked with `@Transactional(readOnly = true)`.
+  - **Class-Level Default**: Prefer setting `@Transactional(readOnly = true)` at the class level and overriding it with `@Transactional` on specific write methods (create, update, delete).
 
 ---
 

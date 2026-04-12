@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <U> Update request type (DTO)
  */
 @Slf4j
-@Transactional
+@Transactional(readOnly = true)
 public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R, C, U>
     implements BaseEntityService<ID, R, C, U> {
 
@@ -44,6 +44,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
     this.validators = validators;
   }
 
+  @Transactional
   @Override
   public R create(C createRequest) {
     log.debug("Create entity: {}", createRequest);
@@ -52,7 +53,6 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
     return mapper.toModel(savedEntity);
   }
 
-  @Transactional(readOnly = true)
   @Override
   public R read(ID id) {
     log.debug("Read entity by id: {}", id);
@@ -60,6 +60,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
     return mapper.toModel(entity);
   }
 
+  @Transactional
   @Override
   public R update(ID id, U patchRequest) {
     log.debug("Update entity by id: {}", id);
@@ -68,6 +69,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
     return mapper.toModel(updatedEntity);
   }
 
+  @Transactional
   @Override
   public R replace(ID id, C replaceRequest) {
     log.debug("Replace entity by id: {}", id);
@@ -76,6 +78,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
     return mapper.toModel(replacedEntity);
   }
 
+  @Transactional
   @Override
   public void delete(ID id) {
     log.debug("Delete entity by id: {}", id);
@@ -83,7 +86,6 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
     log.debug("Successfully deleted entity with id: {}", id);
   }
 
-  @Transactional(readOnly = true)
   @Override
   public List<R> list() {
     log.debug("List all entities");
@@ -92,7 +94,6 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
     return mapper.toModelList(entities);
   }
 
-  @Transactional(readOnly = true)
   @Override
   public Page<R> list(Pageable pageable) {
     log.debug("List all entities with pageRequest: {}", pageable);
@@ -100,7 +101,6 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
         .map(mapper::toModel);
   }
 
-  @Transactional(readOnly = true)
   @Override
   public long count() {
     log.debug("Count all entities");
@@ -128,6 +128,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
    * @param createRequest the create request
    * @return the created entity
    */
+  @Transactional
   protected E createInternal(C createRequest) {
     E entity = mapper.toEntity(createRequest);
     validate(entity);
@@ -153,6 +154,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
    * @param updateRequest the update request
    * @return the updated entity
    */
+  @Transactional
   protected E updateInternal(ID id, U updateRequest) {
     E existingEntity = readInternal(id);
     mapper.patchEntity(updateRequest, existingEntity);
@@ -167,6 +169,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
    * @param replaceRequest the replace request
    * @return the replaced entity
    */
+  @Transactional
   protected E replaceInternal(ID id, C replaceRequest) {
     E existingEntity = readInternal(id);
     mapper.replaceEntity(replaceRequest, existingEntity);
@@ -179,6 +182,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
    *
    * @param id the unique identifier
    */
+  @Transactional
   protected void deleteInternal(ID id) {
     var entity = readInternal(id);
     repository.delete(entity);

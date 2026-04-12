@@ -11,10 +11,12 @@ import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for managing user transactions. Extends {@link OwnableEntityService} to provide basic CRUD operations and includes custom filtering for transactions.
  */
+@Transactional(readOnly = true)
 @Service
 public class TransactionService extends
     OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionWrite, TransactionUpdate> {
