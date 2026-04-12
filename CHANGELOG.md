@@ -1,3 +1,9 @@
+## [0.3.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.2.3...v0.3.0) (2026-04-12)
+
+### Features
+
+* enforce password complexity at registration ([#86](https://github.com/budget-buddy-org/budget-buddy-api/issues/86)) ([a16a364](https://github.com/budget-buddy-org/budget-buddy-api/commit/a16a3641af5a90d0aa5b9de7f565bec828c39021)), closes [#79](https://github.com/budget-buddy-org/budget-buddy-api/issues/79)
+
 ## [0.2.3](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.2.2...v0.2.3) (2026-04-12)
 
 ### Bug Fixes
