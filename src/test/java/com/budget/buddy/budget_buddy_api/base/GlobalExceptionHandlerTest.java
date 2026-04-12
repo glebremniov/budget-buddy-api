@@ -1,20 +1,11 @@
 package com.budget.buddy.budget_buddy_api.base;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
-
+import com.budget.buddy.budget_buddy_contracts.generated.model.FieldError;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
-import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,6 +26,17 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -96,9 +98,13 @@ class GlobalExceptionHandlerTest {
           .returns(HttpStatus.BAD_REQUEST, ResponseEntity::getStatusCode)
           .extracting(ResponseEntity::getBody)
           .returns(HttpStatus.BAD_REQUEST.value(), Problem::getStatus)
-          .returns("Validation failed", Problem::getTitle)
+          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
           .returns("One or more fields are invalid", Problem::getDetail)
           .returns(PROBLEM_TYPE, Problem::getType);
+
+      assertThat(response.getBody())
+          .extracting(Problem::getErrors)
+          .isNotNull();
     }
 
     @Test
@@ -106,12 +112,20 @@ class GlobalExceptionHandlerTest {
     void shouldHandleSingleFieldError() {
       // Given
       var exception = mock(MethodArgumentNotValidException.class);
+      var bindingResult = mock(org.springframework.validation.BindingResult.class);
+      var fieldError = new org.springframework.validation.FieldError("object", "field", "message");
+      when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(fieldError));
+      when(exception.getBindingResult()).thenReturn(bindingResult);
 
       // When
       var response = handler.handleValidationException(exception, webRequest);
 
       // Then
       assertResponseEntity(response);
+      var problem = response.getBody();
+      assertThat(problem.getErrors())
+          .hasSize(1)
+          .containsExactly(new FieldError().field("field").message("message"));
     }
   }
 
@@ -125,8 +139,12 @@ class GlobalExceptionHandlerTest {
           .returns(HttpStatus.BAD_REQUEST, ResponseEntity::getStatusCode)
           .extracting(ResponseEntity::getBody)
           .returns(HttpStatus.BAD_REQUEST.value(), Problem::getStatus)
-          .returns("Validation failed", Problem::getTitle)
+          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
           .returns("Constraint violations", Problem::getDetail);
+
+      assertThat(response.getBody())
+          .extracting(Problem::getErrors)
+          .isNotNull();
     }
 
     @Test
@@ -147,6 +165,10 @@ class GlobalExceptionHandlerTest {
 
       // Then
       assertResponseEntity(response);
+      var problem = response.getBody();
+      assertThat(problem.getErrors())
+          .hasSize(1)
+          .containsExactly(new FieldError().field("username").message("must be unique"));
     }
 
     @Test
@@ -172,6 +194,11 @@ class GlobalExceptionHandlerTest {
 
       // Then
       assertResponseEntity(response);
+      var problem = response.getBody();
+      assertThat(problem.getErrors())
+          .hasSize(2)
+          .contains(new FieldError().field("email").message("invalid email format"),
+              new FieldError().field("age").message("must be at least 18"));
     }
 
     @Test
@@ -192,6 +219,10 @@ class GlobalExceptionHandlerTest {
 
       // Then
       assertResponseEntity(response);
+      var problem = response.getBody();
+      assertThat(problem.getErrors())
+          .hasSize(1)
+          .containsExactly(new FieldError().field("null").message("validation failed"));
     }
   }
 
@@ -214,7 +245,7 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.NOT_FOUND, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
-          .returns("Resource not found", Problem::getTitle);
+          .returns(HttpStatus.NOT_FOUND.getReasonPhrase(), Problem::getTitle);
     }
   }
 
@@ -237,7 +268,7 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.NOT_FOUND, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
-          .returns("Resource not found", Problem::getTitle)
+          .returns(HttpStatus.NOT_FOUND.getReasonPhrase(), Problem::getTitle)
           .returns("Resource not found", Problem::getDetail)
           .returns(HttpStatus.NOT_FOUND.value(), Problem::getStatus);
     }
@@ -266,7 +297,7 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.FORBIDDEN, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
-          .returns("Access denied", Problem::getTitle)
+          .returns(HttpStatus.FORBIDDEN.getReasonPhrase(), Problem::getTitle)
           .returns("Access denied", Problem::getDetail)
           .returns(HttpStatus.FORBIDDEN.value(), Problem::getStatus);
     }
@@ -295,7 +326,7 @@ class GlobalExceptionHandlerTest {
         assertThat(response)
             .returns(HttpStatus.UNAUTHORIZED, ResponseEntity::getStatusCode)
             .extracting(HttpEntity::getBody)
-            .returns("Authentication failed", Problem::getTitle)
+            .returns(HttpStatus.UNAUTHORIZED.getReasonPhrase(), Problem::getTitle)
             .returns("Authentication failed", Problem::getDetail)
             .returns(HttpStatus.UNAUTHORIZED.value(), Problem::getStatus);
       }
@@ -351,7 +382,7 @@ class GlobalExceptionHandlerTest {
       assertThat(response.getBody()).isNotNull();
       var problem = response.getBody();
       assertThat(problem)
-          .returns("Malformed request", Problem::getTitle)
+          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
           .returns(400, Problem::getStatus);
     }
   }
@@ -379,7 +410,7 @@ class GlobalExceptionHandlerTest {
       assertThat(response.getBody()).isNotNull();
       var problem = response.getBody();
       assertThat(problem)
-          .returns("Invalid argument", Problem::getTitle)
+          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
           .returns(400, Problem::getStatus);
     }
   }
@@ -407,7 +438,7 @@ class GlobalExceptionHandlerTest {
       assertThat(response.getBody()).isNotNull();
       var problem = response.getBody();
       assertThat(problem)
-          .returns("Not implemented", Problem::getTitle)
+          .returns(HttpStatus.NOT_IMPLEMENTED.getReasonPhrase(), Problem::getTitle)
           .returns("Operation not supported", Problem::getDetail)
           .returns(501, Problem::getStatus);
     }
@@ -436,7 +467,7 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.INTERNAL_SERVER_ERROR, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
-          .returns("Internal server error", Problem::getTitle)
+          .returns(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), Problem::getTitle)
           .returns("An unexpected error occurred", Problem::getDetail)
           .returns(HttpStatus.INTERNAL_SERVER_ERROR.value(), Problem::getStatus);
     }

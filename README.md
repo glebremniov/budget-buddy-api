@@ -145,3 +145,23 @@ The API supports JSON Merge Patch semantics for fields that can be cleared:
 - **Omitted field**: Leaves the existing value unchanged.
 
 This is implemented using MapStruct with `JsonNullable` support in the `BaseEntityMapper`.
+
+### Error Responses (RFC 9457)
+
+The API uses standardized Problem Details for HTTP APIs (RFC 9457) for all error responses.
+When `type` is `about:blank`, the `title` field corresponds to the standard HTTP status phrase.
+
+For validation errors (`400 Bad Request`), the response is extended with an `errors` array containing field-level details:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "One or more fields are invalid",
+  "instance": "/v1/transactions",
+  "errors": [
+    { "field": "amount", "message": "must be greater than 0" }
+  ]
+}
+```

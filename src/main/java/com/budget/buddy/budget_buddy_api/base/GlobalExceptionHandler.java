@@ -1,11 +1,10 @@
 package com.budget.buddy.budget_buddy_api.base;
 
+import com.budget.buddy.budget_buddy_api.base.validation.FieldErrorFactory;
 import com.budget.buddy.budget_buddy_api.security.exception.InvalidPasswordException;
 import com.budget.buddy.budget_buddy_api.security.exception.UsernameAlreadyTakenException;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
 import jakarta.validation.ConstraintViolationException;
-import java.net.URI;
-import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,6 +22,9 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.net.URI;
+import java.util.NoSuchElementException;
+
 /**
  * Global exception handler for the application. Converts various exceptions into standardized {@link Problem} responses.
  */
@@ -35,18 +37,34 @@ public class GlobalExceptionHandler {
   private static final String ACCESS_DENIED = "Access denied";
   private static final String AUTHENTICATION_FAILED = "Authentication failed";
 
-  private ResponseEntity<Problem> problemResponse(HttpStatus status, String title, String detail, WebRequest request) {
-    var problem = new Problem()
+  private static ResponseEntity<Problem> problemResponse(HttpStatus status, String detail, WebRequest request) {
+    return problemResponse(status, status.getReasonPhrase(), detail, request);
+  }
+
+  private static ResponseEntity<Problem> problemResponse(HttpStatus status, String title, String detail, WebRequest request) {
+    return buildProblemResponse(new Problem(), status, title, detail, request);
+  }
+
+  private static ResponseEntity<Problem> buildProblemResponse(Problem problem, HttpStatus status, String title, String detail, WebRequest request) {
+    problem
         .type(URI.create("about:blank"))
         .title(title)
         .status(status.value())
         .detail(detail)
-        .instance(URI.create(((ServletWebRequest) request).getRequest().getRequestURI()));
+        .instance(URI.create(getRequestUri(request)));
 
     var headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
 
     return new ResponseEntity<>(problem, headers, status);
+  }
+
+  private static String getRequestUri(WebRequest request) {
+    if (request instanceof ServletWebRequest servletWebRequest) {
+      return servletWebRequest.getRequest().getRequestURI();
+    }
+
+    return "";
   }
 
   /**
@@ -58,7 +76,14 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Problem> handleValidationException(MethodArgumentNotValidException ex, WebRequest request) {
-    return problemResponse(HttpStatus.BAD_REQUEST, "Validation failed", "One or more fields are invalid", request);
+    var errors = ex.getBindingResult()
+        .getFieldErrors()
+        .stream()
+        .map(FieldErrorFactory::from)
+        .toList();
+
+    var problem = new Problem().errors(errors);
+    return buildProblemResponse(problem, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "One or more fields are invalid", request);
   }
 
   /**
@@ -70,7 +95,13 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(ConstraintViolationException.class)
   public ResponseEntity<Problem> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
-    return problemResponse(HttpStatus.BAD_REQUEST, "Validation failed", "Constraint violations", request);
+    var errors = ex.getConstraintViolations()
+        .stream()
+        .map(FieldErrorFactory::from)
+        .toList();
+
+    var problem = new Problem().errors(errors);
+    return buildProblemResponse(problem, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "Constraint violations", request);
   }
 
   /**
@@ -83,7 +114,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<Problem> handleNotFound(NoSuchElementException ex, WebRequest request) {
     log.debug("Entity not found: {}", ex.getMessage());
-    return problemResponse(HttpStatus.NOT_FOUND, RESOURCE_NOT_FOUND, RESOURCE_NOT_FOUND, request);
+    return problemResponse(HttpStatus.NOT_FOUND, RESOURCE_NOT_FOUND, request);
   }
 
   /**
@@ -96,7 +127,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(NoResourceFoundException.class)
   public ResponseEntity<Problem> handleNoResourceFoundException(NoResourceFoundException ex, WebRequest request) {
     log.debug("Resource not found: {}", ex.getMessage());
-    return problemResponse(HttpStatus.NOT_FOUND, RESOURCE_NOT_FOUND, RESOURCE_NOT_FOUND, request);
+    return problemResponse(HttpStatus.NOT_FOUND, RESOURCE_NOT_FOUND, request);
   }
 
   /**
@@ -109,7 +140,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(AccessDeniedException.class)
   public ResponseEntity<Problem> handleAccessDenied(AccessDeniedException ex, WebRequest request) {
     log.warn("Access denied: {}", ex.getMessage());
-    return problemResponse(HttpStatus.FORBIDDEN, ACCESS_DENIED, ACCESS_DENIED, request);
+    return problemResponse(HttpStatus.FORBIDDEN, ACCESS_DENIED, request);
   }
 
   /**
@@ -122,7 +153,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<Problem> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
     log.warn("Authentication failed: {}", ex.getMessage());
-    return problemResponse(HttpStatus.UNAUTHORIZED, AUTHENTICATION_FAILED, AUTHENTICATION_FAILED, request);
+    return problemResponse(HttpStatus.UNAUTHORIZED, AUTHENTICATION_FAILED, request);
   }
 
   /**
@@ -135,7 +166,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(DataIntegrityViolationException.class)
   public ResponseEntity<Problem> handleDataIntegrity(DataIntegrityViolationException ex, WebRequest request) {
     log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
-    return problemResponse(HttpStatus.CONFLICT, "Data integrity violation", "A data conflict occurred", request);
+    return problemResponse(HttpStatus.CONFLICT, "A data conflict occurred", request);
   }
 
   /**
@@ -148,7 +179,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<Problem> handleNotReadable(HttpMessageNotReadableException ex, WebRequest request) {
     log.debug("Malformed request: {}", ex.getMessage());
-    return problemResponse(HttpStatus.BAD_REQUEST, "Malformed request", "The request body could not be read", request);
+    return problemResponse(HttpStatus.BAD_REQUEST, "The request body could not be read", request);
   }
 
   /**
@@ -161,7 +192,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(UsernameAlreadyTakenException.class)
   public ResponseEntity<Problem> handleUsernameAlreadyTakenException(UsernameAlreadyTakenException ex, WebRequest request) {
     log.debug("Username already taken: {}", ex.getMessage());
-    return problemResponse(HttpStatus.CONFLICT, "Username conflict", ex.getMessage(), request);
+    return problemResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
   }
 
   /**
@@ -174,7 +205,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(InvalidPasswordException.class)
   public ResponseEntity<Problem> handleInvalidPasswordException(InvalidPasswordException ex, WebRequest request) {
     log.debug("Invalid password: {}", ex.getMessage());
-    return problemResponse(HttpStatus.BAD_REQUEST, "Invalid password", ex.getMessage(), request);
+    return problemResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
   }
 
   /**
@@ -187,7 +218,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Problem> handleIllegalArgument(IllegalArgumentException ex, WebRequest request) {
     log.debug("Illegal argument: {}", ex.getMessage());
-    return problemResponse(HttpStatus.BAD_REQUEST, "Invalid argument", ex.getMessage(), request);
+    return problemResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
   }
 
   /**
@@ -200,7 +231,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Problem> handleGeneric(Exception ex, WebRequest request) {
     log.error("Unhandled exception: {}", ex.getMessage(), ex);
-    return problemResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", "An unexpected error occurred", request);
+    return problemResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", request);
   }
 
   /**
@@ -213,6 +244,6 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(UnsupportedOperationException.class)
   public ResponseEntity<Problem> handleUnsupported(UnsupportedOperationException ex, WebRequest request) {
     log.warn("Unsupported operation: {}", ex.getMessage());
-    return problemResponse(HttpStatus.NOT_IMPLEMENTED, "Not implemented", "Operation not supported", request);
+    return problemResponse(HttpStatus.NOT_IMPLEMENTED, "Operation not supported", request);
   }
 }
