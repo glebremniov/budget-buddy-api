@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Service for managing users.
  */
-@Transactional
+@Transactional(readOnly = true)
 @Service
 public class UserService extends AbstractBaseEntityService<UserEntity, UUID, UserDto, RegisterRequest, Object> {
 
@@ -66,11 +66,13 @@ public class UserService extends AbstractBaseEntityService<UserEntity, UUID, Use
     return savedUser;
   }
 
+  @Transactional
   @Override
   public UserDto update(UUID uuid, Object patchRequest) throws EntityNotFoundException {
     throw new UnsupportedOperationException();
   }
 
+  @Transactional
   @Override
   public void delete(UUID uuid) throws EntityNotFoundException {
     throw new UnsupportedOperationException();

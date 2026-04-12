@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Base class for services managing entities that belong to a specific owner.
@@ -51,12 +52,14 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     return repository.findAllByOwnerId(ownerIdProvider.get(), pageRequest);
   }
 
+  @Transactional
   @Override
   protected void deleteInternal(ID id) {
     var entity = readInternal(id);
     repository.delete(entity);
   }
 
+  @Transactional
   @Override
   protected E updateInternal(ID id, U updateRequest) {
     E existingEntity = readInternal(id);
@@ -65,6 +68,7 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     return repository.save(existingEntity);
   }
 
+  @Transactional
   @Override
   protected E replaceInternal(ID id, C replaceRequest) {
     E existingEntity = readInternal(id);
@@ -84,6 +88,7 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     return repository.existsByIdAndOwnerId(id, ownerIdProvider.get());
   }
 
+  @Transactional
   @Override
   protected E createInternal(C createRequest) {
     E entity = mapper.toEntity(createRequest);
