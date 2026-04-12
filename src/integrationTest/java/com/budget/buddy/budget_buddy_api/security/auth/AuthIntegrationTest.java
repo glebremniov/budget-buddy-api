@@ -142,6 +142,25 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
           .as("Password '%s' should be rejected with 400 Bad Request, reason: %s", password, reason)
           .hasStatus(HttpStatus.BAD_REQUEST);
     }
+
+    @Test
+    void should_Return400_When_UsernameTooShort() {
+      // Given
+      var request = new RegisterRequest()
+          .username("ab")
+          .password(STRONG_TEST_PASSWORD);
+
+      // When
+      var exchange = mvc.post().uri("/v1/auth/register")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(request))
+          .exchange();
+
+      // Then
+      assertThat(exchange)
+          .as("Registration with too-short username should return 400 Bad Request")
+          .hasStatus(HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Nested
