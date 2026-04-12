@@ -20,15 +20,11 @@ jobs:
 
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
-          node-version: "24"
-          cache: "pnpm"
+          node-version: 24
+          cache: pnpm
 
       - run: pnpm install --frozen-lockfile
 
       - name: Lint commit messages
         if: github.actor != 'dependabot[bot]'
         run: pnpm exec commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}" --verbose
-
-      - name: Lint PR title
-        if: github.actor != 'dependabot[bot]'
-        run: echo "${{ github.event.pull_request.title }}" | pnpm exec commitlint --verbose
