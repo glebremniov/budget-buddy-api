@@ -262,9 +262,9 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
   class List {
 
     @Test
-    void should_ReturnOnlyOwnCategories() throws Exception {
-      createCategory(userToken, "My Food");
+    void should_ReturnOnlyOwnCategoriesOrderedByName() throws Exception {
       createCategory(userToken, "My Transport");
+      createCategory(userToken, "My Food");
       createCategory(otherUserToken, "Other's Food");
 
       var result = mvc.get().uri("/v1/categories")
@@ -276,7 +276,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
       assertThat(page.getItems()).hasSize(2);
       assertThat(page.getItems())
           .extracting(Category::getName)
-          .containsExactlyInAnyOrder("My Food", "My Transport");
+          .containsExactly("My Food", "My Transport");
     }
 
     @Test

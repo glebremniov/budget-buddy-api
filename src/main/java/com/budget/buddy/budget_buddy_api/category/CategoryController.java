@@ -3,13 +3,16 @@ package com.budget.buddy.budget_buddy_api.category;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
 import com.budget.buddy.budget_buddy_contracts.generated.api.CategoriesApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
-import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedCategories;
-import java.net.URI;
-import java.util.UUID;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
+import java.util.UUID;
 
 @RestController
 public class CategoryController
@@ -42,7 +45,8 @@ public class CategoryController
 
   @Override
   public ResponseEntity<PaginatedCategories> listCategories(Integer page, Integer size) {
-    return super.listInternal(page, size);
+    var pageable = PageRequest.of(page, size, Sort.Direction.ASC, "name");
+    return super.listInternal(pageable);
   }
 
   @Override

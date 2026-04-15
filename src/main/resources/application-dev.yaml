@@ -17,7 +17,7 @@ security:
     allowed-origin-patterns:
       - "http://localhost:[*]"
   access-token:
-    validity-seconds: 86400 # 1 day
+    validity-seconds: 900
   refresh-token:
     validity-seconds: 1209600 # 14 days
     cleanup:
