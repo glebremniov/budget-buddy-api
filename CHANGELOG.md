@@ -1,3 +1,9 @@
+## [0.6.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.6.0...v0.6.1) (2026-04-16)
+
+### Bug Fixes
+
+* list transactions ordered by date and created at ([#121](https://github.com/budget-buddy-org/budget-buddy-api/issues/121)) ([b21f001](https://github.com/budget-buddy-org/budget-buddy-api/commit/b21f001a0d1f7e1a4e7ea26fa31978151b847648))
+
 ## [0.6.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.5.0...v0.6.0) (2026-04-15)
 
 ### Features
