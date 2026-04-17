@@ -31,7 +31,7 @@ class TransactionMapperTest {
       var create = new TransactionWrite(
           categoryId,
           1000L,
-          TransactionWrite.TypeEnum.EXPENSE,
+          com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.EXPENSE,
           "EUR",
           date
       );
@@ -241,7 +241,7 @@ class TransactionMapperTest {
       var replace = new TransactionWrite(
           UUID.randomUUID(), // New category
           200L,
-          TransactionWrite.TypeEnum.INCOME,
+          com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.INCOME,
           "USD",
           LocalDate.now()
       );

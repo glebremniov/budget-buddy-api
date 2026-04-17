@@ -23,6 +23,7 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
       AND (:startDate::date IS NULL OR date >= :startDate::date)
       AND (:endDate::date IS NULL OR date <= :endDate::date)
       AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
+      AND (:type::text IS NULL OR type = :type::text)
       """;
 
   String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC_QUERY =
@@ -43,6 +44,7 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
       AND (:startDate::date IS NULL OR date >= :startDate::date)
       AND (:endDate::date IS NULL OR date <= :endDate::date)
       AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
+      AND (:type::text IS NULL OR type = :type::text)
       """;
 
   default List<TransactionEntity> findAllByFilter(
@@ -54,12 +56,15 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
         .map(Order::getDirection)
         .orElse(Direction.DESC);
 
+    var typeStr = filter.type() != null ? filter.type().name() : null;
+
     if (order.isAscending()) {
       return findAllByFilterOrderByDateAsc(
           filter.ownerId(),
           filter.start(),
           filter.end(),
           filter.categoryId(),
+          typeStr,
           pageable.getPageSize(),
           pageable.getOffset());
     }
@@ -69,6 +74,7 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
         filter.start(),
         filter.end(),
         filter.categoryId(),
+        typeStr,
         pageable.getPageSize(),
         pageable.getOffset());
   }
@@ -79,6 +85,7 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       @Param("categoryId") UUID categoryId,
+      @Param("type") String type,
       @Param("limit") int limit,
       @Param("offset") long offset
   );
@@ -89,12 +96,14 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       @Param("categoryId") UUID categoryId,
+      @Param("type") String type,
       @Param("limit") int limit,
       @Param("offset") long offset
   );
 
   default long countByFilter(TransactionFilter filter) {
-    return countByFilter(filter.ownerId(), filter.start(), filter.end(), filter.categoryId());
+    var typeStr = filter.type() != null ? filter.type().name() : null;
+    return countByFilter(filter.ownerId(), filter.start(), filter.end(), filter.categoryId(), typeStr);
   }
 
   @Query(COUNT_BY_FILTERS_QUERY)
@@ -102,6 +111,7 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
       @Param("ownerId") UUID ownerId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
-      @Param("categoryId") UUID categoryId
+      @Param("categoryId") UUID categoryId,
+      @Param("type") String type
   );
 }

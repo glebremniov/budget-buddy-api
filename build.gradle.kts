@@ -31,7 +31,7 @@ dependencies {
   val mapstructVersion = "1.6.3"
   val lombokMapstructBindingVersion = "0.2.0"
   val jacksonDatabindNullableVersion = "0.2.10"
-  val budgetBuddyContractsVersion = "2.2.0"
+  val budgetBuddyContractsVersion = "2.3.0"
   val passayVersion = "2.0.0"
 
   implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")

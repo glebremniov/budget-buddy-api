@@ -71,7 +71,7 @@ class TransactionServiceTest {
     @EnumSource(Direction.class)
     void should_ListWithFilter(Direction direction) {
       // Given
-      var filter = TransactionFilter.of(null, null, null);
+      var filter = TransactionFilter.of(null, null, null, null);
       var pageable = PageRequest.of(0, 10, direction, "date");
       var entities = List.of(new TransactionEntity());
       var models = List.of(new Transaction());
@@ -104,7 +104,7 @@ class TransactionServiceTest {
     @Test
     void should_CountWithFilter() {
       // Given
-      var filter = TransactionFilter.of(null, null, null);
+      var filter = TransactionFilter.of(null, null, null, null);
       var expectedCount = 5L;
       when(repository.countByFilter(any(TransactionFilter.class))).thenReturn(expectedCount);
 

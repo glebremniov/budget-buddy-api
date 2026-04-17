@@ -5,6 +5,7 @@ import com.budget.buddy.budget_buddy_contracts.generated.api.TransactionsApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import org.springframework.data.domain.PageRequest;
@@ -43,10 +44,12 @@ public class TransactionController
       UUID categoryId,
       LocalDate start,
       LocalDate end,
+      TransactionType type,
       String sort
   ) {
     var pageable = PageRequest.of(page, size, buildSort(sort));
-    var filter = TransactionFilter.of(categoryId, start, end);
+    var localType = type != null ? com.budget.buddy.budget_buddy_api.transaction.TransactionType.valueOf(type.name()) : null;
+    var filter = TransactionFilter.of(categoryId, start, end, localType);
     var items = service.list(filter, pageable);
     var total = service.count(filter);
 
