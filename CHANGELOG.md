@@ -1,3 +1,9 @@
+## [0.7.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.6.1...v0.7.0) (2026-04-17)
+
+### Features
+
+* add TransactionType schema and type filter for list transactions ([#122](https://github.com/budget-buddy-org/budget-buddy-api/issues/122)) ([7e8fb32](https://github.com/budget-buddy-org/budget-buddy-api/commit/7e8fb32a422b2e74c43a0d352081a5e7da71c1d7))
+
 ## [0.6.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.6.0...v0.6.1) (2026-04-16)
 
 ### Bug Fixes
