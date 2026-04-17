@@ -56,7 +56,9 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
         .map(Order::getDirection)
         .orElse(Direction.DESC);
 
-    var typeStr = filter.type() != null ? filter.type().name() : null;
+    var type = Optional.ofNullable(filter.type())
+        .map(Enum::name)
+        .orElse(null);
 
     if (order.isAscending()) {
       return findAllByFilterOrderByDateAsc(
@@ -64,7 +66,7 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
           filter.start(),
           filter.end(),
           filter.categoryId(),
-          typeStr,
+          type,
           pageable.getPageSize(),
           pageable.getOffset());
     }
@@ -74,7 +76,7 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
         filter.start(),
         filter.end(),
         filter.categoryId(),
-        typeStr,
+        type,
         pageable.getPageSize(),
         pageable.getOffset());
   }
@@ -102,8 +104,10 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
   );
 
   default long countByFilter(TransactionFilter filter) {
-    var typeStr = filter.type() != null ? filter.type().name() : null;
-    return countByFilter(filter.ownerId(), filter.start(), filter.end(), filter.categoryId(), typeStr);
+    var type = Optional.ofNullable(filter.type())
+        .map(Enum::name)
+        .orElse(null);
+    return countByFilter(filter.ownerId(), filter.start(), filter.end(), filter.categoryId(), type);
   }
 
   @Query(COUNT_BY_FILTERS_QUERY)
