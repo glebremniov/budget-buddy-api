@@ -5,6 +5,11 @@ spring:
       file: docker-compose.local.yaml
   liquibase:
     contexts: dev
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8085
 
 management:
   endpoints:
