@@ -3,14 +3,16 @@ services:
     image: postgres:${DB_IMAGE_TAG:-18.3-alpine}
     platform: ${DOCKER_PLATFORM:-linux/arm64}
     environment:
-      - POSTGRES_DB=budgetbuddy
-      - POSTGRES_USER=budgetbuddy
-      - POSTGRES_PASSWORD=budgetbuddy
+      POSTGRES_DB: budgetbuddy
+      POSTGRES_USER: budgetbuddy
+      POSTGRES_PASSWORD: budgetbuddy
     ports:
       - "5432:5432"
 
   zitadel-db:
     image: postgres:16-alpine
+    labels:
+      org.springframework.boot.ignore: "true"
     environment:
       POSTGRES_DB: zitadel
       POSTGRES_USER: zitadel
@@ -23,9 +25,11 @@ services:
 
   zitadel:
     image: ghcr.io/zitadel/zitadel:latest
+    labels:
+      org.springframework.boot.ignore: "true"
     command: start-from-init --masterkeyFromEnv --tlsMode disabled
     environment:
-      ZITADEL_MASTERKEY: LocalDevMasterkeyNeedsExact32Ch
+      ZITADEL_MASTERKEY: LocalDevMasterkeyNeedsExact32Chs
       ZITADEL_DATABASE_POSTGRES_HOST: zitadel-db
       ZITADEL_DATABASE_POSTGRES_PORT: 5432
       ZITADEL_DATABASE_POSTGRES_DATABASE: zitadel
@@ -40,6 +44,7 @@ services:
       ZITADEL_EXTERNALDOMAIN: localhost
     ports:
       - "8085:8080"
+    restart: on-failure
     depends_on:
       zitadel-db:
         condition: service_healthy
