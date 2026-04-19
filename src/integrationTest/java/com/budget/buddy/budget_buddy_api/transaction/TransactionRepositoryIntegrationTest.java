@@ -38,9 +38,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
   @BeforeEach
   void setUp() {
     var user = UserEntity.builder()
-        .username("owner_" + UUID.randomUUID())
         .oidcSubject("sub_" + UUID.randomUUID())
-        .enabled(true)
         .build();
     ownerId = userRepository.save(user).getId();
 

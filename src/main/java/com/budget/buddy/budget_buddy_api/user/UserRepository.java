@@ -1,31 +1,16 @@
 package com.budget.buddy.budget_buddy_api.user;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.stereotype.Repository;
 
 /**
  * Repository for User entity operations using Spring Data JDBC.
  */
 @Repository
 public interface UserRepository extends BaseEntityRepository<UserEntity, UUID> {
-
-  /**
-   * Find user by username
-   *
-   * @param username user name
-   * @return Optional containing user if found
-   */
-  Optional<UserEntity> findByUsername(String username);
-
-  /**
-   * Check if user exists by username
-   *
-   * @param username user name
-   * @return true if user exists
-   */
-  boolean existsByUsername(String username);
 
   /**
    * Find user by OIDC subject (JWT sub claim)

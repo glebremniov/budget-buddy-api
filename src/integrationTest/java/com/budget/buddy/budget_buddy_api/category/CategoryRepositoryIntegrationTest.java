@@ -1,16 +1,17 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
 import com.budget.buddy.budget_buddy_api.user.UserEntity;
 import com.budget.buddy.budget_buddy_api.user.UserRepository;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("CategoryRepository Integration Tests")
 class CategoryRepositoryIntegrationTest extends BaseIntegrationTest {
@@ -26,9 +27,7 @@ class CategoryRepositoryIntegrationTest extends BaseIntegrationTest {
   @BeforeEach
   void setUp() {
     var user = UserEntity.builder()
-        .username("owner_" + UUID.randomUUID())
         .oidcSubject("sub_" + UUID.randomUUID())
-        .enabled(true)
         .build();
     ownerId = userRepository.save(user).getId();
   }
@@ -67,9 +66,7 @@ class CategoryRepositoryIntegrationTest extends BaseIntegrationTest {
     categoryRepository.save(c2);
 
     var otherOwnerId = userRepository.save(UserEntity.builder()
-        .username("other_" + UUID.randomUUID())
         .oidcSubject("sub_" + UUID.randomUUID())
-        .enabled(true)
         .build()).getId();
     var c3 = new CategoryEntity();
     c3.setName("Other");

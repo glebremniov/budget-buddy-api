@@ -1,15 +1,15 @@
 package com.budget.buddy.budget_buddy_api.security.oidc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_api.user.UserRepository;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("OIDC User Provisioning Integration Tests")
 class OidcUserProvisioningIntegrationTest extends BaseMvcIntegrationTest {
@@ -35,7 +35,6 @@ class OidcUserProvisioningIntegrationTest extends BaseMvcIntegrationTest {
     var user = userRepository.findByOidcSubject(oidcSubject);
     assertThat(user).isPresent();
     assertThat(user.get().getOidcSubject()).isEqualTo(oidcSubject);
-    assertThat(user.get().isEnabled()).isTrue();
   }
 
   @Test
@@ -60,52 +59,6 @@ class OidcUserProvisioningIntegrationTest extends BaseMvcIntegrationTest {
     var secondUser = userRepository.findByOidcSubject(oidcSubject);
     assertThat(secondUser).isPresent();
     assertThat(secondUser.get().getId()).isEqualTo(userId);
-  }
-
-  @Test
-  @DisplayName("should use preferred_username from JWT claims as username")
-  void shouldUsePreferredUsernameFromJwtClaims() {
-    var oidcSubject = "test-sub-" + UUID.randomUUID();
-
-    mvc.get().uri("/v1/categories")
-        .with(jwt().jwt(j -> j
-            .subject(oidcSubject)
-            .claim("preferred_username", "johndoe")))
-        .exchange();
-
-    var user = userRepository.findByOidcSubject(oidcSubject);
-    assertThat(user).isPresent();
-    assertThat(user.get().getUsername()).isEqualTo("johndoe");
-  }
-
-  @Test
-  @DisplayName("should fall back to email when preferred_username is absent")
-  void shouldFallBackToEmailWhenPreferredUsernameAbsent() {
-    var oidcSubject = "test-sub-" + UUID.randomUUID();
-
-    mvc.get().uri("/v1/categories")
-        .with(jwt().jwt(j -> j
-            .subject(oidcSubject)
-            .claim("email", "john@example.com")))
-        .exchange();
-
-    var user = userRepository.findByOidcSubject(oidcSubject);
-    assertThat(user).isPresent();
-    assertThat(user.get().getUsername()).isEqualTo("john@example.com");
-  }
-
-  @Test
-  @DisplayName("should fall back to subject when no username claims are present")
-  void shouldFallBackToSubjectWhenNoUsernameClaims() {
-    var oidcSubject = "test-sub-" + UUID.randomUUID();
-
-    mvc.get().uri("/v1/categories")
-        .with(jwt().jwt(j -> j.subject(oidcSubject)))
-        .exchange();
-
-    var user = userRepository.findByOidcSubject(oidcSubject);
-    assertThat(user).isPresent();
-    assertThat(user.get().getUsername()).isEqualTo(oidcSubject);
   }
 
   @Test
