@@ -28,15 +28,6 @@ springdoc:
 security:
   cors:
     allowed-origin-patterns: ${BUDGET_BUDDY_API_CORS_ALLOWED_ORIGIN_PATTERNS}
-  access-token:
-    secret: ${BUDGET_BUDDY_API_ACCESS_TOKEN_SECRET}
-    validity-seconds: ${BUDGET_BUDDY_API_ACCESS_TOKEN_VALIDITY_SECONDS}
-  refresh-token:
-    validity-seconds: ${BUDGET_BUDDY_API_REFRESH_TOKEN_VALIDITY_SECONDS}
-    cleanup:
-      enabled: true
-      cron: "0 0 3 * * *"
-
 logging:
   level:
     root: INFO

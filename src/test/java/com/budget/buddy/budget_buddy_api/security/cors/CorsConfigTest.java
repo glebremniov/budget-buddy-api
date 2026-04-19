@@ -102,7 +102,7 @@ class CorsConfigTest {
           .withPropertyValues("security.cors.allowed-origin-patterns=https://app.example.com")
           .run(context -> {
             var source = context.getBean(CorsConfigurationSource.class);
-            for (var path : new String[] {"/", "/v1/categories", "/v1/auth/login", "/actuator/health"}) {
+            for (var path : new String[] {"/", "/v1/categories", "/v1/transactions", "/actuator/health"}) {
               var request = new MockHttpServletRequest("GET", path);
               assertThat(source.getCorsConfiguration(request))
                   .as("CORS config should apply to path: %s", path)

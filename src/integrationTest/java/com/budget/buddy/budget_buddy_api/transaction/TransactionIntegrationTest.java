@@ -6,7 +6,6 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -17,14 +16,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
-  private String userToken;
-  private String otherUserToken;
+  private String userId;
+  private String otherUserId;
   private UUID userCategoryId;
   private UUID otherUserCategoryId;
 
-  private UUID createCategory(String token, String name) throws Exception {
+  private UUID createCategory(String ownerId, String name) throws Exception {
     var result = mvc.post().uri("/v1/categories")
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+        .with(jwtForUser(ownerId))
         .contentType(MediaType.APPLICATION_JSON)
         .content(json(new CategoryWrite().name(name)))
         .exchange();
@@ -32,11 +31,11 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     return parseBody(result, Category.class).getId();
   }
 
-  private Transaction createTransaction(String token, UUID categoryId) throws Exception {
-    return createTransaction(token, categoryId, null);
+  private Transaction createTransaction(String ownerId, UUID categoryId) throws Exception {
+    return createTransaction(ownerId, categoryId, null);
   }
 
-  private Transaction createTransaction(String token, UUID categoryId, String description) throws Exception {
+  private Transaction createTransaction(String ownerId, UUID categoryId, String description) throws Exception {
     var body = new TransactionWrite()
         .categoryId(categoryId)
         .amount(1000L)
@@ -46,7 +45,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
         .description(description);
 
     var result = mvc.post().uri("/v1/transactions")
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+        .with(jwtForUser(ownerId))
         .contentType(MediaType.APPLICATION_JSON)
         .content(json(body))
         .exchange();
@@ -56,10 +55,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    userToken = registerAndLogin("txuser");
-    otherUserToken = registerAndLogin("othertxuser");
-    userCategoryId = createCategory(userToken, "Food");
-    otherUserCategoryId = createCategory(otherUserToken, "Other Food");
+    userId = createTestUser();
+    otherUserId = createTestUser();
+    userCategoryId = createCategory(userId, "Food");
+    otherUserCategoryId = createCategory(otherUserId, "Other Food");
   }
 
   // ── tests ──────────────────────────────────────────────────────────────────
@@ -69,7 +68,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_CreateTransaction_When_ValidRequest() throws Exception {
-      var transaction = createTransaction(userToken, userCategoryId);
+      var transaction = createTransaction(userId, userCategoryId);
 
       assertThat(transaction.getId()).isNotNull();
       assertThat(transaction.getAmount()).isEqualTo(1000);
@@ -80,7 +79,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_ReturnLocationHeader_When_Created() {
       var result = mvc.post().uri("/v1/transactions")
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
@@ -98,7 +97,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_Return400_When_CategoryBelongsToOtherUser() {
       var result = mvc.post().uri("/v1/transactions")
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionWrite()
               .categoryId(otherUserCategoryId)
@@ -114,7 +113,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_Return400_When_CategoryDoesNotExist() {
       var result = mvc.post().uri("/v1/transactions")
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionWrite()
               .categoryId(UUID.randomUUID())
@@ -148,10 +147,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_ReturnTransaction_When_Owner() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.get().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
@@ -162,10 +161,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return404_When_TransactionBelongsToOtherUser() throws Exception {
-      var created = createTransaction(otherUserToken, otherUserCategoryId);
+      var created = createTransaction(otherUserId, otherUserCategoryId);
 
       var result = mvc.get().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
@@ -174,7 +173,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_Return404_When_TransactionNotFound() {
       var result = mvc.get().uri("/v1/transactions/{id}", UUID.randomUUID())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
@@ -182,7 +181,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return401_When_NotAuthenticated() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.get().uri("/v1/transactions/{id}", created.getId())
           .exchange();
@@ -196,7 +195,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_ReplaceTransaction_When_Owner() throws Exception {
-      var created = createTransaction(userToken, userCategoryId, "original");
+      var created = createTransaction(userId, userCategoryId, "original");
 
       var replaceBody = new TransactionWrite()
           .categoryId(userCategoryId)
@@ -206,7 +205,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .date(LocalDate.of(2026, 6, 1));
 
       var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(replaceBody))
           .exchange();
@@ -225,10 +224,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return400_When_ReplaceWithOtherUserCategory() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionWrite()
               .categoryId(otherUserCategoryId)
@@ -243,10 +242,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return404_When_TransactionBelongsToOtherUser() throws Exception {
-      var created = createTransaction(otherUserToken, otherUserCategoryId);
+      var created = createTransaction(otherUserId, otherUserCategoryId);
 
       var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
@@ -261,7 +260,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return401_When_NotAuthenticated() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
           .contentType(MediaType.APPLICATION_JSON)
@@ -284,10 +283,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_UpdateTransaction_When_Owner() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionUpdate().amount(AMOUNT)))
           .exchange();
@@ -300,10 +299,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return400_When_UpdateWithOtherUserCategory() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionUpdate().categoryId(otherUserCategoryId)))
           .exchange();
@@ -313,10 +312,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return400_When_UpdateWithNonExistentCategory() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionUpdate().categoryId(UUID.randomUUID())))
           .exchange();
@@ -326,10 +325,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return404_When_TransactionBelongsToOtherUser() throws Exception {
-      var created = createTransaction(otherUserToken, otherUserCategoryId);
+      var created = createTransaction(otherUserId, otherUserCategoryId);
 
       var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionUpdate().amount(AMOUNT)))
           .exchange();
@@ -339,7 +338,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return401_When_NotAuthenticated() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
           .contentType(MediaType.APPLICATION_JSON)
@@ -352,11 +351,11 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_ClearDescription_When_ExplicitNullInPatch() throws Exception {
       // Given
-      var created = createTransaction(userToken, userCategoryId, "A description");
+      var created = createTransaction(userId, userCategoryId, "A description");
 
       // When — raw JSON to explicitly send null (distinct from omitting the field)
       var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content("{\"description\": null}")
           .exchange();
@@ -375,16 +374,16 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_DeleteTransaction_When_Owner() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var deleteResult = mvc.delete().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(deleteResult).hasStatus(HttpStatus.NO_CONTENT);
 
       var getResult = mvc.get().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(getResult).hasStatus(HttpStatus.NOT_FOUND);
@@ -392,10 +391,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return404_When_TransactionBelongsToOtherUser() throws Exception {
-      var created = createTransaction(otherUserToken, otherUserCategoryId);
+      var created = createTransaction(otherUserId, otherUserCategoryId);
 
       var result = mvc.delete().uri("/v1/transactions/{id}", created.getId())
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
@@ -403,7 +402,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return401_When_NotAuthenticated() throws Exception {
-      var created = createTransaction(userToken, userCategoryId);
+      var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.delete().uri("/v1/transactions/{id}", created.getId())
           .exchange();
@@ -417,12 +416,12 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_ReturnOnlyOwnTransactionsOrderedByDateDesc() throws Exception {
-      var txn1 = createTransaction(userToken, userCategoryId);
-      var txn2 = createTransaction(userToken, userCategoryId);
-      createTransaction(otherUserToken, otherUserCategoryId);
+      var txn1 = createTransaction(userId, userCategoryId);
+      var txn2 = createTransaction(userId, userCategoryId);
+      createTransaction(otherUserId, otherUserCategoryId);
 
       var result = mvc.get().uri("/v1/transactions")
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
@@ -435,12 +434,12 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_FilterByCategory() throws Exception {
-      var otherCategoryId = createCategory(userToken, "Transport");
-      createTransaction(userToken, userCategoryId);
-      createTransaction(userToken, otherCategoryId);
+      var otherCategoryId = createCategory(userId, "Transport");
+      createTransaction(userId, userCategoryId);
+      createTransaction(userId, otherCategoryId);
 
       var result = mvc.get().uri("/v1/transactions?categoryId={categoryId}", userCategoryId)
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
@@ -454,7 +453,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_FilterByDateRange() throws Exception {
       mvc.post().uri("/v1/transactions")
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
@@ -465,7 +464,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .exchange();
 
       mvc.post().uri("/v1/transactions")
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
@@ -476,7 +475,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .exchange();
 
       var result = mvc.get().uri("/v1/transactions?start=2026-01-01&end=2026-03-31")
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
@@ -490,7 +489,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_ReturnEmptyList_When_NoTransactions() throws Exception {
       var result = mvc.get().uri("/v1/transactions")
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .with(jwtForUser(userId))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);

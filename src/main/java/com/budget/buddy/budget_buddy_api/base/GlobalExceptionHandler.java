@@ -1,8 +1,6 @@
 package com.budget.buddy.budget_buddy_api.base;
 
 import com.budget.buddy.budget_buddy_api.base.validation.FieldErrorFactory;
-import com.budget.buddy.budget_buddy_api.security.exception.InvalidPasswordException;
-import com.budget.buddy.budget_buddy_api.security.exception.UsernameAlreadyTakenException;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -180,32 +178,6 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Problem> handleNotReadable(HttpMessageNotReadableException ex, WebRequest request) {
     log.debug("Malformed request: {}", ex.getMessage());
     return problemResponse(HttpStatus.BAD_REQUEST, "The request body could not be read", request);
-  }
-
-  /**
-   * Handles username already taken exceptions.
-   *
-   * @param ex the exception
-   * @param request the current web request
-   * @return a {@link ResponseEntity} containing a {@link Problem} detail
-   */
-  @ExceptionHandler(UsernameAlreadyTakenException.class)
-  public ResponseEntity<Problem> handleUsernameAlreadyTakenException(UsernameAlreadyTakenException ex, WebRequest request) {
-    log.debug("Username already taken: {}", ex.getMessage());
-    return problemResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
-  }
-
-  /**
-   * Handles invalid password exceptions.
-   *
-   * @param ex the exception
-   * @param request the current web request
-   * @return a {@link ResponseEntity} containing a {@link Problem} detail
-   */
-  @ExceptionHandler(InvalidPasswordException.class)
-  public ResponseEntity<Problem> handleInvalidPasswordException(InvalidPasswordException ex, WebRequest request) {
-    log.debug("Invalid password: {}", ex.getMessage());
-    return problemResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
   }
 
   /**

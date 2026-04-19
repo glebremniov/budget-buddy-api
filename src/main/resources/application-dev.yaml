@@ -5,6 +5,11 @@ spring:
       file: docker-compose.local.yaml
   liquibase:
     contexts: dev
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8085
 
 management:
   endpoints:
@@ -16,13 +21,6 @@ security:
   cors:
     allowed-origin-patterns:
       - "http://localhost:[*]"
-  access-token:
-    validity-seconds: 900
-  refresh-token:
-    validity-seconds: 1209600 # 14 days
-    cleanup:
-      enabled: false
-
 logging:
   level:
     root: INFO

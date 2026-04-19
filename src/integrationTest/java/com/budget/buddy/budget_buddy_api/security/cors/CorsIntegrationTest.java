@@ -17,7 +17,7 @@ class CorsIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_RespondWithCorsHeaders_When_PreflightFromAllowedOrigin() {
-      var result = mvc.options().uri("/v1/auth/login")
+      var result = mvc.options().uri("/v1/categories")
           .header("Origin", ALLOWED_ORIGIN)
           .header("Access-Control-Request-Method", "POST")
           .exchange();
@@ -38,7 +38,7 @@ class CorsIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_RejectPreflight_When_OriginNotAllowed() {
-      var result = mvc.options().uri("/v1/auth/login")
+      var result = mvc.options().uri("/v1/categories")
           .header("Origin", DISALLOWED_ORIGIN)
           .header("Access-Control-Request-Method", "POST")
           .exchange();

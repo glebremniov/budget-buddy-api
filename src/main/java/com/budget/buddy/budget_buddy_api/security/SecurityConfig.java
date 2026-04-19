@@ -1,78 +1,46 @@
 package com.budget.buddy.budget_buddy_api.security;
 
+import com.budget.buddy.budget_buddy_api.security.oidc.OidcUserProvisioningFilter;
+import com.budget.buddy.budget_buddy_api.user.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import javax.sql.DataSource;
-
 /**
- * Security configuration for the application. Configures HTTP security, authentication manager, password encoder, and user details manager.
+ * Security configuration for the application.
+ * The API is a stateless OIDC resource server — all authentication is handled
+ * by the external OIDC provider. JWTs are validated against the configured issuer.
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-  /**
-   * Configures the security filter chain.
-   *
-   * @param http the {@link HttpSecurity} to configure
-   * @return the {@link SecurityFilterChain}
-   */
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) {
+  SecurityFilterChain securityFilterChain(
+      HttpSecurity http,
+      CorsConfigurationSource corsConfigurationSource,
+      UserService userService
+  ) {
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/actuator/health").permitAll()
-            .requestMatchers("/v1/auth/login").permitAll()
-            .requestMatchers("/v1/auth/register").permitAll()
-            .requestMatchers("/v1/auth/refresh").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+        .addFilterAfter(new OidcUserProvisioningFilter(userService), BearerTokenAuthenticationFilter.class)
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .passwordManagement(Customizer.withDefaults())
         .httpBasic(AbstractHttpConfigurer::disable)
         .csrf(csrf -> csrf.ignoringRequestMatchers("/v1/**", "/actuator/**"))
         .formLogin(AbstractHttpConfigurer::disable);
 
     return http.build();
-  }
-
-  @Bean
-  UserDetailsManager jdbcUserDetailsManager(DataSource dataSource) {
-    return new JdbcUserDetailsManager(dataSource);
-  }
-
-  @Bean
-  PasswordEncoder passwordEncoder() {
-    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-  }
-
-  @Profile("!dev")
-  @Bean
-  CompromisedPasswordChecker compromisedPasswordChecker() {
-    return new HaveIBeenPwnedRestApiPasswordChecker();
-  }
-
-  @Bean
-  AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) {
-    return authConfig.getAuthenticationManager();
   }
 }

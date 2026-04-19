@@ -6,9 +6,9 @@ import org.springframework.security.core.AuthenticationException;
 /**
  * Resolves the ID of the currently authenticated owner.
  *
- * <p>Implementations are expected to read the identity from the active security context.
- * The production binding lives in {@code ApplicationConfig} and delegates to
- * {@link com.budget.buddy.budget_buddy_api.security.auth.AuthUtils}.
+ * <p>Implementations are expected to read the identity from the active request context.
+ * The production binding lives in {@code ApplicationConfig} and reads the user ID
+ * set by {@link com.budget.buddy.budget_buddy_api.security.oidc.OidcUserProvisioningFilter}.
  *
  * @param <ID> the owner identifier type
  */

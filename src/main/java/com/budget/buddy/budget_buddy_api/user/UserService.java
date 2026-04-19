@@ -1,110 +1,38 @@
 package com.budget.buddy.budget_buddy_api.user;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.base.AbstractBaseEntityService;
-import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
-import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.authentication.DisabledException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+import java.util.function.Supplier;
+
 /**
  * Service for managing users.
+ * Users are provisioned automatically via JIT provisioning on first OIDC login.
  */
-@Transactional(readOnly = true)
+@Slf4j
 @Service
-public class UserService extends AbstractBaseEntityService<UserEntity, UUID, UserDto, RegisterRequest, Object> {
+@RequiredArgsConstructor
+public class UserService {
 
   private final UserRepository repository;
-  private final UserMapper mapper;
-  private final AuthorityRepository authorityRepository;
-
-  public UserService(
-      UserRepository repository,
-      UserMapper mapper,
-      AuthorityRepository authorityRepository,
-      Set<BaseEntityValidator<UserEntity>> validators
-  ) {
-    super(repository, mapper, validators);
-    this.repository = repository;
-    this.mapper = mapper;
-    this.authorityRepository = authorityRepository;
-  }
+  private final Supplier<UUID> idGenerator;
 
   /**
-   * Checks if a user exists by username.
+   * Finds or creates a local user for the given OIDC subject.
+   * On first login, a new user is provisioned automatically (JIT provisioning).
+   * first-login requests are safe without try-catch or retries.
    *
-   * @param username the username to check
-   * @return true if the user exists, false otherwise
+   * @param oidcSubject the OIDC subject identifier (JWT sub claim)
+   * @return the local user's UUID
    */
-  public boolean existsByUsername(String username) {
-    return repository.existsByUsername(username);
-  }
-
-  /**
-   * Finds a user by username.
-   *
-   * @param username the username to find
-   * @return an {@link Optional} containing the user, or empty if not found
-   */
-  public Optional<UserDto> findByUsername(String username) {
-    return repository.findByUsername(username)
-        .map(mapper::toModel);
-  }
-
   @Transactional
-  @Override
-  protected UserEntity createInternal(RegisterRequest createRequest) {
-    var savedUser = super.createInternal(createRequest);
-    authorityRepository.addDefaultAuthorityToUser(savedUser.getUsername());
-    return savedUser;
-  }
-
-  @Transactional
-  @Override
-  public UserDto update(UUID uuid, Object patchRequest) throws EntityNotFoundException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Transactional
-  @Override
-  public void delete(UUID uuid) throws EntityNotFoundException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public List<UserDto> list() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Page<UserDto> list(Pageable pageRequest) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public long count() {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Find and validate that user exists and is enabled
-   *
-   * @param userId user ID
-   * @return UserDto if user exists and is enabled
-   * @throws DisabledException if user is disabled
-   */
-  public UserDto requireEnabledUser(UUID userId) {
-    var user = readInternal(userId);
-    if (!user.isEnabled()) {
-      throw new DisabledException("User is disabled");
-    }
-    return mapper.toModel(user);
+  @Cacheable(value = "oidcUsers", key = "#oidcSubject")
+  public UUID findOrCreateByOidcSubject(String oidcSubject) {
+    log.info("Provisioning or retrieving local ID for OIDC subject: {}", oidcSubject);
+    return repository.upsert(idGenerator.get(), oidcSubject);
   }
 }

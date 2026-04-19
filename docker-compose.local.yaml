@@ -3,8 +3,8 @@ services:
     image: postgres:${DB_IMAGE_TAG:-18.3-alpine}
     platform: ${DOCKER_PLATFORM:-linux/arm64}
     environment:
-      - POSTGRES_DB=budgetbuddy
-      - POSTGRES_USER=budgetbuddy
-      - POSTGRES_PASSWORD=budgetbuddy
+      POSTGRES_DB: budgetbuddy
+      POSTGRES_USER: budgetbuddy
+      POSTGRES_PASSWORD: budgetbuddy
     ports:
       - "5432:5432"
