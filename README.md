@@ -31,7 +31,7 @@ git clone https://github.com/your-username/budget-buddy-api.git
 cd budget-buddy-api
 
 # Set OIDC issuer URI (required for JWT validation)
-export OIDC_ISSUER_URI=https://<your-zitadel-host>
+export OIDC_ISSUER_URI=https://<your-auth-server-host>
 
 # Run with dev profile
 ./gradlew bootRun --args='--spring.profiles.active=dev'
@@ -54,14 +54,14 @@ docker compose logs -f app
 
 ### Environment Variables
 
-| Variable | Description |
-|---|---|
-| `BUDGET_BUDDY_API_IMAGE` | Docker image (e.g. `ghcr.io/username/budget-buddy-api:latest`) |
-| `SPRING_PROFILES_ACTIVE` | Spring profile (`prod`) |
-| `DB_NAME` | PostgreSQL database name |
-| `DB_USER` | PostgreSQL username |
-| `DB_PASSWORD` | PostgreSQL password |
-| `OIDC_ISSUER_URI` | OIDC issuer URI for JWT validation (e.g. `https://<zitadel-host>`) |
+| Variable                 | Description                                                            |
+|--------------------------|------------------------------------------------------------------------|
+| `BUDGET_BUDDY_API_IMAGE` | Docker image (e.g. `ghcr.io/username/budget-buddy-api:latest`)         |
+| `SPRING_PROFILES_ACTIVE` | Spring profile (`prod`)                                                |
+| `DB_NAME`                | PostgreSQL database name                                               |
+| `DB_USER`                | PostgreSQL username                                                    |
+| `DB_PASSWORD`            | PostgreSQL password                                                    |
+| `OIDC_ISSUER_URI`        | OIDC issuer URI for JWT validation (e.g. `https://<auth-server-host>`) |
 
 ## API
 
