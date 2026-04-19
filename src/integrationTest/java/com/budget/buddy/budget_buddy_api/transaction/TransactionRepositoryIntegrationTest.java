@@ -3,7 +3,6 @@ package com.budget.buddy.budget_buddy_api.transaction;
 import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
 import com.budget.buddy.budget_buddy_api.category.CategoryEntity;
 import com.budget.buddy.budget_buddy_api.category.CategoryRepository;
-import com.budget.buddy.budget_buddy_api.user.UserEntity;
 import com.budget.buddy.budget_buddy_api.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,11 +36,7 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
 
   @BeforeEach
   void setUp() {
-    var user = UserEntity.builder()
-        .oidcSubject("sub_" + UUID.randomUUID())
-        .build();
-    ownerId = userRepository.save(user).getId();
-
+    ownerId = userRepository.upsert(UUID.randomUUID(), "sub_" + UUID.randomUUID());
     var category = new CategoryEntity();
     category.setName("Food");
     category.setOwnerId(ownerId);

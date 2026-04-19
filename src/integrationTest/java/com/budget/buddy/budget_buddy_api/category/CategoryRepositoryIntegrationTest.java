@@ -1,7 +1,6 @@
 package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
-import com.budget.buddy.budget_buddy_api.user.UserEntity;
 import com.budget.buddy.budget_buddy_api.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,10 +25,7 @@ class CategoryRepositoryIntegrationTest extends BaseIntegrationTest {
 
   @BeforeEach
   void setUp() {
-    var user = UserEntity.builder()
-        .oidcSubject("sub_" + UUID.randomUUID())
-        .build();
-    ownerId = userRepository.save(user).getId();
+    ownerId = userRepository.upsert(UUID.randomUUID(), "sub_" + UUID.randomUUID());
   }
 
   @Test
@@ -65,9 +61,7 @@ class CategoryRepositoryIntegrationTest extends BaseIntegrationTest {
     c2.setOwnerId(ownerId);
     categoryRepository.save(c2);
 
-    var otherOwnerId = userRepository.save(UserEntity.builder()
-        .oidcSubject("sub_" + UUID.randomUUID())
-        .build()).getId();
+    var otherOwnerId = userRepository.upsert(UUID.randomUUID(), "sub_" + UUID.randomUUID());
     var c3 = new CategoryEntity();
     c3.setName("Other");
     c3.setOwnerId(otherOwnerId);

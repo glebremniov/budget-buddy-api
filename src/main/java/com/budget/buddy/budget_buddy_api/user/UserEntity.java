@@ -1,12 +1,14 @@
 package com.budget.buddy.budget_buddy_api.user;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
-import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntity;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
@@ -18,11 +20,23 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserEntity extends AuditableEntity implements BaseEntity<UUID> {
+public class UserEntity {
 
   @Id
   @Column("id")
   private UUID id;
+
+  @Version
+  @Column("version")
+  private Integer version;
+
+  @CreatedDate
+  @Column("created_at")
+  private OffsetDateTime createdAt;
+
+  @LastModifiedDate
+  @Column("updated_at")
+  private OffsetDateTime updatedAt;
 
   @Column("oidc_subject")
   private String oidcSubject;

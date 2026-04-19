@@ -42,7 +42,7 @@ public class OidcUserProvisioningFilter extends OncePerRequestFilter {
 
     if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
       var oidcSubject = jwt.getSubject();
-      UUID localUserId = userService.findOrCreateByOidcSubject(oidcSubject, jwt);
+      UUID localUserId = userService.findOrCreateByOidcSubject(oidcSubject);
       request.setAttribute(USER_ID_ATTRIBUTE, localUserId);
     }
 

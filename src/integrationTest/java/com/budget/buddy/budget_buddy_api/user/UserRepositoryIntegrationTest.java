@@ -16,42 +16,35 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
   private UserRepository userRepository;
 
   @Test
-  @DisplayName("should find user by ID")
-  void shouldFindById() {
+  void upsert_Should_InsertAndReturnId_When_NoUserWithSameSubject() {
     // Given
-    var user = UserEntity.builder()
-        .oidcSubject("sub_" + UUID.randomUUID())
-        .build();
-    var saved = userRepository.save(user);
-    assertThat(saved.getId()).isNotNull();
+    var newId = UUID.randomUUID();
+    var subject = "sub_" + UUID.randomUUID();
 
     // When
-    var found = userRepository.findById(saved.getId());
+    UUID actual = userRepository.upsert(newId, subject);
 
     // Then
-    assertThat(found)
-        .isPresent()
-        .get()
-        .returns(saved.getId(), UserEntity::getId);
+    assertThat(actual)
+        .as("Returned ID should be equal to new ID")
+        .isEqualTo(newId);
   }
 
   @Test
-  @DisplayName("should find user by OIDC subject")
-  void shouldFindByOidcSubject() {
+  void upsert_Should_ReturnOldId_When_UserWithSameSubject() {
     // Given
-    var oidcSubject = "oidc_" + UUID.randomUUID();
-    var user = UserEntity.builder()
-        .oidcSubject(oidcSubject)
-        .build();
-    userRepository.save(user);
+    var oldId = UUID.randomUUID();
+    var subject = "sub_" + UUID.randomUUID();
+    userRepository.upsert(oldId, subject);
+
+    var newId = UUID.randomUUID();
 
     // When
-    var found = userRepository.findByOidcSubject(oidcSubject);
-    var notFound = userRepository.findByOidcSubject("nonexistent");
+    UUID actual = userRepository.upsert(newId, subject);
 
     // Then
-    assertThat(found).isPresent();
-    assertThat(found.get().getOidcSubject()).isEqualTo(oidcSubject);
-    assertThat(notFound).isEmpty();
+    assertThat(actual)
+        .as("Returned ID should be equal to old ID")
+        .isEqualTo(oldId);
   }
 }
