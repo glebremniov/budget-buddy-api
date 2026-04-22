@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.0.0...v1.1.0) (2026-04-22)
+
+### Features
+
+* set up audience validation in jwt claims ([#137](https://github.com/budget-buddy-org/budget-buddy-api/issues/137)) ([f73a1f3](https://github.com/budget-buddy-org/budget-buddy-api/commit/f73a1f362a00378d94be82bbc6bbb57c47528d28))
+
 ## [1.0.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.7.0...v1.0.0) (2026-04-19)
 
 ### ⚠ BREAKING CHANGES
