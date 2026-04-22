@@ -4,10 +4,19 @@ plugins {
   jacoco
   id("org.springframework.boot") version "4.0.5"
   id("io.spring.dependency-management") version "1.1.7"
+  id("org.owasp.dependencycheck") version "10.0.4"
 }
 
 group = "com.budget.buddy"
 description = "API for Budget Buddy App"
+
+dependencyCheck {
+  failBuildOnCVSS = 7.0f
+  suppressionFile = "dependency-check-suppressions.xml"
+  nvd {
+    apiKey = System.getenv("NVD_API_KEY") ?: ""
+  }
+}
 
 java {
   toolchain {
