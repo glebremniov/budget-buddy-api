@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-@Import({TestcontainersConfig.class, TestSecurityConfig.class})
+@Import({TestcontainersConfig.class})
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional

@@ -7,6 +7,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://test-issuer.example.com
+          audiences:
+            - budget-buddy-api
 
 security:
   cors:

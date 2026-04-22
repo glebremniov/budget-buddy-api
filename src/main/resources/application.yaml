@@ -9,6 +9,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${OIDC_ISSUER_URI}
+          audiences: ${OIDC_AUDIENCES}
   cache:
     type: caffeine
     cache-names:
