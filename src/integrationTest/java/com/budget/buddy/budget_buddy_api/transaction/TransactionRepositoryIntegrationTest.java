@@ -1,9 +1,8 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
+import com.budget.buddy.budget_buddy_api.BaseOwnableIntegrationTest;
 import com.budget.buddy.budget_buddy_api.category.CategoryEntity;
 import com.budget.buddy.budget_buddy_api.category.CategoryRepository;
-import com.budget.buddy.budget_buddy_api.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("TransactionRepository Integration Tests")
-class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
+class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
 
   @Autowired
   private TransactionRepository transactionRepository;
@@ -28,15 +27,12 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
   @Autowired
   private CategoryRepository categoryRepository;
 
-  @Autowired
-  private UserRepository userRepository;
-
   private UUID ownerId;
   private UUID categoryId;
 
   @BeforeEach
   void setUp() {
-    ownerId = userRepository.upsert(UUID.randomUUID(), "sub_" + UUID.randomUUID());
+    ownerId = upsertRandomUser();
     var category = new CategoryEntity();
     category.setName("Food");
     category.setOwnerId(ownerId);

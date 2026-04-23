@@ -41,4 +41,7 @@ public class UserEntity {
   @Column("oidc_subject")
   private String oidcSubject;
 
+  @Column("oidc_issuer")
+  private String oidcIssuer;
+
 }

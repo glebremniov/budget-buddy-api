@@ -11,7 +11,7 @@ spring:
         jwt:
           issuer-uri: http://localhost:8085
           audiences:
-            - budget-buddy-web-app
+            - budget-buddy-api
 
 management:
   endpoints:
@@ -22,7 +22,8 @@ management:
 security:
   cors:
     allowed-origin-patterns:
-      - "http://localhost:[*]"
+      - http://localhost:[*]
+
 logging:
   level:
     root: INFO

@@ -1,7 +1,6 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
-import com.budget.buddy.budget_buddy_api.user.UserRepository;
+import com.budget.buddy.budget_buddy_api.BaseOwnableIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,19 +12,16 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("CategoryRepository Integration Tests")
-class CategoryRepositoryIntegrationTest extends BaseIntegrationTest {
+class CategoryRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
 
   @Autowired
   private CategoryRepository categoryRepository;
-
-  @Autowired
-  private UserRepository userRepository;
 
   private UUID ownerId;
 
   @BeforeEach
   void setUp() {
-    ownerId = userRepository.upsert(UUID.randomUUID(), "sub_" + UUID.randomUUID());
+    ownerId = upsertRandomUser();
   }
 
   @Test
@@ -61,7 +57,7 @@ class CategoryRepositoryIntegrationTest extends BaseIntegrationTest {
     c2.setOwnerId(ownerId);
     categoryRepository.save(c2);
 
-    var otherOwnerId = userRepository.upsert(UUID.randomUUID(), "sub_" + UUID.randomUUID());
+    var otherOwnerId = upsertRandomUser();
     var c3 = new CategoryEntity();
     c3.setName("Other");
     c3.setOwnerId(otherOwnerId);

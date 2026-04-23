@@ -43,12 +43,13 @@ public class OidcUserProvisioningFilter extends OncePerRequestFilter {
 
     if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
       var oidcSubject = jwt.getSubject();
+      var oidcIssuer = jwt.getIssuer();
 
-      if (oidcSubject == null) {
-        throw new InsufficientAuthenticationException("JWT subject is missing");
+      if (oidcSubject == null || oidcIssuer == null) {
+        throw new InsufficientAuthenticationException("JWT subject and (or) issuer are missing");
       }
 
-      UUID localUserId = userService.findOrCreateByOidcSubject(oidcSubject);
+      UUID localUserId = userService.findOrCreateByOidcSubject(oidcSubject, oidcIssuer.toString());
       request.setAttribute(USER_ID_ATTRIBUTE, localUserId);
     }
 

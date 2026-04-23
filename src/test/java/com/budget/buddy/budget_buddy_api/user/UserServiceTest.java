@@ -28,13 +28,14 @@ class UserServiceTest {
   void upsert_Should_DelegateToRepository() {
     // Given
     var subject = "test-sub";
+    var issuer = "test-issuer";
     var userId = UUID.randomUUID();
     var existingId = UUID.randomUUID();
     when(idGenerator.get()).thenReturn(userId);
-    when(userRepository.upsert(userId, subject)).thenReturn(existingId);
+    when(userRepository.upsert(userId, subject, issuer)).thenReturn(existingId);
 
     // When
-    UUID actual = userService.findOrCreateByOidcSubject(subject);
+    UUID actual = userService.findOrCreateByOidcSubject(subject, issuer);
 
     // Then
     assertThat(actual).isEqualTo(existingId);
