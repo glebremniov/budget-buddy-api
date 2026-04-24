@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.2.1...v1.3.0) (2026-04-24)
+
+### Features
+
+* **security:** trust X-Forwarded-* headers for DPoP URL validation ([#140](https://github.com/budget-buddy-org/budget-buddy-api/issues/140)) ([24c3d6d](https://github.com/budget-buddy-org/budget-buddy-api/commit/24c3d6dd12b5d35af6e6f8f1317d91f27e9649d0))
+
 ## [1.2.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.2.0...v1.2.1) (2026-04-24)
 
 ### Bug Fixes
