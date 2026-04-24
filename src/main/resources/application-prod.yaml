@@ -12,6 +12,9 @@ spring:
       idle-timeout: 300000
       max-lifetime: 1200000
 
+server:
+  forward-headers-strategy: framework
+
 management:
   endpoints:
     web:
