@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.1.0...v1.2.0) (2026-04-24)
+
+### Features
+
+* **user:** add oidc issuer column ([#138](https://github.com/budget-buddy-org/budget-buddy-api/issues/138)) ([0552717](https://github.com/budget-buddy-org/budget-buddy-api/commit/0552717e049246d0e863bc76291e3bef06fb0e5b))
+
 ## [1.1.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.0.0...v1.1.0) (2026-04-22)
 
 ### Features
