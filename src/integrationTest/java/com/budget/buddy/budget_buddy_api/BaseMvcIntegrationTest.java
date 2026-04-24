@@ -40,11 +40,14 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
   /**
    * Returns a JWT request post-processor for the given OIDC subject.
    */
+  private static final String TEST_ISSUER = "https://test-issuer.example.com";
+  private static final String TEST_AUDIENCE = "budget-buddy-api";
+
   protected static RequestPostProcessor jwtForUser(String oidcSubject) {
     return jwt().jwt(j -> j
         .subject(oidcSubject)
-        .audience(Collections.singleton("http://test-audience"))
-        .issuer("http://test-issuer")
+        .audience(Collections.singleton(TEST_AUDIENCE))
+        .issuer(TEST_ISSUER)
     );
   }
 

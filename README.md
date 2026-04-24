@@ -27,11 +27,12 @@ The project uses Spring Docker Compose — PostgreSQL starts automatically when 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/budget-buddy-api.git
+git clone https://github.com/budget-buddy-org/budget-buddy-api.git
 cd budget-buddy-api
 
-# Set OIDC issuer URI (required for JWT validation)
+# Set OIDC configuration (required for JWT validation)
 export OIDC_ISSUER_URI=https://<your-auth-server-host>
+export OIDC_AUDIENCES=https://<your-oidc-audiences>
 
 # Run with dev profile
 ./gradlew bootRun --args='--spring.profiles.active=dev'
@@ -62,12 +63,17 @@ docker compose logs -f app
 | `DB_USER`                | PostgreSQL username                                                    |
 | `DB_PASSWORD`            | PostgreSQL password                                                    |
 | `OIDC_ISSUER_URI`        | OIDC issuer URI for JWT validation (e.g. `https://<auth-server-host>`) |
+| `OIDC_AUDIENCES`         | Expected JWT audience(s) (e.g. `https://<your-oidc-audiences>`)        |
 
 ## API
 
 ### Authentication
 
-Authentication is handled by an external OIDC provider. The API is a stateless resource server that validates JWTs using the JWKS endpoint discovered from `OIDC_ISSUER_URI`. On first authenticated request, a local user is automatically provisioned (JIT provisioning) by mapping the JWT `sub` claim to a local `oidc_subject` field.
+Authentication is handled by an external OIDC provider. The API is a stateless resource server that validates JWTs using the JWKS endpoint discovered from `OIDC_ISSUER_URI`.
+
+- **Issuer & audience validation** — JWTs are verified against the configured issuer and must contain an expected audience (`OIDC_AUDIENCES`).
+- **Multi-issuer support** — The same `sub` claim from different issuers is treated as separate users (composite unique constraint on `oidc_subject + oidc_issuer`).
+- **JIT provisioning** — On first authenticated request, a local user is automatically created by mapping the JWT `sub` and `iss` claims to a local user record.
 
 ### Categories
 
@@ -102,7 +108,7 @@ To build the project, you need to provide GitHub credentials to access the `budg
 ./gradlew build -Pgpr.user=YOUR_USERNAME -Pgpr.key=YOUR_TOKEN
 ```
 
-# Build Docker image
+### Build Docker image
 
 ```bash
 ./gradlew bootBuildImage --imageName=ghcr.io/your-username/budget-buddy-api:latest
@@ -121,6 +127,7 @@ To build the project, you need to provide GitHub credentials to access the `budg
 ```
 GET /actuator/health
 ```
+
 ### PATCH Behavior
 
 The API supports JSON Merge Patch semantics for fields that can be cleared:

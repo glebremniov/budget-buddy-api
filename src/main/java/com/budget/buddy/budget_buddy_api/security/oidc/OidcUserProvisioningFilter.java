@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -46,7 +46,7 @@ public class OidcUserProvisioningFilter extends OncePerRequestFilter {
       var oidcIssuer = jwt.getIssuer();
 
       if (oidcSubject == null || oidcIssuer == null) {
-        throw new InsufficientAuthenticationException("JWT subject and (or) issuer are missing");
+        throw new InvalidBearerTokenException("JWT must contain both 'sub' and 'iss' claims");
       }
 
       UUID localUserId = userService.findOrCreateByOidcSubject(oidcSubject, oidcIssuer.toString());

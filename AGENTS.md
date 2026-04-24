@@ -2,8 +2,6 @@
 
 This file provides guidance for AI agents (Claude Code, Junie, etc.) when working with this repository.
 
-**For comprehensive documentation on architecture, testing, versioning, and code conventions, see [.github/SHARED.md](.github/SHARED.md).**
-
 ---
 
 ## Quick Start
@@ -46,6 +44,15 @@ Or add `gpr.user` / `gpr.key` to `~/.gradle/gradle.properties`.
 - **Field-Level Errors**: Validation exceptions (`MethodArgumentNotValidException`, `ConstraintViolationException`) must return a `Problem` containing an `errors` array with `field` and `message` properties.
 - **Request URI**: The `instance` field should contain the current request URI, retrieved using `ServletWebRequest` in `GlobalExceptionHandler`.
 
+### Security & OIDC
+
+- **Stateless resource server**: The API validates JWTs from an external OIDC provider. No sessions, no server-side token storage.
+- **JIT user provisioning**: `OidcUserProvisioningFilter` runs after `BearerTokenAuthenticationFilter` and maps JWT `sub` + `iss` claims to a local user via an atomic upsert. The resolved user UUID is stored as a request attribute.
+- **Multi-issuer support**: Users are identified by the composite `(oidc_subject, oidc_issuer)` unique constraint. The same `sub` from different issuers creates separate users.
+- **Audience validation**: JWTs must contain an expected audience configured via `OIDC_AUDIENCES`.
+- **Ownership isolation**: All ownable entities are scoped to the authenticated user via `OwnerIdProvider<UUID>`, which reads the user UUID set by the provisioning filter.
+- **No PII in logs**: Never log OIDC subjects or other user-identifying claims at INFO level or above. Use DEBUG.
+
 ### Code Patterns
 
 - **Problem Details Extension**: The base `Problem` class from `budget-buddy-contracts` now includes an `errors` field for field-level validation errors. Use it directly instead of extending it for common validation cases.
@@ -84,14 +91,4 @@ Use these slash commands for common workflows:
 | `/ship` | Commit all changes and open a PR against `main` |
 | `/javadoc` | Add Javadoc to public/protected API in recently changed files |
 
----
 
-## Reference
-
-For details on:
-- **Architecture & CRUDL framework** → see [.github/SHARED.md#architecture](.github/SHARED.md#architecture)
-- **Testing conventions** → see [.github/SHARED.md#testing-conventions](.github/SHARED.md#testing-conventions)
-- **Adding new features** → see [.github/SHARED.md#adding-a-new-feature](.github/SHARED.md#adding-a-new-feature)
-- **Code conventions** → see [.github/SHARED.md#code-conventions](.github/SHARED.md#code-conventions)
-
-For Copilot CLI (GitHub Copilot in terminal), see [.github/copilot-instructions.md](.github/copilot-instructions.md) for expanded documentation on environment setup, CI/CD, and Docker deployment.

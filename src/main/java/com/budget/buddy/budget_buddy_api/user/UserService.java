@@ -30,7 +30,7 @@ public class UserService {
    */
   @Transactional
   public UUID findOrCreateByOidcSubject(String oidcSubject, String oidcIssuer) {
-    log.info("Provisioning or retrieving local ID for OIDC subject: {}, issuer: {}", oidcSubject, oidcIssuer);
+    log.debug("Resolving local user for OIDC issuer: {}", oidcIssuer);
     return repository.upsert(idGenerator.get(), oidcSubject, oidcIssuer);
   }
 }
