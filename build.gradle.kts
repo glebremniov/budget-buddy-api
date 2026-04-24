@@ -39,10 +39,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
-  implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
   implementation("org.mapstruct:mapstruct:${mapstructVersion}")
-  implementation("com.github.ben-manes.caffeine:caffeine")
 
 
   compileOnly("org.projectlombok:lombok")

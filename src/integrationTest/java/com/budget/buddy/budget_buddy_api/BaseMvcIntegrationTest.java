@@ -7,6 +7,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -40,7 +41,11 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
    * Returns a JWT request post-processor for the given OIDC subject.
    */
   protected static RequestPostProcessor jwtForUser(String oidcSubject) {
-    return jwt().jwt(j -> j.subject(oidcSubject));
+    return jwt().jwt(j -> j
+        .subject(oidcSubject)
+        .audience(Collections.singleton("http://test-audience"))
+        .issuer("http://test-issuer")
+    );
   }
 
 }

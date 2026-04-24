@@ -20,9 +20,10 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
     // Given
     var newId = UUID.randomUUID();
     var subject = "sub_" + UUID.randomUUID();
+    var issuer = "test_issuer";
 
     // When
-    UUID actual = userRepository.upsert(newId, subject);
+    UUID actual = userRepository.upsert(newId, subject, issuer);
 
     // Then
     assertThat(actual)
@@ -35,12 +36,14 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
     // Given
     var oldId = UUID.randomUUID();
     var subject = "sub_" + UUID.randomUUID();
-    userRepository.upsert(oldId, subject);
+    var issuer = "test_issuer";
+
+    userRepository.upsert(oldId, subject, issuer);
 
     var newId = UUID.randomUUID();
 
     // When
-    UUID actual = userRepository.upsert(newId, subject);
+    UUID actual = userRepository.upsert(newId, subject, issuer);
 
     // Then
     assertThat(actual)

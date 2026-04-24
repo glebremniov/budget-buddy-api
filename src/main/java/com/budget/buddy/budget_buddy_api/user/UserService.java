@@ -2,7 +2,6 @@ package com.budget.buddy.budget_buddy_api.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,9 +29,8 @@ public class UserService {
    * @return the local user's UUID
    */
   @Transactional
-  @Cacheable(value = "oidcUsers", key = "#oidcSubject")
-  public UUID findOrCreateByOidcSubject(String oidcSubject) {
-    log.info("Provisioning or retrieving local ID for OIDC subject: {}", oidcSubject);
-    return repository.upsert(idGenerator.get(), oidcSubject);
+  public UUID findOrCreateByOidcSubject(String oidcSubject, String oidcIssuer) {
+    log.info("Provisioning or retrieving local ID for OIDC subject: {}, issuer: {}", oidcSubject, oidcIssuer);
+    return repository.upsert(idGenerator.get(), oidcSubject, oidcIssuer);
   }
 }

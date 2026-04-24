@@ -12,21 +12,30 @@ import java.util.UUID;
 public interface UserRepository extends Repository<UserEntity, UUID> {
 
   String UPSERT_QUERY = """
-      INSERT INTO users 
-          (id, oidc_subject, version, created_at, updated_at)
-      VALUES 
-          (:id, :oidcSubject, 0, NOW(), NOW())
-      ON CONFLICT (oidc_subject) DO UPDATE SET oidc_subject = EXCLUDED.oidc_subject
-      RETURNING id;
+      WITH ins AS (
+        INSERT INTO users (id, oidc_subject, oidc_issuer, version, created_at, updated_at)
+        VALUES (:id, :oidcSubject, :oidcIssuer, 0, NOW(), NOW())
+        ON CONFLICT (oidc_subject, oidc_issuer) DO NOTHING
+        RETURNING id
+      )
+      SELECT id FROM ins
+      UNION ALL
+      SELECT id FROM users
+      WHERE oidc_subject = :oidcSubject AND oidc_issuer = :oidcIssuer
+      LIMIT 1
       """;
 
   /**
    * Atomically inserts a new user if no row with the given OIDC subject exists.
-   * Uses {@code ON CONFLICT DO UPDATE SET ... RETURNING id} so concurrent calls are safe.
+   * Uses {@code ON CONFLICT DO NOTHING ... RETURNING id} so concurrent calls are safe.
    *
    * @return {@link UUID} id of the user
    */
   @Query(UPSERT_QUERY)
-  UUID upsert(@Param("id") UUID id, @Param("oidcSubject") String oidcSubject);
+  UUID upsert(
+      @Param("id") UUID id,
+      @Param("oidcSubject") String oidcSubject,
+      @Param("oidcIssuer") String oidcIssuer
+  );
 
 }

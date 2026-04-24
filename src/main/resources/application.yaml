@@ -4,21 +4,14 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
+    parameters:
+      oidc-issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${OIDC_ISSUER_URI}
           audiences: ${OIDC_AUDIENCES}
-  cache:
-    type: caffeine
-    cache-names:
-      - oidcUsers
-    caffeine:
-      spec: >
-        initialCapacity=50,
-        maximumSize=200,
-        expireAfterWrite=24h
 
 server:
   port: ${SERVER_PORT:8080}
