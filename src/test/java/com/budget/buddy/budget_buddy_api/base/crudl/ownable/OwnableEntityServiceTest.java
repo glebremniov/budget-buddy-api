@@ -1,17 +1,8 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.ownable;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityMapper;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +14,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("OwnableEntityService Unit Tests")
@@ -263,6 +264,41 @@ class OwnableEntityServiceTest {
         OwnerIdProvider<String> ownerIdProvider
     ) {
       super(repository, mapper, entityValidators, ownerIdProvider);
+    }
+
+    @Override
+    public DummyOwnableEntity readInternal(String id) {
+      return super.readInternal(id);
+    }
+
+    @Override
+    public DummyOwnableEntity createInternal(Object createRequest) {
+      return super.createInternal(createRequest);
+    }
+
+    @Override
+    public DummyOwnableEntity updateInternal(String id, Object updateRequest) {
+      return super.updateInternal(id, updateRequest);
+    }
+
+    @Override
+    public DummyOwnableEntity replaceInternal(String id, Object replaceRequest) {
+      return super.replaceInternal(id, replaceRequest);
+    }
+
+    @Override
+    public void deleteInternal(String id) {
+      super.deleteInternal(id);
+    }
+
+    @Override
+    public boolean existsByIdInternal(String id) {
+      return super.existsByIdInternal(id);
+    }
+
+    @Override
+    public long countInternal() {
+      return super.countInternal();
     }
   }
 }

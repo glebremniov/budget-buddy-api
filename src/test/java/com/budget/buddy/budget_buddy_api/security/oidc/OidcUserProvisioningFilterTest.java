@@ -49,8 +49,8 @@ class OidcUserProvisioningFilterTest {
   }
 
   @Test
-  @DisplayName("should set user ID attribute for valid JWT with sub and iss")
-  void shouldSetUserIdAttributeForValidJwt() throws ServletException, IOException {
+  @DisplayName("should upgrade JwtAuthenticationToken to LocalUserAuthentication")
+  void shouldUpgradeAuthenticationForValidJwt() throws ServletException, IOException {
     var subject = "user-123";
     var issuer = "https://issuer.example.com";
     var localUserId = UUID.randomUUID();
@@ -60,9 +60,27 @@ class OidcUserProvisioningFilterTest {
 
     filter.doFilterInternal(request, response, filterChain);
 
-    assertThat(request.getAttribute(OidcUserProvisioningFilter.USER_ID_ATTRIBUTE))
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    assertThat(authentication)
+        .isInstanceOf(LocalUserAuthentication.class)
+        .extracting(a -> ((LocalUserAuthentication) a).getLocalUserId())
         .isEqualTo(localUserId);
     verify(filterChain).doFilter(request, response);
+  }
+
+  @Test
+  @DisplayName("should not re-upgrade an already-upgraded LocalUserAuthentication")
+  void shouldNotReUpgradeLocalUserAuthentication() throws ServletException, IOException {
+    var jwt = buildJwt("user-123", "https://issuer.example.com");
+    var localUserId = UUID.randomUUID();
+    var existing = new LocalUserAuthentication(jwt, AuthorityUtils.NO_AUTHORITIES, localUserId);
+    SecurityContextHolder.getContext().setAuthentication(existing);
+
+    filter.doFilterInternal(request, response, filterChain);
+
+    assertThat(SecurityContextHolder.getContext().getAuthentication()).isSameAs(existing);
+    verify(filterChain).doFilter(request, response);
+    verifyNoInteractions(userService);
   }
 
   @Test
@@ -78,7 +96,7 @@ class OidcUserProvisioningFilterTest {
   @Test
   @DisplayName("should throw InvalidBearerTokenException when JWT issuer is missing")
   void shouldThrowWhenIssuerMissing() {
-    setJwtAuthenticationWithoutIssuer("user-123");
+    setJwtAuthenticationWithoutIssuer();
 
     assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
         .isInstanceOf(InvalidBearerTokenException.class)
@@ -86,19 +104,17 @@ class OidcUserProvisioningFilterTest {
   }
 
   @Test
-  @DisplayName("should continue filter chain without setting attribute when no authentication")
+  @DisplayName("should continue filter chain without upgrading when no authentication")
   void shouldContinueChainWhenNoAuthentication() throws ServletException, IOException {
-    // SecurityContext has no authentication
-
     filter.doFilterInternal(request, response, filterChain);
 
-    assertThat(request.getAttribute(OidcUserProvisioningFilter.USER_ID_ATTRIBUTE)).isNull();
+    assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     verify(filterChain).doFilter(request, response);
     verifyNoInteractions(userService);
   }
 
   @Test
-  @DisplayName("should continue filter chain without setting attribute for non-JWT authentication")
+  @DisplayName("should continue filter chain without upgrading for non-JWT authentication")
   void shouldContinueChainForNonJwtAuthentication() throws ServletException, IOException {
     var anonymousAuth = new AnonymousAuthenticationToken(
         "key", "anonymous", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
@@ -106,30 +122,29 @@ class OidcUserProvisioningFilterTest {
 
     filter.doFilterInternal(request, response, filterChain);
 
-    assertThat(request.getAttribute(OidcUserProvisioningFilter.USER_ID_ATTRIBUTE)).isNull();
+    assertThat(SecurityContextHolder.getContext().getAuthentication()).isSameAs(anonymousAuth);
     verify(filterChain).doFilter(request, response);
     verifyNoInteractions(userService);
   }
 
-  private void setJwtAuthentication(String subject, String issuer) {
-    try {
-      var jwt = Jwt.withTokenValue("mock-token")
-          .header("alg", "RS256")
-          .subject(subject)
-          .issuer(issuer)
-          .issuedAt(Instant.now())
-          .expiresAt(Instant.now().plusSeconds(300))
-          .build();
-      SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private void setJwtAuthenticationWithoutIssuer(String subject) {
-    var jwt = Jwt.withTokenValue("mock-token")
+  private static Jwt buildJwt(String subject, String issuer) {
+    return Jwt.withTokenValue("mock-token")
         .header("alg", "RS256")
         .subject(subject)
+        .issuer(issuer)
+        .issuedAt(Instant.now())
+        .expiresAt(Instant.now().plusSeconds(300))
+        .build();
+  }
+
+  private void setJwtAuthentication(String subject, String issuer) {
+    SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(buildJwt(subject, issuer)));
+  }
+
+  private void setJwtAuthenticationWithoutIssuer() {
+    var jwt = Jwt.withTokenValue("mock-token")
+        .header("alg", "RS256")
+        .subject("user-123")
         .claim("custom", "value")
         .issuedAt(Instant.now())
         .expiresAt(Instant.now().plusSeconds(300))

@@ -8,28 +8,28 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
-import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 
 /**
- * Ensures a local {@code UserEntity} exists for every authenticated OIDC user.
- * On the first request from a new user, a record is created automatically (JIT provisioning).
- * The resolved local user ID is stored as a request attribute for downstream use by
- * {@link com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider}.
+ * Upgrades the post-authentication {@link JwtAuthenticationToken} to a
+ * {@link LocalUserAuthentication} carrying the resolved local user UUID.
+ *
+ * <p>On the first request from a new OIDC user, a local row is provisioned
+ * automatically (JIT provisioning) — subsequent requests are served from the
+ * in-process cache in {@link UserService}.
+ *
+ * <p>If the principal is already a {@link LocalUserAuthentication} (e.g. the
+ * upgrade has run earlier in the chain), the filter is a no-op.
  */
 @Slf4j
 @RequiredArgsConstructor
 public class OidcUserProvisioningFilter extends OncePerRequestFilter {
-
-  /**
-   * Request attribute key where the local user UUID is stored after provisioning.
-   */
-  public static final String USER_ID_ATTRIBUTE = OidcUserProvisioningFilter.class.getName() + ".USER_ID";
 
   private final UserService userService;
 
@@ -39,9 +39,12 @@ public class OidcUserProvisioningFilter extends OncePerRequestFilter {
       @NonNull HttpServletResponse response,
       @NonNull FilterChain filterChain
   ) throws ServletException, IOException {
-    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    var context = SecurityContextHolder.getContext();
+    var authentication = context.getAuthentication();
 
-    if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+    if (authentication instanceof JwtAuthenticationToken jwtAuth
+        && !(authentication instanceof LocalUserAuthentication)) {
+      Jwt jwt = jwtAuth.getToken();
       var oidcSubject = jwt.getSubject();
       var oidcIssuer = jwt.getIssuer();
 
@@ -49,8 +52,8 @@ public class OidcUserProvisioningFilter extends OncePerRequestFilter {
         throw new InvalidBearerTokenException("JWT must contain both 'sub' and 'iss' claims");
       }
 
-      UUID localUserId = userService.findOrCreateByOidcSubject(oidcSubject, oidcIssuer.toString());
-      request.setAttribute(USER_ID_ATTRIBUTE, localUserId);
+      var localUserId = userService.findOrCreateByOidcSubject(oidcSubject, oidcIssuer.toString());
+      context.setAuthentication(new LocalUserAuthentication(jwt, jwtAuth.getAuthorities(), localUserId));
     }
 
     filterChain.doFilter(request, response);

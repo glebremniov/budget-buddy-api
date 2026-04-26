@@ -1,12 +1,13 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import java.util.Collections;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Abstract base service class providing common CRUDL operations for entities. Subclasses can extend this class to implement specific business logic for different entity types.
@@ -128,7 +129,6 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
    * @param createRequest the create request
    * @return the created entity
    */
-  @Transactional
   protected E createInternal(C createRequest) {
     E entity = mapper.toEntity(createRequest);
     validate(entity);
@@ -154,7 +154,6 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
    * @param updateRequest the update request
    * @return the updated entity
    */
-  @Transactional
   protected E updateInternal(ID id, U updateRequest) {
     E existingEntity = readInternal(id);
     mapper.patchEntity(updateRequest, existingEntity);
@@ -169,7 +168,6 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
    * @param replaceRequest the replace request
    * @return the replaced entity
    */
-  @Transactional
   protected E replaceInternal(ID id, C replaceRequest) {
     E existingEntity = readInternal(id);
     mapper.replaceEntity(replaceRequest, existingEntity);
@@ -182,7 +180,6 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
    *
    * @param id the unique identifier
    */
-  @Transactional
   protected void deleteInternal(ID id) {
     var entity = readInternal(id);
     repository.delete(entity);

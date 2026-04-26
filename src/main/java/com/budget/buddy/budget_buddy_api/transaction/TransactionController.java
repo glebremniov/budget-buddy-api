@@ -2,13 +2,10 @@ package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
 import com.budget.buddy.budget_buddy_contracts.generated.api.TransactionsApi;
-import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
-import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
-import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
+import com.budget.buddy.budget_buddy_contracts.generated.model.*;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
@@ -39,25 +36,24 @@ public class TransactionController
 
   @Override
   public ResponseEntity<PaginatedTransactions> listTransactions(
-      Integer page,
-      Integer size,
-      UUID categoryId,
-      LocalDate start,
-      LocalDate end,
-      TransactionType type,
-      String sort
+      Integer page, Integer size,
+      UUID categoryId, LocalDate start, LocalDate end,
+      TransactionType type, String sort
   ) {
     var pageable = PageRequest.of(page, size, buildSort(sort));
     var filter = TransactionFilter.of(categoryId, start, end, mapper.toModel(type));
+    return listTransactions(filter, pageable);
+  }
+
+  ResponseEntity<PaginatedTransactions> listTransactions(TransactionFilter filter, Pageable pageable) {
     var items = service.list(filter, pageable);
-    var total = service.count(filter);
 
-    var meta = new PaginationMeta()
-        .page(page)
-        .size(size)
-        .total(total);
+    var meta = new PaginationMeta();
+    meta.setPage(items.getNumber());
+    meta.setSize(items.getSize());
+    meta.setTotal(items.getTotalElements());
 
-    return ResponseEntity.ok(mapper.toPageResponse(items, meta));
+    return ResponseEntity.ok(mapper.toPageResponse(items.getContent(), meta));
   }
 
   @Override

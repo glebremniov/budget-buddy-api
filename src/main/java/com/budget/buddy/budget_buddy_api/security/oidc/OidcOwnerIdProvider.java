@@ -1,36 +1,30 @@
 package com.budget.buddy.budget_buddy_api.security.oidc;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.UUID;
 
 /**
- * Provides the local user UUID set by {@link OidcUserProvisioningFilter}.
- * The filter runs after JWT authentication and maps the OIDC subject to a local user,
- * storing the resulting UUID as a request attribute.
+ * Resolves the local user UUID from the {@link LocalUserAuthentication} placed
+ * on the {@link SecurityContextHolder} by {@link OidcUserProvisioningFilter}.
+ *
+ * <p>Reading from the security context (instead of a request attribute) keeps
+ * this provider usable from any thread that propagates the security context —
+ * e.g. {@code @Async} or scheduled tasks.
  */
 @Component
 public class OidcOwnerIdProvider implements OwnerIdProvider<UUID> {
 
   @Override
   public UUID get() throws AuthenticationException {
-    var attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-    if (attrs == null) {
-      throw new InvalidBearerTokenException("No request context available.");
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication instanceof LocalUserAuthentication local) {
+      return local.getLocalUserId();
     }
-
-    HttpServletRequest request = attrs.getRequest();
-    var userId = (UUID) request.getAttribute(OidcUserProvisioningFilter.USER_ID_ATTRIBUTE);
-    if (userId == null) {
-      throw new InvalidBearerTokenException("Current user is not authenticated.");
-    }
-
-    return userId;
+    throw new InvalidBearerTokenException("Current user is not authenticated.");
   }
 }

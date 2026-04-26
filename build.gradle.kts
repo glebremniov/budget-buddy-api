@@ -2,7 +2,7 @@ plugins {
   java
   `jvm-test-suite`
   jacoco
-  id("org.springframework.boot") version "4.0.5"
+  id("org.springframework.boot") version "4.0.6"
   id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -41,7 +41,6 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
   implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
   implementation("org.mapstruct:mapstruct:${mapstructVersion}")
-
 
   compileOnly("org.projectlombok:lombok")
 

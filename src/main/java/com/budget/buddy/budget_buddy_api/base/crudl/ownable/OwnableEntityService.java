@@ -8,14 +8,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Base class for services managing entities that belong to a specific owner.
  *
  * <p>All CRUDL operations are automatically scoped to the owner returned by the
  * injected {@link OwnerIdProvider}. Subclasses inherit this scoping without any
- * additional wiring.
+ * additional wiring — the parent's {@code update/replace/delete} flow is reused
+ * verbatim because it dispatches through the overridden {@link #readInternal(Object)}.
  *
  * @param <E> the entity type
  * @param <ID> the identifier type
@@ -52,31 +52,6 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     return repository.findAllByOwnerId(ownerIdProvider.get(), pageRequest);
   }
 
-  @Transactional
-  @Override
-  protected void deleteInternal(ID id) {
-    var entity = readInternal(id);
-    repository.delete(entity);
-  }
-
-  @Transactional
-  @Override
-  protected E updateInternal(ID id, U updateRequest) {
-    E existingEntity = readInternal(id);
-    mapper.patchEntity(updateRequest, existingEntity);
-    validate(existingEntity);
-    return repository.save(existingEntity);
-  }
-
-  @Transactional
-  @Override
-  protected E replaceInternal(ID id, C replaceRequest) {
-    E existingEntity = readInternal(id);
-    mapper.replaceEntity(replaceRequest, existingEntity);
-    validate(existingEntity);
-    return repository.save(existingEntity);
-  }
-
   @Override
   protected E readInternal(ID id) {
     return repository.findByIdAndOwnerId(id, ownerIdProvider.get())
@@ -88,7 +63,6 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     return repository.existsByIdAndOwnerId(id, ownerIdProvider.get());
   }
 
-  @Transactional
   @Override
   protected E createInternal(C createRequest) {
     E entity = mapper.toEntity(createRequest);
@@ -98,7 +72,7 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
   }
 
   @Override
-  public long countInternal() {
+  protected long countInternal() {
     return repository.countByOwnerId(ownerIdProvider.get());
   }
 }

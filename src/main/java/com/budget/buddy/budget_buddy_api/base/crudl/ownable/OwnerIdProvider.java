@@ -1,14 +1,15 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.ownable;
 
-import java.util.function.Supplier;
 import org.springframework.security.core.AuthenticationException;
+
+import java.util.function.Supplier;
 
 /**
  * Resolves the ID of the currently authenticated owner.
  *
- * <p>Implementations are expected to read the identity from the active request context.
- * The production binding lives in {@code ApplicationConfig} and reads the user ID
- * set by {@link com.budget.buddy.budget_buddy_api.security.oidc.OidcUserProvisioningFilter}.
+ * <p>The production binding reads the user ID from the
+ * {@link org.springframework.security.core.context.SecurityContextHolder}
+ * — see {@code OidcOwnerIdProvider}.
  *
  * @param <ID> the owner identifier type
  */

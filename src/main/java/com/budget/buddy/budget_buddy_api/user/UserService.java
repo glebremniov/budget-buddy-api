@@ -1,9 +1,10 @@
 package com.budget.buddy.budget_buddy_api.user;
 
+import com.budget.buddy.budget_buddy_api.base.config.CacheConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -11,6 +12,12 @@ import java.util.function.Supplier;
 /**
  * Service for managing users.
  * Users are provisioned automatically via JIT provisioning on first OIDC login.
+ *
+ * <p>Resolved {@code (issuer, subject) → localUserId} mappings are cached
+ * via Spring's cache abstraction (see {@link CacheConfig#LOCAL_USER_IDS}).
+ * The hot authentication path therefore touches the database only on the
+ * first request from each OIDC user — subsequent requests are served from
+ * the cache without crossing the proxy boundary.
  */
 @Slf4j
 @Service
@@ -23,12 +30,14 @@ public class UserService {
   /**
    * Finds or creates a local user for the given OIDC subject.
    * On first login, a new user is provisioned automatically (JIT provisioning).
-   * first-login requests are safe without try-catch or retries.
+   * The underlying upsert is atomic ({@code ON CONFLICT DO NOTHING}), so
+   * concurrent first-login requests are safe.
    *
    * @param oidcSubject the OIDC subject identifier (JWT sub claim)
+   * @param oidcIssuer the OIDC issuer URI (JWT iss claim)
    * @return the local user's UUID
    */
-  @Transactional
+  @Cacheable(value = CacheConfig.LOCAL_USER_IDS, key = "#oidcIssuer + '|' + #oidcSubject")
   public UUID findOrCreateByOidcSubject(String oidcSubject, String oidcIssuer) {
     log.debug("Resolving local user for OIDC issuer: {}", oidcIssuer);
     return repository.upsert(idGenerator.get(), oidcSubject, oidcIssuer);
