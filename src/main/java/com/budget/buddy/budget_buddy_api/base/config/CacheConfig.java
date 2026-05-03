@@ -15,11 +15,7 @@ public class CacheConfig {
   /** Maps {@code (issuer, subject) → localUserId} for the OIDC JIT-provisioning lookup. */
   public static final String LOCAL_USER_IDS = "localUserIds";
 
-  /**
-   * Caches JWKS responses from the OIDC issuer. Without this, {@code NimbusJwtDecoder} falls back
-   * to {@code NoOpCache} and refetches the JWKS on every cycle, surfacing transient DNS failures
-   * as 401s.
-   */
+  /** Caches JWKS responses so {@code NimbusJwtDecoder} doesn't refetch them on every cycle. */
   public static final String JWKS = "jwks";
 
   @Bean

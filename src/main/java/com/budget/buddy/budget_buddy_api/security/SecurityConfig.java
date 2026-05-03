@@ -47,12 +47,7 @@ public class SecurityConfig {
     return http.build();
   }
 
-  /**
-   * Attaches the {@link CacheConfig#JWKS} cache to the auto-configured {@code NimbusJwtDecoder}
-   * so the JWKS is fetched from the OIDC issuer at most once per cache TTL instead of on every
-   * cycle. Without a cache the decoder falls back to {@code NoOpCache}, surfacing transient DNS
-   * failures inside the container as 401s.
-   */
+  /** Attaches the {@link CacheConfig#JWKS} cache to the auto-configured {@code NimbusJwtDecoder}. */
   @Bean
   JwkSetUriJwtDecoderBuilderCustomizer jwkSetUriJwtDecoderBuilderCustomizer(
       CacheManager cacheManager
