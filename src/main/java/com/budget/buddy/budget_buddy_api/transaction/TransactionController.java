@@ -42,8 +42,15 @@ public class TransactionController
       TransactionType type, String sort
   ) {
     var pageable = PageRequest.of(page, size, buildSort(sort));
-    var filter = TransactionFilter.of(
-        categoryId, start, end, mapper.toModel(type), query, amountMin, amountMax);
+    var filter = TransactionFilter.builder()
+        .categoryId(categoryId)
+        .start(start)
+        .end(end)
+        .type(mapper.toModel(type))
+        .query(query)
+        .amountMin(amountMin)
+        .amountMax(amountMax)
+        .build();
     return listTransactions(filter, pageable);
   }
 

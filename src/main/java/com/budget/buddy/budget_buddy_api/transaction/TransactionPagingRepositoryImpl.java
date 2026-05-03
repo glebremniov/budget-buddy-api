@@ -16,15 +16,11 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.UUID;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
-
-  private static final String AMOUNT = "amount";
-  private static final String DESCRIPTION = "description";
 
   private final JdbcAggregateOperations jdbc;
   private final CategoryRepository categoryRepository;
@@ -72,10 +68,10 @@ class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
       criteria = criteria.and(TransactionEntity.TYPE).is(filter.type());
     }
     if (filter.amountMin() != null) {
-      criteria = criteria.and(AMOUNT).greaterThanOrEquals(filter.amountMin());
+      criteria = criteria.and(TransactionEntity.AMOUNT).greaterThanOrEquals(filter.amountMin());
     }
     if (filter.amountMax() != null) {
-      criteria = criteria.and(AMOUNT).lessThanOrEquals(filter.amountMax());
+      criteria = criteria.and(TransactionEntity.AMOUNT).lessThanOrEquals(filter.amountMax());
     }
     if (StringUtils.hasText(filter.query())) {
       criteria = criteria.and(searchCriteria(filter.ownerId(), filter.query()));
@@ -90,13 +86,15 @@ class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
    */
   private Criteria searchCriteria(UUID ownerId, String query) {
     var pattern = "%" + escapeLike(query) + "%";
-    var byDescription = Criteria.where(DESCRIPTION).like(pattern).ignoreCase(true);
+    var byDescription = Criteria.where(TransactionEntity.DESCRIPTION).like(pattern).ignoreCase(true);
 
     var matchingCategoryIds = categoryRepository.findIdsByOwnerIdAndNameLike(ownerId, pattern);
+
     if (matchingCategoryIds.isEmpty()) {
       return byDescription;
     }
-    return byDescription.or(Criteria.where(TransactionEntity.CATEGORY_ID).in((List<?>) matchingCategoryIds));
+
+    return byDescription.or(Criteria.where(TransactionEntity.CATEGORY_ID).in(matchingCategoryIds));
   }
 
   /**

@@ -70,7 +70,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var after = save(ownerId, categoryId, TODAY.plusDays(2), TransactionType.EXPENSE, 3L);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withStart(TODAY).build(),
+          filter().start(TODAY).build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -87,7 +87,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var after = save(ownerId, categoryId, TODAY.plusDays(2), TransactionType.EXPENSE, 3L);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withEnd(TODAY).build(),
+          filter().end(TODAY).build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -104,7 +104,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, otherCategoryId, TODAY, TransactionType.EXPENSE, 2L);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withCategoryId(categoryId).build(),
+          filter().categoryId(categoryId).build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -120,7 +120,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var income = save(ownerId, categoryId, TODAY, TransactionType.INCOME, 2L);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withType(TransactionType.INCOME).build(),
+          filter().type(TransactionType.INCOME).build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -195,7 +195,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withStart(TODAY.plusDays(10)).build(),
+          filter().start(TODAY.plusDays(10)).build(),
           defaultPageable());
 
       assertThat(result.getContent()).isEmpty();
@@ -214,7 +214,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L, "Lunch");
 
       var result = transactionRepository.findAllByFilter(
-          filter().withQuery("coffee").build(),
+          filter().query("coffee").build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -230,7 +230,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L, "Groceries");
 
       var result = transactionRepository.findAllByFilter(
-          filter().withQuery("trav").build(),
+          filter().query("trav").build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -247,7 +247,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var byCategory = save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 2L, "tea");
 
       var result = transactionRepository.findAllByFilter(
-          filter().withQuery(queryString).build(),
+          filter().query(queryString).build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -262,7 +262,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var match = save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 1L, null);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withQuery("travel").build(),
+          filter().query("travel").build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -277,7 +277,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L, "50 off");
 
       var result = transactionRepository.findAllByFilter(
-          filter().withQuery("100%").build(),
+          filter().query("100%").build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -292,7 +292,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L, "another");
 
       var result = transactionRepository.findAllByFilter(
-          filter().withQuery("   ").build(),
+          filter().query("   ").build(),
           defaultPageable());
 
       assertThat(result.getContent()).hasSize(2);
@@ -311,7 +311,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var above = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 101L);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withAmountMin(100L).build(),
+          filter().amountMin(100L).build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -328,7 +328,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var above = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 101L);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withAmountMax(100L).build(),
+          filter().amountMax(100L).build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -347,7 +347,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 201L);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withAmountMin(100L).withAmountMax(200L).build(),
+          filter().amountMin(100L).amountMax(200L).build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -363,7 +363,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 101L);
 
       var result = transactionRepository.findAllByFilter(
-          filter().withAmountMin(100L).withAmountMax(100L).build(),
+          filter().amountMin(100L).amountMax(100L).build(),
           defaultPageable());
 
       assertThat(result.getContent())
@@ -390,13 +390,13 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
 
       var result = transactionRepository.findAllByFilter(
           filter()
-              .withQuery("hotel")
-              .withAmountMin(100L)
-              .withAmountMax(200L)
-              .withCategoryId(travelCategoryId)
-              .withStart(TODAY.minusDays(1))
-              .withEnd(TODAY.plusDays(1))
-              .withType(TransactionType.EXPENSE)
+              .query("hotel")
+              .amountMin(100L)
+              .amountMax(200L)
+              .categoryId(travelCategoryId)
+              .start(TODAY.minusDays(1))
+              .end(TODAY.plusDays(1))
+              .type(TransactionType.EXPENSE)
               .build(),
           defaultPageable());
 
@@ -413,7 +413,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(otherOwnerId, otherOwnerTravel, TODAY, TransactionType.EXPENSE, 1L, "Hotel");
 
       var result = transactionRepository.findAllByFilter(
-          filter().withQuery("travel").build(),
+          filter().query("travel").build(),
           defaultPageable());
 
       assertThat(result.getContent()).isEmpty();
@@ -445,38 +445,11 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
     return transactionRepository.save(entity);
   }
 
-  private FilterBuilder filter() {
-    return new FilterBuilder(ownerId);
+  private TransactionFilter.TransactionFilterBuilder filter() {
+    return TransactionFilter.builder().ownerId(ownerId);
   }
 
   private static PageRequest defaultPageable() {
     return PageRequest.of(0, 10, Direction.DESC, "date");
-  }
-
-  private static final class FilterBuilder {
-    private final UUID ownerId;
-    private UUID categoryId;
-    private LocalDate start;
-    private LocalDate end;
-    private TransactionType type;
-    private String query;
-    private Long amountMin;
-    private Long amountMax;
-
-    FilterBuilder(UUID ownerId) {
-      this.ownerId = ownerId;
-    }
-
-    FilterBuilder withCategoryId(UUID v) { this.categoryId = v; return this; }
-    FilterBuilder withStart(LocalDate v) { this.start = v; return this; }
-    FilterBuilder withEnd(LocalDate v) { this.end = v; return this; }
-    FilterBuilder withType(TransactionType v) { this.type = v; return this; }
-    FilterBuilder withQuery(String v) { this.query = v; return this; }
-    FilterBuilder withAmountMin(Long v) { this.amountMin = v; return this; }
-    FilterBuilder withAmountMax(Long v) { this.amountMax = v; return this; }
-
-    TransactionFilter build() {
-      return new TransactionFilter(ownerId, categoryId, start, end, type, query, amountMin, amountMax);
-    }
   }
 }

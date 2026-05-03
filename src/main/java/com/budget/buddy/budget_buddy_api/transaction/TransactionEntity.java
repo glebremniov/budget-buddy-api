@@ -25,18 +25,20 @@ import java.util.UUID;
 public class TransactionEntity extends AuditableEntity implements OwnableEntity<UUID> {
 
   public static final String CATEGORY_ID = "category_id";
+  public static final String AMOUNT = "amount";
   public static final String TYPE = "type";
   public static final String DATE = "date";
+  public static final String DESCRIPTION = "description";
   public static final String OWNER_ID = "owner_id";
 
   @Id
   @Column("id")
   private UUID id;
 
-  @Column(value = CATEGORY_ID)
+  @Column(CATEGORY_ID)
   private UUID categoryId;
 
-  @Column("amount")
+  @Column(AMOUNT)
   private Long amount;
 
   @Column(TYPE)
@@ -48,7 +50,7 @@ public class TransactionEntity extends AuditableEntity implements OwnableEntity<
   @Column(DATE)
   private LocalDate date;
 
-  @Column("description")
+  @Column(DESCRIPTION)
   private String description;
 
   @Column(OWNER_ID)
