@@ -73,7 +73,7 @@ class TransactionServiceTest {
     @EnumSource(Direction.class)
     void should_ListWithFilter(Direction direction) {
       // Given
-      var filter = TransactionFilter.of(null, null, null, null);
+      var filter = TransactionFilter.builder().build();
       var pageable = PageRequest.of(0, 10, direction, "date");
       var entity = new TransactionEntity();
       var model = new Transaction();

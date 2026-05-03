@@ -37,11 +37,20 @@ public class TransactionController
   @Override
   public ResponseEntity<PaginatedTransactions> listTransactions(
       Integer page, Integer size,
+      String query, Long amountMin, Long amountMax,
       UUID categoryId, LocalDate start, LocalDate end,
       TransactionType type, String sort
   ) {
     var pageable = PageRequest.of(page, size, buildSort(sort));
-    var filter = TransactionFilter.of(categoryId, start, end, mapper.toModel(type));
+    var filter = TransactionFilter.builder()
+        .categoryId(categoryId)
+        .start(start)
+        .end(end)
+        .type(mapper.toModel(type))
+        .query(query)
+        .amountMin(amountMin)
+        .amountMax(amountMax)
+        .build();
     return listTransactions(filter, pageable);
   }
 
