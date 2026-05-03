@@ -38,7 +38,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
+  implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
+  implementation("com.github.ben-manes.caffeine:caffeine")
   implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
   implementation("org.mapstruct:mapstruct:${mapstructVersion}")
 

@@ -1,7 +1,10 @@
 package com.budget.buddy.budget_buddy_api.security;
 
+import com.budget.buddy.budget_buddy_api.base.config.CacheConfig;
 import com.budget.buddy.budget_buddy_api.security.oidc.OidcUserProvisioningFilter;
 import com.budget.buddy.budget_buddy_api.user.UserService;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.JwkSetUriJwtDecoderBuilderCustomizer;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -42,5 +45,18 @@ public class SecurityConfig {
         .formLogin(AbstractHttpConfigurer::disable);
 
     return http.build();
+  }
+
+  /**
+   * Attaches the {@link CacheConfig#JWKS} cache to the auto-configured {@code NimbusJwtDecoder}
+   * so the JWKS is fetched from the OIDC issuer at most once per cache TTL instead of on every
+   * cycle. Without a cache the decoder falls back to {@code NoOpCache}, surfacing transient DNS
+   * failures inside the container as 401s.
+   */
+  @Bean
+  JwkSetUriJwtDecoderBuilderCustomizer jwkSetUriJwtDecoderBuilderCustomizer(
+      CacheManager cacheManager
+  ) {
+    return builder -> builder.cache(cacheManager.getCache(CacheConfig.JWKS));
   }
 }
