@@ -36,12 +36,18 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   private Transaction createTransaction(String ownerId, UUID categoryId, String description) throws Exception {
+    return createTransaction(ownerId, categoryId, description, 1000L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+  }
+
+  private Transaction createTransaction(
+      String ownerId, UUID categoryId, String description, long amount, TransactionType type, LocalDate date
+  ) throws Exception {
     var body = new TransactionWrite()
         .categoryId(categoryId)
-        .amount(1000L)
-        .type(TransactionType.EXPENSE)
+        .amount(amount)
+        .type(type)
         .currency("EUR")
-        .date(LocalDate.of(2026, 3, 1))
+        .date(date)
         .description(description);
 
     var result = mvc.post().uri("/v1/transactions")
@@ -504,6 +510,115 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void should_FilterByQuery_AgainstDescription() throws Exception {
+      var match = createTransaction(userId, userCategoryId, "Morning Coffee");
+      createTransaction(userId, userCategoryId, "Lunch");
+
+      var result = mvc.get().uri("/v1/transactions?query={q}", "coffee")
+          .with(jwtForUser(userId))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var page = parseBody(result, PaginatedTransactions.class);
+      assertThat(page.getItems())
+          .singleElement()
+          .returns(match.getId(), Transaction::getId);
+    }
+
+    @Test
+    void should_FilterByQuery_AgainstCategoryName() throws Exception {
+      var travelCategoryId = createCategory(userId, "Travel");
+      var match = createTransaction(userId, travelCategoryId, "Hotel");
+      createTransaction(userId, userCategoryId, "Groceries");
+
+      var result = mvc.get().uri("/v1/transactions?query={q}", "TRAV")
+          .with(jwtForUser(userId))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var page = parseBody(result, PaginatedTransactions.class);
+      assertThat(page.getItems())
+          .singleElement()
+          .returns(match.getId(), Transaction::getId);
+    }
+
+    @Test
+    void should_FilterByAmountRange_Inclusive() throws Exception {
+      var low = createTransaction(userId, userCategoryId, "low", 100L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      var mid = createTransaction(userId, userCategoryId, "mid", 500L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      var high = createTransaction(userId, userCategoryId, "high", 1000L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, userCategoryId, "tooLow", 99L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, userCategoryId, "tooHigh", 1001L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+
+      var result = mvc.get().uri("/v1/transactions?amountMin=100&amountMax=1000")
+          .with(jwtForUser(userId))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var page = parseBody(result, PaginatedTransactions.class);
+      assertThat(page.getItems())
+          .extracting(Transaction::getId)
+          .containsExactlyInAnyOrder(low.getId(), mid.getId(), high.getId());
+    }
+
+    @Test
+    void should_FilterByAmount_Exact_When_MinEqualsMax() throws Exception {
+      var exact = createTransaction(userId, userCategoryId, "exact", 250L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, userCategoryId, "off-by-one", 251L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+
+      var result = mvc.get().uri("/v1/transactions?amountMin=250&amountMax=250")
+          .with(jwtForUser(userId))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var page = parseBody(result, PaginatedTransactions.class);
+      assertThat(page.getItems())
+          .singleElement()
+          .returns(exact.getId(), Transaction::getId);
+    }
+
+    @Test
+    void should_CombineQueryAndAmount_AndCategory() throws Exception {
+      var travelCategoryId = createCategory(userId, "Travel");
+      var match = createTransaction(userId, travelCategoryId, "Hotel in Paris", 500L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, travelCategoryId, "Hotel in Paris", 50L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, userCategoryId, "Hotel in Paris", 500L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, travelCategoryId, "Souvenir", 500L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+
+      var result = mvc.get().uri(
+              "/v1/transactions?query={q}&amountMin=100&amountMax=1000&categoryId={c}",
+              "hotel", travelCategoryId)
+          .with(jwtForUser(userId))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var page = parseBody(result, PaginatedTransactions.class);
+      assertThat(page.getItems())
+          .singleElement()
+          .returns(match.getId(), Transaction::getId);
+    }
+
+    @Test
+    void should_Return400_When_AmountMinBelowOne() {
+      var result = mvc.get().uri("/v1/transactions?amountMin=0")
+          .with(jwtForUser(userId))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_Return400_When_QueryExceedsMaxLength() {
+      var tooLong = "x".repeat(256);
+
+      var result = mvc.get().uri("/v1/transactions?query={q}", tooLong)
+          .with(jwtForUser(userId))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
   }
 }
