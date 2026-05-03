@@ -1,3 +1,9 @@
+## [1.4.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.4.0...v1.4.1) (2026-05-03)
+
+### Bug Fixes
+
+* cache JWKS to prevent intermittent JWT 401s ([#153](https://github.com/budget-buddy-org/budget-buddy-api/issues/153)) ([3cd4210](https://github.com/budget-buddy-org/budget-buddy-api/commit/3cd421006a27fbfdc6204e8cbba08d35e5f16245)), closes [#152](https://github.com/budget-buddy-org/budget-buddy-api/issues/152)
+
 ## [1.4.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.3.2...v1.4.0) (2026-05-01)
 
 ### Features
