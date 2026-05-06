@@ -14,6 +14,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -187,6 +188,12 @@ public class GlobalExceptionHandler {
    * @param request the current web request
    * @return a {@link ResponseEntity} containing a {@link Problem} detail
    */
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<Problem> handleMissingParam(MissingServletRequestParameterException ex, WebRequest request) {
+    log.debug("Missing request parameter: {}", ex.getMessage());
+    return problemResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+  }
+
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Problem> handleIllegalArgument(IllegalArgumentException ex, WebRequest request) {
     log.debug("Illegal argument: {}", ex.getMessage());

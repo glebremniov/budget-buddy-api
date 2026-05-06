@@ -31,4 +31,7 @@ public class CategoryEntity extends AuditableEntity implements OwnableEntity<UUI
   @Column("owner_id")
   private UUID ownerId;
 
+  @Column("monthly_budget")
+  private Long monthlyBudget;
+
 }

@@ -26,13 +26,15 @@ class CategoryServiceTest {
   private CategoryRepository repository;
   @Mock
   private CategoryMapper mapper;
+  @Mock
+  private CategorySummaryRepository summaryRepository;
 
   private CategoryService categoryService;
   private final UUID currentUserId = UUID.randomUUID();
 
   @BeforeEach
   void setUp() {
-    categoryService = new CategoryService(repository, mapper, Collections.emptySet(), () -> currentUserId);
+    categoryService = new CategoryService(repository, mapper, Collections.emptySet(), () -> currentUserId, summaryRepository);
   }
 
   @Nested
