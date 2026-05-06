@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.6.0...v1.7.0) (2026-05-06)
+
+### Features
+
+* implement category monthlyBudget and GET /v1/categories/summary ([#158](https://github.com/budget-buddy-org/budget-buddy-api/issues/158)) ([486b91c](https://github.com/budget-buddy-org/budget-buddy-api/commit/486b91ccdda5dbe78a093706b4f0777b5ffc017c)), closes [#156](https://github.com/budget-buddy-org/budget-buddy-api/issues/156)
+
 ## [1.6.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.5.0...v1.6.0) (2026-05-06)
 
 ### Features
