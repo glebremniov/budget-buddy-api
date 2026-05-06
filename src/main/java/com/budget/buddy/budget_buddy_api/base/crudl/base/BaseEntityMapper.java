@@ -1,13 +1,10 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
-import java.util.List;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Condition;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 import org.openapitools.jackson.nullable.JsonNullable;
+
+import java.util.List;
 
 /**
  * Base interface for entity mappers using MapStruct.
@@ -110,5 +107,17 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
   @Condition
   default boolean isPresent(JsonNullable<?> value) {
     return value != null && value.isPresent();
+  }
+
+  /**
+   * Wraps a value in a {@link JsonNullable} container.
+   *
+   * @param <T>   the type of the value
+   * @param value the value to wrap (may be {@code null})
+   * @return a {@code JsonNullable} carrying {@code value}
+   */
+  @Named("toJsonNullable")
+  default <T> JsonNullable<T> toJsonNullable(T value) {
+    return JsonNullable.of(value);
   }
 }

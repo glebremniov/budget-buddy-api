@@ -45,7 +45,7 @@ class CategoryMapperTest {
       // Given
       var id = UUID.randomUUID();
       var now = OffsetDateTime.now();
-      var entity = new CategoryEntity(id, "Groceries", UUID.randomUUID());
+      var entity = new CategoryEntity(id, "Groceries", UUID.randomUUID(), null);
       entity.setCreatedAt(now);
       entity.setUpdatedAt(now);
 
@@ -71,8 +71,8 @@ class CategoryMapperTest {
       // Given
       var id1 = UUID.randomUUID();
       var id2 = UUID.randomUUID();
-      var entity1 = new CategoryEntity(id1, "Cat 1", UUID.randomUUID());
-      var entity2 = new CategoryEntity(id2, "Cat 2", UUID.randomUUID());
+      var entity1 = new CategoryEntity(id1, "Cat 1", UUID.randomUUID(), null);
+      var entity2 = new CategoryEntity(id2, "Cat 2", UUID.randomUUID(), null);
 
       // When
       var models = categoryMapper.toModelList(List.of(entity1, entity2));
@@ -102,7 +102,7 @@ class CategoryMapperTest {
       // Given
       var originalId = UUID.randomUUID();
       var ownerId = UUID.randomUUID();
-      var entity = new CategoryEntity(originalId, "Old Name", ownerId);
+      var entity = new CategoryEntity(originalId, "Old Name", ownerId, null);
       var update = new CategoryUpdate();
       update.setName("New Name");
 
@@ -121,7 +121,7 @@ class CategoryMapperTest {
     void should_NotUpdateIfNull() {
       // Given
       var originalName = "Keep Me";
-      var entity = new CategoryEntity(UUID.randomUUID(), originalName, UUID.randomUUID());
+      var entity = new CategoryEntity(UUID.randomUUID(), originalName, UUID.randomUUID(), null);
       var update = new CategoryUpdate();
       update.setName(null);
 
@@ -147,7 +147,7 @@ class CategoryMapperTest {
       var originalUpdatedAt = OffsetDateTime.now().minusHours(1);
       var originalVersion = 10;
 
-      var entity = new CategoryEntity(originalId, "Old Name", originalOwnerId);
+      var entity = new CategoryEntity(originalId, "Old Name", originalOwnerId, null);
       entity.setCreatedAt(originalCreatedAt);
       entity.setUpdatedAt(originalUpdatedAt);
       entity.setVersion(originalVersion);

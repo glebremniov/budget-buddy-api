@@ -10,9 +10,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for category operations.
- */
 @Service
 public class CategoryService extends OwnableEntityService<CategoryEntity, UUID, Category, CategoryWrite, CategoryUpdate> {
 
@@ -24,4 +21,5 @@ public class CategoryService extends OwnableEntityService<CategoryEntity, UUID, 
   ) {
     super(repository, mapper, validators, ownerIdProvider);
   }
+
 }

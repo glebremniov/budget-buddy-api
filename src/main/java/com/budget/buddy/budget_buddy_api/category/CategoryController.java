@@ -3,6 +3,7 @@ package com.budget.buddy.budget_buddy_api.category;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
 import com.budget.buddy.budget_buddy_contracts.generated.api.CategoriesApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingSummary;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedCategories;
@@ -19,8 +20,11 @@ public class CategoryController
     extends BaseEntityController<UUID, Category, CategoryWrite, CategoryUpdate, PaginatedCategories>
     implements CategoriesApi {
 
-  public CategoryController(CategoryService service, CategoryMapper mapper) {
+  private final CategorySummaryService summaryService;
+
+  public CategoryController(CategoryService service, CategoryMapper mapper, CategorySummaryService summaryService) {
     super(service, mapper);
+    this.summaryService = summaryService;
   }
 
   @Override
@@ -52,6 +56,11 @@ public class CategoryController
   @Override
   public ResponseEntity<Category> createCategory(CategoryWrite categoryCreate) {
     return super.createInternal(categoryCreate);
+  }
+
+  @Override
+  public ResponseEntity<CategorySpendingSummary> getCategoriesSummary(String month, String currency) {
+    return ResponseEntity.ok(summaryService.getSummary(month, currency));
   }
 
   @Override
