@@ -23,11 +23,11 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
 
   // ── helpers ────────────────────────────────────────────────────────────────
 
-  UUID createCategory(String ownerId, String name) throws Exception {
+  private UUID createCategory(String ownerId, String name) throws Exception {
     return createCategory(ownerId, name, null);
   }
 
-  UUID createCategory(String ownerId, String name, Long monthlyBudget) throws Exception {
+  private UUID createCategory(String ownerId, String name, Long monthlyBudget) throws Exception {
     var body = new CategoryWrite().name(name).monthlyBudget(monthlyBudget);
     var result = mvc.post().uri("/v1/categories")
         .with(jwtForUser(ownerId))
@@ -37,7 +37,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     return parseBody(result, com.budget.buddy.budget_buddy_contracts.generated.model.Category.class).getId();
   }
 
-  void createTransaction(
+  private void createTransaction(
       String ownerId, UUID categoryId, long amount, TransactionType type, String currency, LocalDate date
   ) throws Exception {
     var body = new TransactionWrite()
@@ -53,7 +53,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
         .exchange();
   }
 
-  CategorySpendingSummary getSummary(String ownerId, String month, String currency) throws Exception {
+  private CategorySpendingSummary getSummary(String ownerId, String month, String currency) throws Exception {
     var result = mvc.get().uri("/v1/categories/summary?month={m}&currency={c}", month, currency)
         .with(jwtForUser(ownerId))
         .exchange();

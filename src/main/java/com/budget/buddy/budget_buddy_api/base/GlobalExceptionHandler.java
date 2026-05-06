@@ -181,13 +181,6 @@ public class GlobalExceptionHandler {
     return problemResponse(HttpStatus.BAD_REQUEST, "The request body could not be read", request);
   }
 
-  /**
-   * Handles illegal argument exceptions.
-   *
-   * @param ex the exception
-   * @param request the current web request
-   * @return a {@link ResponseEntity} containing a {@link Problem} detail
-   */
   @ExceptionHandler(MissingServletRequestParameterException.class)
   public ResponseEntity<Problem> handleMissingParam(MissingServletRequestParameterException ex, WebRequest request) {
     log.debug("Missing request parameter: {}", ex.getMessage());

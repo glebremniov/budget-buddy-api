@@ -29,7 +29,6 @@ public interface CategoryMapper
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "ownerId", ignore = true)
-  @Mapping(target = "monthlyBudget", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
   void patchEntity(CategoryUpdate patchRequest, @MappingTarget CategoryEntity existingEntity);
 
   @Mapping(target = "monthlyBudget", expression = "java(JsonNullable.of(row.monthlyBudget()))")

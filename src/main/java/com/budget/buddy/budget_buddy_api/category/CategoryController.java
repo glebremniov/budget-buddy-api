@@ -20,11 +20,11 @@ public class CategoryController
     extends BaseEntityController<UUID, Category, CategoryWrite, CategoryUpdate, PaginatedCategories>
     implements CategoriesApi {
 
-  private final CategoryService categoryService;
+  private final CategorySummaryService summaryService;
 
-  public CategoryController(CategoryService service, CategoryMapper mapper) {
+  public CategoryController(CategoryService service, CategoryMapper mapper, CategorySummaryService summaryService) {
     super(service, mapper);
-    this.categoryService = service;
+    this.summaryService = summaryService;
   }
 
   @Override
@@ -60,7 +60,7 @@ public class CategoryController
 
   @Override
   public ResponseEntity<CategorySpendingSummary> getCategoriesSummary(String month, String currency) {
-    return ResponseEntity.ok(categoryService.getSummary(month, currency));
+    return ResponseEntity.ok(summaryService.getSummary(month, currency));
   }
 
   @Override

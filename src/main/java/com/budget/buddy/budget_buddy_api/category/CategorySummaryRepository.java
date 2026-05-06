@@ -10,28 +10,20 @@ import org.springframework.stereotype.Repository;
 public class CategorySummaryRepository {
 
   private static final String SUMMARY_SQL = """
-      SELECT c.id AS category_id, c.name AS category_name, c.monthly_budget,
-             COALESCE(agg.spent, 0)      AS spent,
-             COALESCE(agg.tx_count, 0)   AS transaction_count,
-             COALESCE(other.tx_count, 0) AS excluded_transaction_count
+      SELECT c.id    AS category_id,
+             c.name  AS category_name,
+             c.monthly_budget,
+             COALESCE(SUM(t.amount) FILTER (WHERE t.currency = :currency), 0)  AS spent,
+             COALESCE(COUNT(*)      FILTER (WHERE t.currency = :currency), 0)  AS transaction_count,
+             COALESCE(COUNT(*)      FILTER (WHERE t.currency <> :currency), 0) AS excluded_transaction_count
       FROM categories c
-      LEFT JOIN (
-        SELECT category_id, SUM(amount) AS spent, COUNT(*) AS tx_count
-        FROM transactions
-        WHERE owner_id = :ownerId AND type = 'EXPENSE'
-          AND currency = :currency
-          AND date BETWEEN :monthStart AND :monthEnd
-        GROUP BY category_id
-      ) agg ON agg.category_id = c.id
-      LEFT JOIN (
-        SELECT category_id, COUNT(*) AS tx_count
-        FROM transactions
-        WHERE owner_id = :ownerId AND type = 'EXPENSE'
-          AND currency <> :currency
-          AND date BETWEEN :monthStart AND :monthEnd
-        GROUP BY category_id
-      ) other ON other.category_id = c.id
+      LEFT JOIN transactions t
+             ON t.category_id = c.id
+            AND t.owner_id    = :ownerId
+            AND t.type        = 'EXPENSE'
+            AND t.date BETWEEN :monthStart AND :monthEnd
       WHERE c.owner_id = :ownerId
+      GROUP BY c.id, c.name, c.monthly_budget
       ORDER BY c.name
       """;
 
