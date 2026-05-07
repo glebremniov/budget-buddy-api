@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.7.0...v1.8.0) (2026-05-07)
+
+### Features
+
+* implement GET /v1/transactions/summary (closes [#159](https://github.com/budget-buddy-org/budget-buddy-api/issues/159)) ([#160](https://github.com/budget-buddy-org/budget-buddy-api/issues/160)) ([3f0fa7d](https://github.com/budget-buddy-org/budget-buddy-api/commit/3f0fa7d5354ef1202c01d60d4b91150992e35442))
+
 ## [1.7.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.6.0...v1.7.0) (2026-05-06)
 
 ### Features
