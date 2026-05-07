@@ -27,11 +27,21 @@ public class TransactionController
 
   private final TransactionService service;
   private final TransactionMapper mapper;
+  private final TransactionSummaryService summaryService;
 
-  public TransactionController(TransactionService service, TransactionMapper mapper) {
+  public TransactionController(
+      TransactionService service,
+      TransactionMapper mapper,
+      TransactionSummaryService summaryService) {
     super(service, mapper);
     this.service = service;
     this.mapper = mapper;
+    this.summaryService = summaryService;
+  }
+
+  @Override
+  public ResponseEntity<MonthlySummary> getTransactionsSummary(String month, String currency) {
+    return ResponseEntity.ok(summaryService.getSummary(month, currency));
   }
 
   @Override
