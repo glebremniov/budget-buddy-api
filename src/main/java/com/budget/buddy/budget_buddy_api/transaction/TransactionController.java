@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -42,6 +43,12 @@ public class TransactionController
   @Override
   public ResponseEntity<MonthlySummary> getTransactionsSummary(String month, String currency) {
     return ResponseEntity.ok(summaryService.getSummary(month, currency));
+  }
+
+  @Override
+  public ResponseEntity<List<MonthlySummary>> getTransactionsSummaryTrend(
+      String from, String to, String currency) {
+    return ResponseEntity.ok(summaryService.getTrend(from, to, currency));
   }
 
   @Override

@@ -63,6 +63,39 @@ Or add `gpr.user` / `gpr.key` to `~/.gradle/gradle.properties`.
   - **Read-Only Operations**: All service-level read operations (e.g., `read`, `list`, `count`) MUST be marked with `@Transactional(readOnly = true)`.
   - **Class-Level Default**: Prefer setting `@Transactional(readOnly = true)` at the class level and overriding it with `@Transactional` on specific write methods (create, update, delete).
 
+### Entity Column Constants
+
+Entities owned by this service expose their table and column names as `public static final String` constants and
+reference them from `@Table` / `@Column` annotations. This keeps a single source of truth for column names and lets
+repositories that build queries programmatically (e.g. via Spring Data Criteria, Sort) refer to them in a refactor-safe
+way.
+
+- Add a `TABLE` constant (used in `@Table(MyEntity.TABLE)`).
+- Add one constant per persisted column (used in `@Column(COL_NAME)`).
+- Examples: `TransactionEntity`, `CategoryEntity`. `TransactionPagingRepositoryImpl` consumes these via
+  `Criteria.where(TransactionEntity.OWNER_ID)…`.
+
+Raw SQL repositories (text-block queries) intentionally keep literal column names in the SQL itself for readability and
+copy-paste-into-`psql` debuggability — entity constants are not interpolated into text blocks.
+
+### Raw SQL Repositories (`JdbcClient`)
+
+When a query is too dynamic or aggregate-heavy for Spring Data JDBC, drop down to `JdbcClient` with text-block SQL.
+Examples: `TransactionSummaryRepository`, `CategorySummaryRepository`. Conventions:
+
+- **Named parameters as constants**: lift each `:bindingName` into a `private static final String` constant. The
+  constant is used in both the SQL literal and the `.param(NAME, value)` call so renames stay in sync.
+- **Extract `RowMapper`s**: declare each `RowMapper<T>` as a `private static final` field rather than inline lambdas.
+  Reuse mappers when one row type is built from another (e.g. a bucketed mapper delegating to a per-row mapper via
+  `mapRow`).
+- **Result alias literals**: SELECT-list aliases (e.g. `AS income_count`) stay literal — they're query-local artifacts,
+  not part of the persistent schema.
+- **Stream over list**: prefer `.query(mapper).stream().collect(...)` over `.list().stream()` to avoid materializing an
+  intermediate list when collecting to a different shape (e.g. `Map`).
+- **Return value objects**: repositories return small `record`s (e.g. `TransactionSummaryRow`,
+  `TransactionTrendBucket`), not API DTOs. The service layer maps to contract types and handles cross-row concerns like
+  zero-filling missing buckets.
+
 ---
 
 ## Development Notes
