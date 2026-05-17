@@ -76,7 +76,7 @@ jobs:
 
       - name: Upload amd64 scan results to GitHub Security tab
         if: always() && matrix.platform == 'linux/amd64'
-        uses: github/codeql-action/upload-sarif@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4.35.4
+        uses: github/codeql-action/upload-sarif@9e0d7b8d25671d64c341c19c0152d693099fb5ba # v4.35.5
         with:
           sarif_file: trivy-amd64.sarif
           category: trivy-amd64
@@ -156,7 +156,7 @@ jobs:
 
       - name: Upload arm64 scan results to GitHub Security tab
         if: always() && steps.trivy-arm64.outcome != 'skipped'
-        uses: github/codeql-action/upload-sarif@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4.35.4
+        uses: github/codeql-action/upload-sarif@9e0d7b8d25671d64c341c19c0152d693099fb5ba # v4.35.5
         with:
           sarif_file: trivy-arm64.sarif
           category: trivy-arm64
